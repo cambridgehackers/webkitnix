@@ -96,6 +96,7 @@ list(APPEND WebCore_SOURCES
     platform/graphics/surfaces/GraphicsSurface.cpp
     platform/graphics/surfaces/GLTransportSurface.cpp
     platform/graphics/texmap/TextureMapperGL.cpp
+    platform/graphics/texmap/TextureMapperPNG.cpp
     platform/graphics/texmap/TextureMapperShaderProgram.cpp
     platform/graphics/texmap/GraphicsLayerTextureMapper.cpp
 

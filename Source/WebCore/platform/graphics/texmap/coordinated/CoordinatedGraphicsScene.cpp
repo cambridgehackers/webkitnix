@@ -127,6 +127,8 @@ void CoordinatedGraphicsScene::paintToCurrentGLContext(const TransformationMatri
         dispatchOnMainThread(bind(&CoordinatedGraphicsScene::animationFrameReady, this));
     }
 #endif
+
+    layer->dumpToPNG();
 }
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)

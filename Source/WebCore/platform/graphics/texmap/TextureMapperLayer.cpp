@@ -18,6 +18,7 @@
  */
 
 #include "config.h"
+#include "TextureMapperPNG.h"
 #include "TextureMapperLayer.h"
 
 #include "Region.h"
@@ -132,6 +133,19 @@ void TextureMapperLayer::paintSelf(const TextureMapperPaintOptions& options)
         m_contentsLayer->paintToTextureMapper(options.textureMapper, m_state.contentsRect, transform, opacity);
         if (m_state.showDebugBorders)
             m_contentsLayer->drawBorder(options.textureMapper, m_state.debugBorderColor, m_state.debugBorderWidth, m_state.contentsRect, transform);
+    }
+}
+
+void TextureMapperLayer::dumpToPNG() const
+{
+    Vector<TextureMapperLayer*>::const_iterator it = m_children.begin();
+    for (; it != m_children.end(); ++it)
+        (*it)->dumpToPNG();
+
+    if (m_backingStore) {
+        TextureMapperPNG texMapperPNG(m_state.size);
+        m_backingStore->paintToTextureMapper(&texMapperPNG, FloatRect(), TransformationMatrix(), 0);
+        printf("dumping layer %p\n", this);
     }
 }
 

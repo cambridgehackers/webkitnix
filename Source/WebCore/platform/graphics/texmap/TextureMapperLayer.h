@@ -95,6 +95,7 @@ public:
     bool descendantsOrSelfHaveRunningAnimations() const;
 
     void paint();
+    void dumpToPNG() const;
 
     void setScrollPositionDeltaIfNeeded(const FloatSize&);
 
