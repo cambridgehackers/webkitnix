@@ -1,3 +1,4 @@
+#ifndef KLAATU
 #include "LinuxWindow.h"
 
 #include <EGL/egl.h>
@@ -67,3 +68,4 @@ void LinuxWindow::swapBuffers()
 {
     eglSwapBuffers(m_glContextData->eglDisplay, m_glContextData->surface);
 }
+#endif
