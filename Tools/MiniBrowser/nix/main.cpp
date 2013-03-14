@@ -1,15 +1,21 @@
 #include "GestureRecognizer.h"
 #include "LinuxWindow.h"
 #include "TouchMocker.h"
-#include "XlibEventUtils.h"
+//#include "XlibEventUtils.h"
+#ifdef WTF_USE_OPENGL_ES_2
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#else
 #include <GL/gl.h>
+#endif
+
 #include <WebKit2/WKPreferences.h>
 #include <WebKit2/WKPreferencesPrivate.h>
 #include <WebKit2/WKString.h>
 #include <WebKit2/WKURL.h>
 #include <WebView.h>
-#include <X11/Xutil.h>
-#include <X11/keysym.h>
+//#include <X11/Xutil.h>
+//#include <X11/keysym.h>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -20,6 +26,10 @@
 
 #include <wtf/Platform.h>
 #include <WebKit2/WKRetainPtr.h>
+
+
+// this is to put up a triangle rather than show the webview render. mostly to make sure our surface is ok.
+//#define KLAATU_DRAW_TRIANGLE 1
 
 extern "C" {
 static gboolean callUpdateDisplay(gpointer);
@@ -41,11 +51,11 @@ public:
 
     // LinuxWindowClient.
     virtual void handleExposeEvent() { scheduleUpdateDisplay(); }
-    virtual void handleKeyPressEvent(const XKeyPressedEvent&);
-    virtual void handleKeyReleaseEvent(const XKeyReleasedEvent&);
-    virtual void handleButtonPressEvent(const XButtonPressedEvent&);
-    virtual void handleButtonReleaseEvent(const XButtonReleasedEvent&);
-    virtual void handlePointerMoveEvent(const XPointerMovedEvent&);
+    //    virtual void handleKeyPressEvent(const XKeyPressedEvent&);
+    //virtual void handleKeyReleaseEvent(const XKeyReleasedEvent&);
+    //virtual void handleButtonPressEvent(const XButtonPressedEvent&);
+    //virtual void handleButtonReleaseEvent(const XButtonReleasedEvent&);
+    //virtual void handlePointerMoveEvent(const XPointerMovedEvent&);
     virtual void handleSizeChanged(int, int);
     virtual void handleClosed();
 
@@ -80,8 +90,8 @@ private:
         AdjustToBoundaries = 1 << 0,
         LowerMinimumScale = 1 << 1
     };
-    void handleWheelEvent(const XButtonPressedEvent&);
-    void updateClickCount(const XButtonPressedEvent&);
+    //void handleWheelEvent(const XButtonPressedEvent&);
+    //void updateClickCount(const XButtonPressedEvent&);
 
     void updateDisplay();
     void scheduleUpdateDisplay();
@@ -202,228 +212,9 @@ enum NavigationCommand {
     ReloadNavigation
 };
 
-static NavigationCommand checkNavigationCommand(const KeySym keySym, const unsigned state)
-{
-    if (keySym == XK_F5)
-        return ReloadNavigation;
-    if (!(state & Mod1Mask))
-        return NoNavigation;
-    if (keySym == XK_Left)
-        return BackNavigation;
-    if (keySym == XK_Right)
-        return ForwardNavigation;
-    return NoNavigation;
-}
-
-static inline bool isKeypadKeysym(const KeySym symbol)
-{
-    // Following keypad symbols are specified on Xlib Programming Manual (section: Keyboard Encoding).
-    return (symbol >= 0xFF80 && symbol <= 0xFFBD);
-}
-
-static KeySym chooseSymbolForXKeyEvent(const XKeyEvent& event, bool* useUpperCase)
-{
-    KeySym firstSymbol = XLookupKeysym(const_cast<XKeyEvent*>(&event), 0);
-    KeySym secondSymbol = XLookupKeysym(const_cast<XKeyEvent*>(&event), 1);
-    KeySym lowerCaseSymbol, upperCaseSymbol, chosenSymbol;
-    XConvertCase(firstSymbol, &lowerCaseSymbol, &upperCaseSymbol);
-    bool numLockModifier = event.state & Mod2Mask;
-    bool capsLockModifier = event.state & LockMask;
-    bool shiftModifier = event.state & ShiftMask;
-    if (numLockModifier && isKeypadKeysym(secondSymbol)) {
-        chosenSymbol = shiftModifier ? firstSymbol : secondSymbol;
-    } else if (lowerCaseSymbol == upperCaseSymbol) {
-        chosenSymbol = shiftModifier ? secondSymbol : firstSymbol;
-    } else if (shiftModifier == capsLockModifier)
-        chosenSymbol = firstSymbol;
-    else
-        chosenSymbol = secondSymbol;
-
-    *useUpperCase = (lowerCaseSymbol != upperCaseSymbol && chosenSymbol == upperCaseSymbol);
-    XConvertCase(chosenSymbol, &lowerCaseSymbol, &upperCaseSymbol);
-    return upperCaseSymbol;
-}
-
-static Nix::KeyEvent convertXKeyEventToNixKeyEvent(const XKeyEvent& event, const KeySym& symbol, bool useUpperCase)
-{
-    Nix::KeyEvent nixEvent;
-    nixEvent.type = (event.type == KeyPress) ? Nix::InputEvent::KeyDown : Nix::InputEvent::KeyUp;
-    nixEvent.modifiers = convertXEventModifiersToNativeModifiers(event.state);
-    nixEvent.timestamp = convertXEventTimeToNixTimestamp(event.time);
-    nixEvent.shouldUseUpperCase = useUpperCase;
-    nixEvent.isKeypad = isKeypadKeysym(symbol);
-    nixEvent.key = convertXKeySymToNativeKeycode(symbol);
-    return nixEvent;
-}
-
-static Nix::MouseEvent convertXButtonEventToNixButtonEvent(Nix::WebView* webView, const XButtonEvent& event, Nix::InputEvent::Type type, unsigned clickCount)
-{
-    Nix::MouseEvent nixEvent;
-    nixEvent.type = type;
-    nixEvent.button = convertXEventButtonToNativeMouseButton(event.button);
-    WKPoint contentsPoint = webView->userViewportToContents(WKPointMake(event.x, event.y));
-    nixEvent.x = contentsPoint.x;
-    nixEvent.y = contentsPoint.y;
-    nixEvent.globalX = event.x_root;
-    nixEvent.globalY = event.y_root;
-    nixEvent.clickCount = clickCount;
-    nixEvent.modifiers = convertXEventModifiersToNativeModifiers(event.state);
-    nixEvent.timestamp = convertXEventTimeToNixTimestamp(event.time);
-    return nixEvent;
-}
-
-void MiniBrowser::handleKeyPressEvent(const XKeyPressedEvent& event)
-{
-    if (!m_webView)
-        return;
-
-    bool shouldUseUpperCase;
-    KeySym symbol = chooseSymbolForXKeyEvent(event, &shouldUseUpperCase);
-    NavigationCommand command = checkNavigationCommand(symbol, event.state);
-    switch (command) {
-    case BackNavigation:
-        WKPageGoBack(pageRef());
-        return;
-    case ForwardNavigation:
-        WKPageGoForward(pageRef());
-        return;
-    case ReloadNavigation:
-        WKPageReload(pageRef());
-        return;
-    default:
-        Nix::KeyEvent nixEvent = convertXKeyEventToNixKeyEvent(event, symbol, shouldUseUpperCase);
-        m_webView->sendEvent(nixEvent);
-    }
-}
-
-void MiniBrowser::handleKeyReleaseEvent(const XKeyReleasedEvent& event)
-{
-    if (!m_webView)
-        return;
-
-    bool shouldUseUpperCase;
-    KeySym symbol = chooseSymbolForXKeyEvent(event, &shouldUseUpperCase);
-    if (checkNavigationCommand(symbol, event.state) != NoNavigation)
-        return;
-    Nix::KeyEvent nixEvent = convertXKeyEventToNixKeyEvent(event, symbol, shouldUseUpperCase);
-    if (m_touchMocker && m_touchMocker->handleKeyRelease(nixEvent)) {
-        scheduleUpdateDisplay();
-        return;
-    }
-    m_webView->sendEvent(nixEvent);
-}
-
-void MiniBrowser::handleWheelEvent(const XButtonPressedEvent& event)
-{
-    WKPoint contentsPoint = m_webView->userViewportToContents(WKPointMake(event.x, event.y));
-
-    if (m_mode == MobileMode && event.state & ControlMask) {
-        double newScale = m_webView->scale() * (event.button == 4 ? 1.1 : 0.9);
-        scaleAtPoint(contentsPoint, newScale);
-        return;
-    }
-
-    // Same constant we use inside WebView to calculate the ticks. See also WebCore::Scrollbar::pixelsPerLineStep().
-    const float pixelsPerStep = 40.0f;
-
-    Nix::WheelEvent nixEvent;
-    nixEvent.type = Nix::InputEvent::Wheel;
-    nixEvent.modifiers = convertXEventModifiersToNativeModifiers(event.state);
-    nixEvent.timestamp = convertXEventTimeToNixTimestamp(event.time);
-    nixEvent.x = contentsPoint.x;
-    nixEvent.y = contentsPoint.y;
-    nixEvent.globalX = event.x_root;
-    nixEvent.globalY = event.y_root;
-    nixEvent.delta = pixelsPerStep * (event.button == 4 ? 1 : -1);
-    nixEvent.orientation = event.state & ShiftMask ? Nix::WheelEvent::Horizontal : Nix::WheelEvent::Vertical;
-    m_webView->sendEvent(nixEvent);
-}
-
 static const double doubleClickInterval = 300;
 static const double horizontalMarginForViewportAdjustment = 8.0;
 static const double scaleFactorForTextInputFocus = 2.0;
-
-void MiniBrowser::updateClickCount(const XButtonPressedEvent& event)
-{
-    if (m_lastClickX != event.x
-        || m_lastClickY != event.y
-        || m_lastClickButton != event.button
-        || event.time - m_lastClickTime >= doubleClickInterval)
-        m_clickCount = 1;
-    else
-        ++m_clickCount;
-
-    m_lastClickX = event.x;
-    m_lastClickY = event.y;
-    m_lastClickButton = convertXEventButtonToNativeMouseButton(event.button);
-    m_lastClickTime = event.time;
-}
-
-void MiniBrowser::handleButtonPressEvent(const XButtonPressedEvent& event)
-{
-    Nix::WebView* webView = webViewAtX11Position(WKPointMake(event.x, event.y));
-    if (!webView)
-        return;
-
-    if (event.button == 4 || event.button == 5) {
-        handleWheelEvent(event);
-        return;
-    }
-
-    updateClickCount(event);
-
-    Nix::MouseEvent nixEvent = convertXButtonEventToNixButtonEvent(webView, event, Nix::InputEvent::MouseDown, m_clickCount);
-    if (m_touchMocker && m_touchMocker->handleMousePress(nixEvent, WKPointMake(event.x, event.y))) {
-        scheduleUpdateDisplay();
-        return;
-    }
-    webView->sendEvent(nixEvent);
-}
-
-void MiniBrowser::handleButtonReleaseEvent(const XButtonReleasedEvent& event)
-{
-    if (event.button == 4 || event.button == 5)
-        return;
-
-    Nix::MouseEvent nixEvent = convertXButtonEventToNixButtonEvent(m_webView, event, Nix::InputEvent::MouseUp, 0);
-    if (m_touchMocker && m_touchMocker->handleMouseRelease(nixEvent)) {
-        scheduleUpdateDisplay();
-        return;
-    }
-
-    // The mouse release event was allowed to be sent to the TouchMocker because it
-    // may be tracking a button press that happened in a valid position.
-    Nix::WebView* webView = webViewAtX11Position(WKPointMake(event.x, event.y));
-    if (!webView)
-        return;
-    webView->sendEvent(nixEvent);
-}
-
-void MiniBrowser::handlePointerMoveEvent(const XPointerMovedEvent& event)
-{
-    Nix::MouseEvent nixEvent;
-    nixEvent.type = Nix::InputEvent::MouseMove;
-    nixEvent.button = Nix::MouseEvent::NoButton;
-    WKPoint contentsPoint = m_webView->userViewportToContents(WKPointMake(event.x, event.y));
-    nixEvent.x = contentsPoint.x;
-    nixEvent.y = contentsPoint.y;
-    nixEvent.globalX = event.x_root;
-    nixEvent.globalY = event.y_root;
-    nixEvent.clickCount = 0;
-    nixEvent.modifiers = convertXEventModifiersToNativeModifiers(event.state);
-    nixEvent.timestamp = convertXEventTimeToNixTimestamp(event.time);
-    if (m_touchMocker && m_touchMocker->handleMouseMove(nixEvent, WKPointMake(event.x, event.y))) {
-        scheduleUpdateDisplay();
-        return;
-    }
-
-    // The mouse move event was allowed to be sent to the TouchMocker because it
-    // may be tracking a button press that happened in a valid position.
-    Nix::WebView* webView = webViewAtX11Position(WKPointMake(event.x, event.y));
-    if (!webView)
-        return;
-    webView->sendEvent(nixEvent);
-}
 
 void MiniBrowser::handleSizeChanged(int width, int height)
 {
@@ -443,6 +234,190 @@ void MiniBrowser::handleClosed()
     g_main_loop_quit(m_mainLoop);
 }
 
+#define FLOAT_TO_FIXED(X)   ((X) * 65535.0)
+
+
+
+static GLfloat view_rotx = 0.0, view_roty = 0.0;
+
+static GLint u_matrix = -1;
+static GLint attr_pos = 0, attr_color = 1;
+
+static void
+make_z_rot_matrix(GLfloat angle, GLfloat *m)
+{
+   float c = cos(angle * M_PI / 180.0);
+   float s = sin(angle * M_PI / 180.0);
+   int i;
+   for (i = 0; i < 16; i++)
+      m[i] = 0.0;
+   m[0] = m[5] = m[10] = m[15] = 1.0;
+
+   m[0] = c;
+   m[1] = s;
+   m[4] = -s;
+   m[5] = c;
+}
+
+static void
+make_scale_matrix(GLfloat xs, GLfloat ys, GLfloat zs, GLfloat *m)
+{
+   int i;
+   for (i = 0; i < 16; i++)
+      m[i] = 0.0;
+   m[0] = xs;
+   m[5] = ys;
+   m[10] = zs;
+   m[15] = 1.0;
+}
+
+
+static void
+mul_matrix(GLfloat *prod, const GLfloat *a, const GLfloat *b)
+{
+#define A(row,col)  a[(col<<2)+row]
+#define B(row,col)  b[(col<<2)+row]
+#define P(row,col)  p[(col<<2)+row]
+   GLfloat p[16];
+   GLint i;
+   for (i = 0; i < 4; i++) {
+      const GLfloat ai0=A(i,0),  ai1=A(i,1),  ai2=A(i,2),  ai3=A(i,3);
+      P(i,0) = ai0 * B(0,0) + ai1 * B(1,0) + ai2 * B(2,0) + ai3 * B(3,0);
+      P(i,1) = ai0 * B(0,1) + ai1 * B(1,1) + ai2 * B(2,1) + ai3 * B(3,1);
+      P(i,2) = ai0 * B(0,2) + ai1 * B(1,2) + ai2 * B(2,2) + ai3 * B(3,2);
+      P(i,3) = ai0 * B(0,3) + ai1 * B(1,3) + ai2 * B(2,3) + ai3 * B(3,3);
+   }
+   memcpy(prod, p, sizeof(p));
+#undef A
+#undef B
+#undef PROD
+}
+
+
+static int klaatu_shaders_created=0;
+static void klaatu_init_shaders(void){
+{
+    klaatu_shaders_created=1;
+#ifndef KLAATU
+   static const char *fragShaderText =
+      "varying vec4 v_color;\n"
+      "void main() {\n"
+      "   gl_FragColor = v_color;\n"
+      "}\n";
+#else
+   static const char *fragShaderText =
+      "precision mediump float;\n"
+      "void main() {\n"
+      "   gl_FragColor = vec4(1.0,0.0,1.0,1.0);\n"
+      "}\n";
+#endif //KLAATU
+   static const char *vertShaderText =
+      "uniform mat4 modelviewProjection;\n"
+      "attribute vec4 pos;\n"
+      "attribute vec4 color;\n"
+      "varying vec4 v_color;\n"
+      "void main() {\n"
+      "   gl_Position = modelviewProjection * pos;\n"
+      "   v_color = color;\n"
+      "}\n";
+
+   GLuint fragShader, vertShader, program;
+   GLint stat;
+
+
+   fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+   glShaderSource(fragShader, 1, (const char **) &fragShaderText, NULL);
+   glCompileShader(fragShader);
+   glGetShaderiv(fragShader, GL_COMPILE_STATUS, &stat);
+   if (!stat) {
+      printf("Error: fragment shader did not compile!\n");
+      exit(1);
+   }
+
+   vertShader = glCreateShader(GL_VERTEX_SHADER);
+   glShaderSource(vertShader, 1, (const char **) &vertShaderText, NULL);
+   glCompileShader(vertShader);
+   glGetShaderiv(vertShader, GL_COMPILE_STATUS, &stat);
+   if (!stat) {
+      printf("Error: vertex shader did not compile!\n");
+      exit(1);
+   }
+
+   program = glCreateProgram();
+   glAttachShader(program, fragShader);
+   glAttachShader(program, vertShader);
+   glLinkProgram(program);
+
+   glGetProgramiv(program, GL_LINK_STATUS, &stat);
+   if (!stat) {
+      char log[1000];
+      GLsizei len;
+      glGetProgramInfoLog(program, 1000, &len, log);
+      printf("Error: linking:\n%s\n", log);
+      exit(1);
+   }
+
+   glUseProgram(program);
+
+   if (1) {
+      /* test setting attrib locations */
+      glBindAttribLocation(program, attr_pos, "pos");
+      glBindAttribLocation(program, attr_color, "color");
+      glLinkProgram(program);  /* needed to put attribs into effect */
+   }
+   else {
+      /* test automatic attrib locations */
+      attr_pos = glGetAttribLocation(program, "pos");
+      attr_color = glGetAttribLocation(program, "color");
+   }
+
+   u_matrix = glGetUniformLocation(program, "modelviewProjection");
+   printf("Uniform modelviewProjection at %d\n", u_matrix);
+   printf("Attrib pos at %d\n", attr_pos);
+   printf("Attrib color at %d\n", attr_color);
+}
+
+
+}
+static void klaatu_draw_triangle(void)
+{
+   static const GLfloat verts[3][2] = {
+      { -1, -1 },
+      {  1, -1 },
+      {  0,  1 }
+   };
+   static const GLfloat colors[3][3] = {
+      { 1, 0, 0 },
+      { 0, 1, 0 },
+      { 0, 0, 1 }
+   };
+   GLfloat mat[16], rot[16], scale[16];
+
+   if (!klaatu_shaders_created)
+       klaatu_init_shaders();
+
+   /* Set modelview/projection matrix */
+   make_z_rot_matrix(view_rotx, rot);
+   make_scale_matrix(0.5, 0.5, 0.5, scale);
+   mul_matrix(mat, rot, scale);
+   glUniformMatrix4fv(u_matrix, 1, GL_FALSE, mat);
+
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+   {
+      glVertexAttribPointer(attr_pos, 2, GL_FLOAT, GL_FALSE, 0, verts);
+      glVertexAttribPointer(attr_color, 3, GL_FLOAT, GL_FALSE, 0, colors);
+      glEnableVertexAttribArray(attr_pos);
+      glEnableVertexAttribArray(attr_color);
+
+      glDrawArrays(GL_TRIANGLES, 0, 3);
+
+      glDisableVertexAttribArray(attr_pos);
+      glDisableVertexAttribArray(attr_color);
+   }
+}
+
+
 void MiniBrowser::updateDisplay()
 {
     if (!m_webView || !m_window)
@@ -450,6 +425,7 @@ void MiniBrowser::updateDisplay()
 
     m_window->makeCurrent();
 
+#ifndef KLAATU_DRAW_TRIANGLE
     WKSize size = m_window->size();
     glViewport(0, 0, size.width, size.height);
     glClearColor(0.4, 0.4, 0.4, 1.0);
@@ -458,7 +434,9 @@ void MiniBrowser::updateDisplay()
     m_webView->paintToCurrentGLContext();
     if (m_touchMocker)
         m_touchMocker->paintTouchPoints(size);
-
+#else
+    klaatu_draw_triangle();
+#endif
     m_window->swapBuffers();
 }
 
@@ -664,13 +642,15 @@ static inline bool areaContainsPoint(const WKRect& area, const WKPoint& point)
     return !(point.x < area.origin.x || point.y < area.origin.y || point.x >= (area.origin.x + area.size.width) || point.y >= (area.origin.y + area.size.height));
 }
 
+#if 0
+//used to handle mouse button down, up, move etc.
 Nix::WebView* MiniBrowser::webViewAtX11Position(const WKPoint& position)
 {
     if (areaContainsPoint(m_webViewRect, position))
         return m_webView;
     return 0;
 }
-
+#endif 
 void MiniBrowser::adjustViewportToTextInputArea()
 {
     m_shouldRestoreViewportWhenLosingFocus = true;
@@ -733,6 +713,10 @@ void MiniBrowser::updateTextInputState(bool isContentEditable, WKRect cursorRect
 
 void MiniBrowser::compositeCustomLayerToCurrentGLContext(uint32_t id, WKRect rect, const float* matrix, float opacity)
 {
+    fprintf(stderr," MiniBrowser::compositeCustomLayerToCurrentGLContext called id=%d, m_customRendererID=%d, opacity = %f\n",id,m_customRendererID,opacity);
+    return;
+    
+#if 0
     if (id != m_customRendererID)
         return;
 
@@ -757,6 +741,7 @@ void MiniBrowser::compositeCustomLayerToCurrentGLContext(uint32_t id, WKRect rec
     glVertexPointer(2, GL_FLOAT, 0, vertexData);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glPopMatrix();
+#endif
 }
 
 struct Device {
@@ -774,7 +759,8 @@ struct Device {
 };
 
 Device deviceList[] = {
-    { 1024, 768, "" },
+    //{ 1024, 768, "" },
+    { 720, 1280, "" },
     { 854, 480, "Mozilla/5.0 (MeeGo; NokiaN9) AppleWebKit/534.13 (KHTML, like Gecko) NokiaBrowser/8.5.0 Mobile Safari/534.13" },
     { 1024, 768, "Mozilla/5.0 (iPad; CPU OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3" },
     { 960, 640, "Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3" },
