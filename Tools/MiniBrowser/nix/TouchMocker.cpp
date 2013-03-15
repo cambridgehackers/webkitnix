@@ -1,6 +1,12 @@
 #include "TouchMocker.h"
 
+#ifdef WTF_USE_OPENGL_ES_2
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#else
 #include <GL/gl.h>
+#endif
+
 #include <cassert>
 #include "touchTexture.h"
 
@@ -38,6 +44,7 @@ TouchMocker::~TouchMocker()
 
 void TouchMocker::paintTouchPoints(const WKSize& size)
 {
+#if 0
     static float vertexData[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     static const float texCoords[] = { 0, 0, 1, 0, 0, 1, 1, 1};
 
@@ -79,6 +86,7 @@ void TouchMocker::paintTouchPoints(const WKSize& size)
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     glPopMatrix();
+#endif
 }
 
 bool TouchMocker::handleMousePress(const MouseEvent& event, const WKPoint& windowPos)

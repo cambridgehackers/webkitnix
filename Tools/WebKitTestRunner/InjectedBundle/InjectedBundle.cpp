@@ -40,6 +40,12 @@
 #include <wtf/text/StringBuilder.h>
 #include <wtf/Vector.h>
 
+
+#ifdef KLAATU
+#include <locale.h>
+#endif
+
+
 namespace WTR {
 
 InjectedBundle& InjectedBundle::shared()

@@ -1,23 +1,22 @@
-FIND_PACKAGE(X11 REQUIRED)
+#FIND_PACKAGE(X11 REQUIRED)
 
 SET(MiniBrowser_DIR "${TOOLS_DIR}/MiniBrowser/nix")
-
+MESSAGE("MiniBrowser nix making")
 SET(MiniBrowser_SOURCES
     ${MiniBrowser_DIR}/main.cpp
     ${MiniBrowser_DIR}/LinuxWindow.cpp
     ${MiniBrowser_DIR}/GestureRecognizer.cpp
     ${MiniBrowser_DIR}/TouchMocker.cpp
-    ${MiniBrowser_DIR}/XlibEventSource.cpp
 )
 
 SET(MiniBrowser_LIBRARIES
     ${WebKit2_LIBRARY_NAME}
-    ${OPENGL_LIBRARIES}
     ${GLIB_LIBRARIES}
     ${GLIB_GTHREAD_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${X11_LIBRARIES}
+#    ${X11_LIBRARIES}
 )
+
 
 SET(MiniBrowser_INCLUDE_DIRECTORIES
     ${GLIB_INCLUDE_DIRS}
@@ -27,12 +26,31 @@ SET(MiniBrowser_INCLUDE_DIRECTORIES
     ${WEBKIT2_DIR}
     ${CMAKE_SOURCE_DIR}/Source
     ${WTF_DIR}
-    ${X11_INCLUDE_DIR}
-    ${OPENGL_INCLUDE_DIR}
+ #   ${X11_INCLUDE_DIR}
 )
 
+
+
+IF (WTF_USE_OPENGL_ES_2)
+  LIST(APPEND MiniBrowser_LIBRARIES ${OPENGLES2_LIBRARIES})
+  LIST(APPEND MiniBrowser_LIBRARIES  gui  )
+  LIST(APPEND MiniBrowser_LIBRARIES  log  )
+  LIST(APPEND MiniBrowser_LIBRARIES  binder  )
+  LIST(APPEND MiniBrowser_LIBRARIES  utils  )
+  LIST(APPEND MiniBrowser_LIBRARIES  glib-2.0  )
+  LIST(APPEND MiniBrowser_LIBRARIES  ui  )
+  LIST(APPEND MiniBrowser_LIBRARIES  stdc++  )
+
+  LIST(APPEND MiniBrowser_INCLUDE_DIRECTORIES ${OPENGLES2_INCLUDE_DIR})
+ELSE ()
+  LIST(APPEND MiniBrowser_LIBRARIES ${OPENGL_LIBRARIES})
+  LIST(APPEND MiniBrowser_INCLUDE_DIRECTORIES ${OPENGL_INCLUDE_DIR})
+ENDIF ()
+
+
+
 IF (WTF_USE_EGL)
-  LIST(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/LinuxWindowEGL.cpp)
+#  LIST(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/LinuxWindowEGL.cpp)
   LIST(APPEND MiniBrowser_LIBRARIES ${EGL_LIBRARY})
   LIST(APPEND MiniBrowser_INCLUDE_DIRECTORIES ${EGL_INCLUDE_DIR})
 ELSE ()

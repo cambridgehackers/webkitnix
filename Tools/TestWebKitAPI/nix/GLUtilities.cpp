@@ -2,7 +2,12 @@
 
 #include "GLUtilities.h"
 #include <iostream>
+#if USE(OPENGL_ES_2)
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#else
 #include <GL/gl.h>
+#endif
 #include <png.h>
 
 using namespace std;

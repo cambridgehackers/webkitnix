@@ -315,12 +315,19 @@ template<typename T> inline T timesThreePlusOneDividedByTwo(T value)
 }
 
 #if !COMPILER(MSVC) && !COMPILER(RVCT) && !OS(SOLARIS)
+// baveryXXX the gnustl version doesnt have this.  If we switch back to the stlport version, it does.
+#ifndef KLAATU
 using std::isfinite;
+#endif // KLAATU
 #if !COMPILER_QUIRK(GCC11_GLOBAL_ISINF_ISNAN)
+#ifndef KLAATU
 using std::isinf;
-using std::isnan;
+using std::isnan
+#endif // KLAATU;
 #endif
+#ifndef KLAATU
 using std::signbit;
+#endif // KLAATU
 #endif
 
 #if COMPILER_QUIRK(GCC11_GLOBAL_ISINF_ISNAN)

@@ -56,6 +56,10 @@
 #include <WebKit2/WKBundleIntentRequest.h>
 #endif
 
+#ifdef KLAATU
+#include <locale.h>
+#endif
+
 namespace WTR {
 
 const double TestRunner::waitToDumpWatchdogTimerInterval = 30;

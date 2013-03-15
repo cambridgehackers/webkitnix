@@ -1,0 +1,8 @@
+The klaatu version of nix uses kwebkit and klaatu-manifest scripts to build an environment for nix to run.
+kwebkit - https://github.com/cambridgehackers/kwebkit
+klaatu -  http://gitorious.org/+cambridgehackers/cambridge/klaatu-manifests
+
+
+This is FAR from bug free but the following does work on a samsung nexus (maguro):
+MiniBrowser http://www.cnn.com
+

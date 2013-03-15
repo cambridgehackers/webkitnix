@@ -99,6 +99,13 @@ SET(test_webcore_LIBRARIES
     ${WebCore_LIBRARY_NAME}
 )
 
+# not sure why test_webcore needs this in gles2 but not gl mode
+IF (WTF_USE_OPENGL_ES_2)
+  MESSAGE("adding gles2 libraries to test_webcore_LIBRARIES")
+  LIST(APPEND test_webcore_LIBRARIES  ${OPENGLES2_LIBRARIES})
+ENDIF ()
+
+
 ADD_EXECUTABLE(test_webcore
     ${test_main_SOURCES}
     ${TESTWEBKITAPI_DIR}/TestsController.cpp
@@ -128,6 +135,14 @@ SET(test_webkit2_api_LIBRARIES
     ${WebKit2_LIBRARY_NAME}
     gtest
 )
+
+#the bfd linker is much pickier than the gold linker. sigh.
+IF (WTF_USE_OPENGL_ES_2)
+  MESSAGE("adding gles2 libraries to test_webkit2_api_LIBRARIES")
+  LIST(APPEND test_webkit2_api_LIBRARIES  ${OPENGLES2_LIBRARIES})
+ENDIF ()
+
+
 
 FOREACH(testName ${test_webkit2_api_BINARIES})
     ADD_EXECUTABLE(test_webkit2_api_${testName} ${TESTWEBKITAPI_DIR}/Tests/WebKit2/${testName}.cpp)

@@ -183,7 +183,9 @@
 #include <runtime/JSExportMacros.h>
 #endif
 #include <wtf/Assertions.h>
-#include <wtf/FastMalloc.h>
+//bavery XXX fastMalloc disabled for klaatu build due to exception issues.
+//baveryXXX, now that we are using a c++ runtime/ndk compiler we should revisit this!
+//#include <wtf/FastMalloc.h>
 
 #include <iostream>  // NOLINT
 #include <sstream>  // NOLINT

@@ -1,4 +1,14 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.3)
+# added to allow klaatu cross to work right
+IF ( USE_OVERRIDE) 
+MESSAGE( USING OVERRIDE FILE)
+# Somewhere before the first PROJECT() command:
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE override.cmake)
+# You could also have language specific files:
+#SET(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX override_cxx.cmake)
+#SET(CMAKE_USER_MAKE_RULES_OVERRIDE_C override_c.cmake)
+ENDIF (USE_OVERRIDE)
+
 PROJECT(WebKit)
 
 # Set a default build type if and only if user did not define one as command

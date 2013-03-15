@@ -43,6 +43,10 @@
 #include <sys/prctl.h>
 #endif
 
+#ifdef KLAATU
+#include <sys/wait.h>
+#endif
+
 #ifdef SOCK_SEQPACKET
 #define SOCKET_TYPE SOCK_SEQPACKET
 #else
@@ -59,11 +63,17 @@ static void childSetupFunction(gpointer userData)
     close(socket);
 
     // Make child process inherit parent's locale.
+#ifndef KLAATU
+    // this tickles what I consider an AOSP bug.  If you set a null env variable,
+    // AOSP (eventually) does something like foo =*name (or in this case *NULL)...
     g_setenv("LC_ALL", setlocale(LC_ALL, 0), TRUE);
+#endif
 }
 
 static void childFinishedFunction(GPid, gint status, gpointer userData)
 {
+    //baveryXXX I have the below 2 lines commented out but I'm not sure why anymore.
+    // if problems crop up check here.
     if (WIFEXITED(status) && !WEXITSTATUS(status))
         return;
 

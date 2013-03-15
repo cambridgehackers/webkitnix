@@ -2,9 +2,11 @@ ADD_DEFINITIONS(-DBUILDING_WITH_CMAKE=1)
 ADD_DEFINITIONS(-DHAVE_CONFIG_H=1)
 
 IF (WTF_OS_UNIX)
-    ADD_DEFINITIONS(-DXP_UNIX)
+    # this also adds things klaatu doesnt need *tested on x86*
+    # ADD_DEFINITIONS(-DXP_UNIX)
     #TODO: check for X11 target
-    ADD_DEFINITIONS(-DMOZ_X11) 
+    # klaatu is  unix but not x11
+    # ADD_DEFINITIONS(-DMOZ_X11) 
 ENDIF (WTF_OS_UNIX)
 
 # CODE_GENERATOR_PREPROCESSOR_WITH_LINEMARKERS only matters with GCC >= 4.7.0.  Since this

@@ -1,3 +1,4 @@
+MESSAGE("Tools cmake")
 IF (ENABLE_WEBKIT2)
     ADD_SUBDIRECTORY(WebKitTestRunner)
 ENDIF()
@@ -16,7 +17,7 @@ IF ("${PORT}" STREQUAL "Efl")
     ADD_SUBDIRECTORY(DumpRenderTree/TestNetscapePlugIn)
 ELSEIF ("${PORT}" STREQUAL "WinCE")
     ADD_SUBDIRECTORY(WinCELauncher)
-ELSEIF ("${PORT}" STREQUAL "Nix" AND NOT WTF_USE_OPENGL_ES_2)
+ELSEIF ("${PORT}" STREQUAL "Nix" )
     ADD_SUBDIRECTORY(MiniBrowser/nix)
 ENDIF()
 

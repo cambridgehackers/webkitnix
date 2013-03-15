@@ -4,7 +4,12 @@
 #include "WebView.h"
 #include "WebKit2/WKRetainPtr.h"
 #include <cstring>
+#if USE(OPENGL_ES_2)
+#include <GLES2/gl2.h>
+#include <GLES2/gl2ext.h>
+#else
 #include <GL/gl.h>
+#endif
 
 using namespace TestWebKitAPI::Util;
 

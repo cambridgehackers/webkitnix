@@ -24,8 +24,19 @@
  */
 
 #include "WebProcessMainNix.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
 int main(int argc, char** argv)
 {
+    // the sleep is here to allow you a chance to attach gdb if you wish....
+    const char* doSleep = getenv("KLAATU_DEBUG_WEBPROCESS");
+    if (doSleep)
+        {
+            int sleepTime = atoi(doSleep);
+            fprintf(stderr,"Sleeping %d due to KLAATU_DEBUG_WEBPROCESS\n",sleepTime);
+            sleep(sleepTime);
+        }
     return WebKit::WebProcessMainNix(argc, argv);
 }
