@@ -1,4 +1,6 @@
 The klaatu version of nix uses kwebkit and klaatu-manifest scripts to build an environment for nix to run.
+klaatu_Nov22_2012 was forked from mainline nix at 6e926636c81c5ef33609fdac873c50de4ab5fa32
+Will pull forward as time permits.
 kwebkit - https://github.com/cambridgehackers/kwebkit
 klaatu -  http://gitorious.org/+cambridgehackers/cambridge/klaatu-manifests
 
