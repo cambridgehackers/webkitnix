@@ -185,7 +185,7 @@ WKSize LinuxWindow::size() const
 
 
 void LinuxWindow::makeCurrent(){
-    fprintf(stderr,"LinuxWindow::makeCurrent\n");
+    //fprintf(stderr,"LinuxWindow::makeCurrent\n");
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext));
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
   
