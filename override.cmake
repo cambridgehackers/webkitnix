@@ -14,5 +14,5 @@ SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-frtti -march=armv7-a -mfpu=neon  -mthu
 
 
 
-SET(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--reduce-memory-overheads -Wl,--no-keep-memory --sysroot=$ENV{ANDROID_BUILD_TOP}  -L$ENV{ANDROID_BUILD_TOP}/usr/local/lib -lgnustl_shared -llog -lm -lz ")
+SET(CMAKE_EXE_LINKER_FLAGS_INIT " -Wl,--no-keep-memory --sysroot=$ENV{ANDROID_BUILD_TOP}  -L$ENV{ANDROID_BUILD_TOP}/usr/local/lib -lgnustl_shared -llog -lm -lz ")
 SET(CMAKE_SHARED_LINKER_FLAGS_INIT " -Wl,--reduce-memory-overheads -Wl,--no-keep-memory --sysroot=$ENV{ANDROID_BUILD_TOP}  -L$ENV{ANDROID_BUILD_TOP}/usr/local/lib -lgnustl_shared -llog -lm -lstdc++ -lui -lwpa_client -lz")
