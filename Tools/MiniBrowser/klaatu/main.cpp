@@ -28,6 +28,7 @@
 #include <WebKit2/WKRetainPtr.h>
 
 
+
 // this is to put up a triangle rather than show the webview render. mostly to make sure our surface is ok.
 //#define KLAATU_DRAW_TRIANGLE 1
 
@@ -432,8 +433,6 @@ void MiniBrowser::updateDisplay()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_webView->paintToCurrentGLContext();
-    if (m_touchMocker)
-        m_touchMocker->paintTouchPoints(size);
 #else
     klaatu_draw_triangle();
 #endif

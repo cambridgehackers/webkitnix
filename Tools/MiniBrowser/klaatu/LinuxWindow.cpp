@@ -15,6 +15,7 @@
 #include <ui/DisplayInfo.h>
 #include <ui/FramebufferNativeWindow.h>
 #include <gui/SurfaceComposerClient.h>
+#include "klaatu_events.h"
 
 using namespace android;
 #define ASSERT_EQ(A, B) {if ((A) != (B)) {printf ("ERROR: %d -- (%d:%d)\n", __LINE__,A,B); exit(9); }}
@@ -140,7 +141,54 @@ void LinuxWindow::klaatu_init_graphics()
   ASSERT_EQ(EGL_SUCCESS, eglGetError());
   
   printf("done with the klaatu_init_graphics\n");
+
+
 }
+
+EventSingleton* eventSingleton;
+class EVDispatcher : public EventSingleton {
+public:
+    bool down;
+    //    Local<Function> cb;
+    EVDispatcher() {
+        down = false;
+        //cb = CB;
+    }
+    virtual void touchStart(float rx, float ry, unsigned int tap_count=0) { 
+        if(down) {
+            fprintf(stderr,"touch moving\n");
+            //Local<Object> event = Object::New();
+            //event->Set(String::NewSymbol("x"), Number::New(rx));
+            //event->Set(String::NewSymbol("y"), Number::New(ry));
+            //event->Set(String::NewSymbol("type"), String::New("drag"));
+            //Handle<Value> argv[] = {event};
+            //cb->Call(Context::GetCurrent()->Global(), 1, argv);
+            
+        } else {
+            down = true;
+            fprintf(stderr,"touch starting\n");
+            //Local<Object> event = Object::New();
+            //event->Set(String::NewSymbol("x"), Number::New(rx));
+            //event->Set(String::NewSymbol("y"), Number::New(ry));
+            //event->Set(String::NewSymbol("type"), String::New("press"));
+            //Handle<Value> argv[] = {event};
+            //cb->Call(Context::GetCurrent()->Global(), 1, argv);
+        }
+    }
+    virtual void touchMove(float rx, float ry, unsigned int tap_count=0) { 
+        fprintf(stderr,"touch moving\n");
+    }
+    virtual void touchEnd(float rx, float ry, unsigned int tap_count=0) { 
+        fprintf(stderr,"touch ending\n");
+        //Local<Object> event = Object::New();
+        //event->Set(String::NewSymbol("x"), Number::New(rx));
+        //event->Set(String::NewSymbol("y"), Number::New(ry));
+        //event->Set(String::NewSymbol("type"), String::New("release"));
+        //Handle<Value> argv[] = {event};
+        //cb->Call(Context::GetCurrent()->Global(), 1, argv);
+        down = false;
+    }
+};
 
 
 LinuxWindow::LinuxWindow(LinuxWindowClient* client, int width, int height)
@@ -165,6 +213,8 @@ LinuxWindow::LinuxWindow(LinuxWindowClient* client, int width, int height)
 #endif
 
     klaatu_init_graphics();
+    eventSingleton = new EVDispatcher();
+    enable_touch(width,height);
 
 }
 

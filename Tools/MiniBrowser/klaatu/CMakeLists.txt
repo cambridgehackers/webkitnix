@@ -1,12 +1,14 @@
 #FIND_PACKAGE(X11 REQUIRED)
 
-SET(MiniBrowser_DIR "${TOOLS_DIR}/MiniBrowser/nix")
-MESSAGE("MiniBrowser nix making")
+SET(MiniBrowser_DIR "${TOOLS_DIR}/MiniBrowser/klaatu")
+MESSAGE("MiniBrowser klaatu making")
+MESSAGE("MiniBrowser CAIRO_LIB= '${CAIRO_LIBRARIES}'")
 SET(MiniBrowser_SOURCES
     ${MiniBrowser_DIR}/main.cpp
     ${MiniBrowser_DIR}/LinuxWindow.cpp
     ${MiniBrowser_DIR}/GestureRecognizer.cpp
     ${MiniBrowser_DIR}/TouchMocker.cpp
+    ${MiniBrowser_DIR}/klaatu_events.cpp
 )
 
 SET(MiniBrowser_LIBRARIES
@@ -14,6 +16,8 @@ SET(MiniBrowser_LIBRARIES
     ${GLIB_LIBRARIES}
     ${GLIB_GTHREAD_LIBRARIES}
     ${CAIRO_LIBRARIES}
+    libandroidfw.so
+    libinput.so
 #    ${X11_LIBRARIES}
 )
 
