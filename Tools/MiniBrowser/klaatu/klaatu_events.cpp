@@ -35,10 +35,11 @@ static void * event_thread(void*arg)
     printf("made a mhub\n");
     while (!event_thread_stop) {
         event_indication = mHub->getEvents(1000, event_buffer, EVENT_BUFFER_SIZE);
-        printf("doing indi = %d stop = %d\n",event_indication,event_thread_stop);
+        //printf("doing indi = %d stop = %d\n",event_indication,event_thread_stop);
         if (event_indication) {
             printf("waiting\n");
-            sem_wait(&event_run_semaphore);
+            //sem_wait(&event_run_semaphore);
+            event_process();
         }
     }
     printf("event thread returning null\n");
@@ -162,7 +163,7 @@ void event_process(void)
         }
     }
     event_indication = 0;
-    sem_post(&event_run_semaphore);
+    //    sem_post(&event_run_semaphore);
 }
 
 

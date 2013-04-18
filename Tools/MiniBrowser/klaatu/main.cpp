@@ -27,9 +27,11 @@
 #include <wtf/Platform.h>
 #include <WebKit2/WKRetainPtr.h>
 
+extern void setTouchWebView(Nix::WebView* wv);
+class MiniBrowser;
+MiniBrowser *g_Browser=0;
+void g_ForceUpdate();
 
-
-// this is to put up a triangle rather than show the webview render. mostly to make sure our surface is ok.
 //#define KLAATU_DRAW_TRIANGLE 1
 
 extern "C" {
@@ -178,6 +180,10 @@ MiniBrowser::MiniBrowser(GMainLoop* mainLoop, Mode mode, int width, int height, 
     m_webView->setFocused(true);
     m_webView->setVisible(true);
     m_webView->setActive(true);
+    fprintf(stderr,"calling settouchwebview\n");
+    setTouchWebView(m_webView);
+    g_Browser=this;
+
 }
 
 MiniBrowser::~MiniBrowser()
@@ -437,6 +443,7 @@ void MiniBrowser::updateDisplay()
     klaatu_draw_triangle();
 #endif
     m_window->swapBuffers();
+    //    fprintf(stderr,"updateDisplay\n");
 }
 
 static gboolean callUpdateDisplay(gpointer data)
@@ -451,6 +458,7 @@ static gboolean callUpdateDisplay(gpointer data)
 
 void MiniBrowser::scheduleUpdateDisplay()
 {
+    //fprintf(stderr,"scheduleUpdateDisplay  called\n");
     if (m_displayUpdateScheduled)
         return;
 
@@ -849,4 +857,14 @@ int main(int argc, char* argv[])
 
     g_main_loop_run(mainLoop);
     g_main_loop_unref(mainLoop);
+}
+
+void g_ForceUpdate()
+{
+    fprintf(stderr,"g_ForceUpdate called\n");
+    if (g_Browser)
+        g_Browser->handleExposeEvent();
+    else
+        fprintf(stderr,"No browser to expose\n");
+
 }

@@ -16,12 +16,22 @@
 #include <ui/FramebufferNativeWindow.h>
 #include <gui/SurfaceComposerClient.h>
 #include "klaatu_events.h"
+#include <NixEvents.h>
+#include <WebView.h>
 
 using namespace android;
 #define ASSERT_EQ(A, B) {if ((A) != (B)) {printf ("ERROR: %d -- (%d:%d)\n", __LINE__,A,B); exit(9); }}
 #define ASSERT_NE(A, B) {if ((A) == (B)) {printf ("ERROR: %d -- (%d:%d)\n", __LINE__,A,B); exit(9); }}
 #define EXPECT_TRUE(A) {if ((A) == 0) {printf ("ERROR: %d -- (%d)\n", __LINE__,A); exit(9); }}
 
+// Terrible hack, will make touch things gsources soon.
+Nix::WebView* g_webView=0;
+extern void g_ForceUpdate();
+void setTouchWebView(Nix::WebView* wv)
+{
+    g_webView=wv;
+    fprintf(stderr,"settouchwebview gwv = 0x%x\n",g_webView);
+}
 
 
 void fatalError(const char* message)
@@ -145,18 +155,20 @@ void LinuxWindow::klaatu_init_graphics()
 
 }
 
+
+
 EventSingleton* eventSingleton;
 class EVDispatcher : public EventSingleton {
 public:
     bool down;
-    //    Local<Function> cb;
+
+
     EVDispatcher() {
         down = false;
-        //cb = CB;
     }
     virtual void touchStart(float rx, float ry, unsigned int tap_count=0) { 
         if(down) {
-            fprintf(stderr,"touch moving\n");
+            fprintf(stderr,"touch moving, x=%f y=%f tap=%d\n",rx,ry,tap_count);
             //Local<Object> event = Object::New();
             //event->Set(String::NewSymbol("x"), Number::New(rx));
             //event->Set(String::NewSymbol("y"), Number::New(ry));
@@ -166,7 +178,25 @@ public:
             
         } else {
             down = true;
-            fprintf(stderr,"touch starting\n");
+            
+            WKPoint contentsPoint = g_webView->userViewportToContents(WKPointMake(int(rx), int(ry)));
+
+            fprintf(stderr,"touch starting, x=%f y=%f tap=%d\n",rx,ry,tap_count);
+            Nix::MouseEvent nixEvent;
+            nixEvent.type =  Nix::InputEvent::MouseDown;
+            nixEvent.button=Nix::MouseEvent::LeftButton;
+            nixEvent.x=contentsPoint.x;
+            nixEvent.y=contentsPoint.y;
+            nixEvent.globalX=nixEvent.x;
+            nixEvent.globalY=nixEvent.y;
+            nixEvent.clickCount=1;
+            fprintf(stderr,"event type for down click = %d\n",nixEvent.type);
+            fprintf(stderr,"Sending down click for %d %d: %d\n",nixEvent.x,nixEvent.y,nixEvent.clickCount);
+            if (g_webView)
+                g_webView->sendEvent(nixEvent);
+            else
+                fprintf(stderr,"No webview to send to :(\n");
+            g_ForceUpdate();
             //Local<Object> event = Object::New();
             //event->Set(String::NewSymbol("x"), Number::New(rx));
             //event->Set(String::NewSymbol("y"), Number::New(ry));
@@ -176,10 +206,27 @@ public:
         }
     }
     virtual void touchMove(float rx, float ry, unsigned int tap_count=0) { 
-        fprintf(stderr,"touch moving\n");
+        fprintf(stderr,"touch moving2, x=%f y=%f tap=%d\n",rx,ry,tap_count);
     }
     virtual void touchEnd(float rx, float ry, unsigned int tap_count=0) { 
-        fprintf(stderr,"touch ending\n");
+        WKPoint contentsPoint = g_webView->userViewportToContents(WKPointMake(int(rx), int(ry)));
+
+
+        fprintf(stderr,"touch ending, x=%f y=%f tap=%d\n",rx,ry,tap_count);
+        Nix::MouseEvent nixEvent;
+        nixEvent.type =  Nix::InputEvent::MouseUp;
+        nixEvent.button=Nix::MouseEvent::LeftButton;
+        nixEvent.x=contentsPoint.x;
+        nixEvent.y=contentsPoint.y;
+        nixEvent.globalX=nixEvent.x;
+        nixEvent.globalY=nixEvent.y;
+        nixEvent.clickCount=0;
+        fprintf(stderr,"Sending up click for %d %d: %d\n",nixEvent.x,nixEvent.y,nixEvent.clickCount);
+        if (g_webView)
+            g_webView->sendEvent(nixEvent);
+        else
+            fprintf(stderr,"No webview to send to :(\n");
+        g_ForceUpdate();
         //Local<Object> event = Object::New();
         //event->Set(String::NewSymbol("x"), Number::New(rx));
         //event->Set(String::NewSymbol("y"), Number::New(ry));
@@ -191,7 +238,7 @@ public:
 };
 
 
-LinuxWindow::LinuxWindow(LinuxWindowClient* client, int width, int height)
+LinuxWindow::LinuxWindow(LinuxWindowClient* client,int width, int height)
     : m_client(client)
       //    , m_eventSource(0)
       //    , m_display(XOpenDisplay(0))
