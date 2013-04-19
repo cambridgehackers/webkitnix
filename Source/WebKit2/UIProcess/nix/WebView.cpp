@@ -44,8 +44,7 @@ using namespace WebCore;
 namespace WebKit {
 
 WebView::WebView(WebContext* context, WebPageGroup* pageGroup)
-    : m_webPageProxy(context->createWebPage(this, pageGroup))
-    , m_focused(true)
+    : m_focused(true)
     , m_visible(true)
     , m_active(true)
     , m_isSuspended(false)
@@ -53,6 +52,7 @@ WebView::WebView(WebContext* context, WebPageGroup* pageGroup)
     , m_opacity(1.f)
     , m_activeContextMenu(WebContextMenuProxyNix::create())
 {
+    m_webPageProxy = context->createWebPage(this, pageGroup);
     m_webPageProxy->pageGroup()->preferences()->setForceCompositingMode(true);
 }
 
