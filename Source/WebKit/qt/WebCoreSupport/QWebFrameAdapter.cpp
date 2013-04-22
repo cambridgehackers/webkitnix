@@ -25,6 +25,7 @@
 #include "Chrome.h"
 #include "ChromeClientQt.h"
 #include "DocumentLoader.h"
+#include "EventHandler.h"
 #include "FocusController.h"
 #include "Frame.h"
 #include "FrameLoadRequest.h"
@@ -235,7 +236,7 @@ void QWebFrameAdapter::addToJavaScriptWindowObject(const QString& name, QObject*
     JSC::JSObject* runtimeObject = JSC::Bindings::QtInstance::getQtInstance(object, root, valueOwnership)->createRuntimeObject(exec);
 
     JSC::PutPropertySlot slot;
-    window->methodTable()->put(window, exec, JSC::Identifier(&exec->globalData(), reinterpret_cast_ptr<const UChar*>(name.constData()), name.length()), runtimeObject, slot);
+    window->methodTable()->put(window, exec, JSC::Identifier(&exec->vm(), reinterpret_cast_ptr<const UChar*>(name.constData()), name.length()), runtimeObject, slot);
 }
 
 QString QWebFrameAdapter::toHtml() const

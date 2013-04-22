@@ -3783,6 +3783,9 @@
     <ClCompile Include="..\css\SVGCSSStyleSelector.cpp">
       <Filter>css</Filter>
     </ClCompile>
+    <ClCompile Include="..\css\TransformFunctions.cpp">
+      <Filter>css</Filter>
+    </ClCompile>
     <ClCompile Include="..\css\ViewportStyleResolver.cpp">
       <Filter>css</Filter>
     </ClCompile>
@@ -3799,6 +3802,9 @@
       <Filter>css</Filter>
     </ClCompile>
     <ClCompile Include="..\css\WebKitCSSMatrix.cpp">
+      <Filter>css</Filter>
+    </ClCompile>
+    <ClCompile Include="..\css\WebKitCSSMatFunctionValue.cpp">
       <Filter>css</Filter>
     </ClCompile>
     <ClCompile Include="..\css\WebKitCSSMixFunctionValue.cpp">
@@ -6341,15 +6347,6 @@
     </ClCompile>
     <ClCompile Include="..\storage\StorageTracker.cpp">
       <Filter>storage</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\AtomicString.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\StringImpl.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\WTFString.cpp">
-      <Filter>strings</Filter>
     </ClCompile>
     <ClCompile Include="..\bridge\jsc\BridgeJSC.cpp">
       <Filter>bridge</Filter>
@@ -9825,6 +9822,9 @@
     <ClInclude Include="..\platform\graphics\filters\CustomFilterArrayParameter.h">
       <Filter>platform\graphics\filters</Filter>
     </ClInclude>
+    <ClInclude Include="..\platform\graphics\filters\CustomFilterColorParameter.h">
+      <Filter>platform\graphics\filters</Filter>
+    </ClInclude>
     <ClInclude Include="..\platform\graphics\filters\CustomFilterCompiledProgram.h">
       <Filter>platform\graphics\filters</Filter>
     </ClInclude>
@@ -10569,6 +10569,9 @@
     <ClInclude Include="..\css\StyleSheetList.h">
       <Filter>css</Filter>
     </ClInclude>
+    <ClInclude Include="..\css\TransformFunctions.h">
+      <Filter>css</Filter>
+    </ClInclude>
     <ClInclude Include="..\css\ViewportStyleResolver.h">
       <Filter>css</Filter>
     </ClInclude>
@@ -10585,6 +10588,9 @@
       <Filter>css</Filter>
     </ClInclude>
     <ClInclude Include="..\css\WebKitCSSMatrix.h">
+      <Filter>css</Filter>
+    </ClInclude>
+    <ClInclude Include="..\css\WebKitCSSMatFunctionValue.h">
       <Filter>css</Filter>
     </ClInclude>
     <ClInclude Include="..\css\WebKitCSSMixFunctionValue.h">
@@ -14044,7 +14050,7 @@
     <ClInclude Include="..\ForwardingHeaders\runtime\JSFunction.h">
       <Filter>ForwardingHeaders\runtime</Filter>
     </ClInclude>
-    <ClInclude Include="..\ForwardingHeaders\runtime\JSGlobalData.h">
+    <ClInclude Include="..\ForwardingHeaders\runtime\VM.h">
       <Filter>ForwardingHeaders\runtime</Filter>
     </ClInclude>
     <ClInclude Include="..\ForwardingHeaders\runtime\JSGlobalObject.h">

@@ -253,6 +253,7 @@ WebPage::WebPage(uint64_t pageID, const WebPageCreationParameters& parameters)
     , m_accessibilityObject(0)
 #endif
     , m_setCanStartMediaTimer(RunLoop::main(), this, &WebPage::setCanStartMediaTimerFired)
+    , m_sendDidUpdateInWindowStateTimer(RunLoop::main(), this, &WebPage::didUpdateInWindowStateTimerFired)
     , m_findController(this)
 #if ENABLE(TOUCH_EVENTS)
 #if PLATFORM(QT)
@@ -516,7 +517,7 @@ void WebPage::initializeInjectedBundleDiagnosticLoggingClient(WKBundlePageDiagno
 }
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
-PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* pluginElement, const Plugin::Parameters& parameters)
+PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* pluginElement, const Plugin::Parameters& parameters, String& newMIMEType)
 {
     String pluginPath;
     uint32_t pluginLoadPolicy;
@@ -524,7 +525,7 @@ PassRefPtr<Plugin> WebPage::createPlugin(WebFrame* frame, HTMLPlugInElement* plu
     String frameURLString = frame->coreFrame()->loader()->documentLoader()->responseURL().string();
     String pageURLString = m_page->mainFrame()->loader()->documentLoader()->responseURL().string();
 
-    if (!sendSync(Messages::WebPageProxy::GetPluginPath(parameters.mimeType, parameters.url.string(), frameURLString, pageURLString), Messages::WebPageProxy::GetPluginPath::Reply(pluginPath, pluginLoadPolicy))) {
+    if (!sendSync(Messages::WebPageProxy::FindPlugin(parameters.mimeType, parameters.url.string(), frameURLString, pageURLString), Messages::WebPageProxy::FindPlugin::Reply(pluginPath, newMIMEType, pluginLoadPolicy))) {
         return 0;
     }
 
@@ -1978,6 +1979,11 @@ void WebPage::setCanStartMediaTimerFired()
         m_page->setCanStartMedia(true);
 }
 
+void WebPage::didUpdateInWindowStateTimerFired()
+{
+    send(Messages::WebPageProxy::DidUpdateInWindowState());
+}
+
 inline bool WebPage::canHandleUserEvents() const
 {
 #if USE(TILED_BACKING_STORE)
@@ -2012,6 +2018,7 @@ void WebPage::setIsInWindow(bool isInWindow)
     }
 
     m_page->setIsInWindow(isInWindow);
+    m_sendDidUpdateInWindowStateTimer.startOneShot(0);
 }
 
 void WebPage::didReceivePolicyDecision(uint64_t frameID, uint64_t listenerID, uint32_t policyAction, uint64_t downloadID)
@@ -2103,7 +2110,7 @@ void WebPage::runJavaScriptInMainFrame(const String& script, uint64_t callbackID
     RefPtr<SerializedScriptValue> serializedResultValue;
     CoreIPC::DataReference dataReference;
 
-    JSLockHolder lock(JSDOMWindow::commonJSGlobalData());
+    JSLockHolder lock(JSDOMWindow::commonVM());
     if (JSValue resultValue = m_mainFrame->coreFrame()->script()->executeScript(script, true).jsValue()) {
         if ((serializedResultValue = SerializedScriptValue::create(m_mainFrame->jsContext(), toRef(m_mainFrame->coreFrame()->script()->globalObject(mainThreadNormalWorld())->globalExec(), resultValue), 0)))
             dataReference = serializedResultValue->data();
@@ -3710,9 +3717,10 @@ bool WebPage::canPluginHandleResponse(const ResourceResponse& response)
 {
 #if ENABLE(NETSCAPE_PLUGIN_API)
     String pluginPath;
+    String newMIMEType;
     uint32_t pluginLoadPolicy;
     
-    if (!sendSync(Messages::WebPageProxy::GetPluginPath(response.mimeType(), response.url().string(), response.url().string(), response.url().string()), Messages::WebPageProxy::GetPluginPath::Reply(pluginPath, pluginLoadPolicy)))
+    if (!sendSync(Messages::WebPageProxy::FindPlugin(response.mimeType(), response.url().string(), response.url().string(), response.url().string()), Messages::WebPageProxy::FindPlugin::Reply(pluginPath, newMIMEType, pluginLoadPolicy)))
         return false;
 
     return pluginLoadPolicy != PluginModuleBlocked && !pluginPath.isEmpty();

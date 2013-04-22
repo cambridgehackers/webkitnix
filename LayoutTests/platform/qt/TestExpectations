@@ -199,10 +199,6 @@ fast/xsl/xslt-xhtml-template.xml
 fast/xpath/xpath-template-element.html
 fast/xsl/xslt-processor-template.html
 
-# Fail until SUBPIXEL_LAYOUT is enabled
-# https://bugs.webkit.org/show_bug.cgi?id=85532
-fast/sub-pixel
-
 # USE(V8)
 
 # v8 i18n extension.
@@ -1910,11 +1906,6 @@ webkit.org/b/109224 fast/forms/number/number-l10n-input.html [ Skip ]
 # [Qt] New fast/flexbox/line-clamp-link-after-ellipsis.html layout test is failing since r142335.
 webkit.org/b/109353 fast/flexbox/line-clamp-link-after-ellipsis.html [ Skip ]
 
-# Some fast/exclusions/shape-outside-floats tests are failing
-webkit.org/b/113769 fast/exclusions/shape-outside-floats/shape-outside-floats-ellipse-margin-left.html [ Skip ]
-webkit.org/b/113769 fast/exclusions/shape-outside-floats/shape-outside-floats-diamond-margin-polygon.html [ Failure ]
-webkit.org/b/113769 fast/exclusions/shape-inside/shape-inside-polygon-padding-003.html [ Skip ]
-
 webkit.org/b/110090 fast/events/clientXY-in-zoom-and-scroll.html [ Skip ]
 
 webkit.org/b/108508 fast/canvas/canvas-currentPath.html [ Skip ]
@@ -1928,7 +1919,7 @@ webkit.org/b/112914 fast/media/mq-resolution-dpi-dpcm-warning.html [ Skip ]
 webkit.org/b/112914 fast/media/mq-resolution.html [ Skip ]
 webkit.org/b/112914 fast/media/w3c/test_media_queries.html [ Skip ]
 
-webkit.org/b/113930 fast/loader/url-selected-user-gesture.html [ Skip ]
+webkit.org/b/114611 fast/repaint/background-shorthand-with-gradient-and-height-changes.html [ Skip ]
 
 webkit.org/b/113931 fast/forms/select/popup-closes-on-blur.html [ Skip ]
 
@@ -2274,7 +2265,7 @@ fast/block/lineboxcontain/font.html
 css3/flexbox/flexbox-overflow-auto.html
 fast/block/line-layout/selection-highlight-overlap.html
 fast/css/empty-cell-baseline.html
-fast/exclusions/shape-inside/shape-inside-polygon-padding-002.html
+
 fast/forms/datalist/input-appearance-range-with-datalist-rtl.html
 fast/forms/datalist/update-range-with-datalist.html
 fast/multicol/cell-shrinkback.html
@@ -2289,21 +2280,15 @@ svg/animations/animateTransform-rotate-around-point.svg
 svg/animations/animateMotion-additive-1.svg
 svg/text/alt-glyph-for-surrogate-pair.svg
 svg/transforms/transformed-text-fill-gradient.html
-fast/regions/counters/extract-list-items-013.html
 fast/regions/floats-basic-in-variable-width-regions.html
 fast/regions/region-style-rule-position.html
 fast/forms/select/intrinsic-min-width-applies-with-fixed-width.html
 webkit.org/b/110762 compositing/overlap-blending/children-opacity-no-overlap.html [ Skip ]
 webkit.org/b/110762 compositing/overlap-blending/reflection-opacity-huge.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-inside/shape-inside-circle.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-inside/shape-inside-circle-padding.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-inside/shape-inside-ellipse.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-inside/shape-inside-ellipse-padding.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-outside-floats/shape-outside-floats-non-zero-y.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-outside-floats/shape-outside-floats-simple-circle.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-outside-floats/shape-outside-floats-simple-ellipse.html [ Skip ]
-webkit.org/b/110089 fast/exclusions/shape-outside-floats/shape-outside-floats-simple-rounded-rectangle.html [ Skip ]
 webkit.org/b/110447 fast/regions/shape-inside/shape-inside-on-regions.html [ Skip ]
+css3/flexbox/auto-margins.html
+fast/regions/overflow-in-uniform-regions.html
+webkit.org/b/114807 fast/gradients/css3-color-stop-invalid.html [ Skip ]
 
 # Failing fast/css/sticky/ tests with minor pixel differences
 # https://bugs.webkit.org/show_bug.cgi?id=92080
@@ -2394,10 +2379,6 @@ jquery/data.html
 # https://bugs.webkit.org/show_bug.cgi?id=92018
 svg/zoom/text/zoom-hixie-mixed-009.xml
 svg/zoom/page/zoom-hixie-mixed-009.xml
-
-# This test depends on subpixel layout.
-# https://bugs.webkit.org/show_bug.cgi?id=92352
-css3/flexbox/flex-rounding.html
 
 # [Qt][GTK] REGRESSION(r125251): It made svg/custom/use-instanceRoot-as-event-target.xhtml assert and flakey
 # https://bugs.webkit.org/show_bug.cgi?id=93812
@@ -2734,3 +2715,11 @@ webkit.org/b/114338 compositing/overlap-blending/nested-non-overlap-clipping.htm
 
 # REGRESSION(r148378): editing/style/block-style-005.html failing
 webkit.org/b/114612 editing/style/block-style-005.html [ Skip ]
+
+# SUBPIXEL tests with missing baselines
+fast/sub-pixel/sub-pixel-accumulates-to-layers.html [ Missing ]
+fast/sub-pixel/sub-pixel-iframe-copy-on-scroll.html [ Missing ]
+fast/sub-pixel/transformed-iframe-copy-on-scroll.html [ Missing ]
+
+# Reference test fast/sub-pixel/float-wrap-zoom.html fails
+webkit.org/b/114800 fast/sub-pixel/float-wrap-zoom.html [ ImageOnlyFailure ]

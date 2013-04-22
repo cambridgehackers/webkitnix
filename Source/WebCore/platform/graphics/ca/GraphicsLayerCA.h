@@ -228,8 +228,6 @@ private:
 
     FloatPoint computePositionRelativeToBase(float& pageScale) const;
 
-    FloatSize constrainedSize() const;
-
     bool requiresTiledLayer(float pageScaleFactor) const;
     void swapFromOrToTiledLayer(bool useTiledLayer);
 
@@ -250,7 +248,7 @@ private:
     FloatRect computeVisibleRect(TransformState&, ComputeVisibleRectFlags = RespectAnimatingTransforms) const;
     const FloatRect& visibleRect() const { return m_visibleRect; }
     
-    FloatRect adjustTiledLayerVisibleRect(TiledBacking*, const FloatRect& oldVisibleRect, const FloatSize& oldSize) const;
+    static FloatRect adjustTiledLayerVisibleRect(TiledBacking*, const FloatRect& oldVisibleRect, const FloatRect& newVisibleRect, const FloatSize& oldSize, const FloatSize& newSize);
 
     bool recursiveVisibleRectChangeRequiresFlush(const TransformState&) const;
 

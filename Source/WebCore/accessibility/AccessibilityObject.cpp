@@ -32,6 +32,7 @@
 #include "AXObjectCache.h"
 #include "AccessibilityRenderObject.h"
 #include "AccessibilityTable.h"
+#include "Editor.h"
 #include "FloatRect.h"
 #include "FocusController.h"
 #include "Frame.h"
@@ -209,7 +210,7 @@ bool AccessibilityObject::isAccessibilityObjectSearchMatchAtIndex(AccessibilityO
             && axObject->roleValue() == criteria->startObject->roleValue();
         
     case StaticTextSearchKey:
-        return axObject->hasStaticText();
+        return axObject->isStaticText();
         
     case StyleChangeSearchKey:
         return criteria->startObject
@@ -527,6 +528,19 @@ bool AccessibilityObject::isARIAControl(AccessibilityRole ariaRole)
 {
     return isARIAInput(ariaRole) || ariaRole == TextAreaRole || ariaRole == ButtonRole 
     || ariaRole == ComboBoxRole || ariaRole == SliderRole; 
+}
+    
+bool AccessibilityObject::isRangeControl() const
+{
+    switch (roleValue()) {
+    case ProgressIndicatorRole:
+    case SliderRole:
+    case ScrollBarRole:
+    case SpinButtonRole:
+        return true;
+    default:
+        return false;
+    }
 }
 
 IntPoint AccessibilityObject::clickPoint()

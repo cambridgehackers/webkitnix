@@ -28,6 +28,7 @@
 #include "Chrome.h"
 #include "Console.h"
 #include "DumpRenderTreeSupportGtk.h"
+#include "Editor.h"
 #include "Element.h"
 #include "FileChooser.h"
 #include "FileIconLoader.h"
@@ -35,6 +36,7 @@
 #include "FloatRect.h"
 #include "FocusController.h"
 #include "FrameLoadRequest.h"
+#include "FrameSelection.h"
 #include "FrameView.h"
 #include "GtkUtilities.h"
 #include "GtkVersioning.h"
@@ -68,6 +70,7 @@
 #include <glib.h>
 #include <glib/gi18n-lib.h>
 #include <gtk/gtk.h>
+#include <wtf/CurrentTime.h>
 #include <wtf/MathExtras.h>
 #include <wtf/text/CString.h>
 #include <wtf/text/WTFString.h>

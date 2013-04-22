@@ -448,7 +448,8 @@ public:
     bool isBlockquote() const;
     bool isLandmark() const;
     bool isColorWell() const { return roleValue() == ColorWellRole; }
-    
+    bool isRangeControl() const;
+
     virtual bool isChecked() const { return false; }
     virtual bool isEnabled() const { return false; }
     virtual bool isSelected() const { return false; }
@@ -479,7 +480,7 @@ public:
     virtual bool hasSameFont(RenderObject*) const { return false; }
     virtual bool hasSameFontColor(RenderObject*) const { return false; }
     virtual bool hasSameStyle(RenderObject*) const { return false; }
-    bool hasStaticText() const { return roleValue() == StaticTextRole; }
+    bool isStaticText() const { return roleValue() == StaticTextRole; }
     virtual bool hasUnderline() const { return false; }
     bool hasHighlighting() const;
 

@@ -110,10 +110,11 @@ macro cCall2(function, arg1, arg2)
         move arg2, t1
         call function
     elsif X86
+        resetX87Stack
         poke arg1, 0
         poke arg2, 1
         call function
-    elsif MIPS
+    elsif MIPS or SH4
         move arg1, a0
         move arg2, a1
         call function
@@ -133,12 +134,13 @@ macro cCall4(function, arg1, arg2, arg3, arg4)
         move arg4, t3
         call function
     elsif X86
+        resetX87Stack
         poke arg1, 0
         poke arg2, 1
         poke arg3, 2
         poke arg4, 3
         call function
-    elsif MIPS
+    elsif MIPS or SH4
         move arg1, a0
         move arg2, a1
         move arg3, a2
@@ -183,6 +185,14 @@ macro callCallSlowPath(advance, slowPath, action)
     cCall2(slowPath, cfr, PC)
     move t1, cfr
     action(t0)
+end
+
+macro callWatchdogTimerHandler(throwHandler)
+    storei PC, ArgumentCount + TagOffset[cfr]
+    cCall2(_llint_slow_path_handle_watchdog_timer, cfr, PC)
+    move t1, cfr
+    btpnz t0, throwHandler
+    loadi ArgumentCount + TagOffset[cfr], PC
 end
 
 macro checkSwitchToJITForLoop()
@@ -302,9 +312,9 @@ macro functionArityCheck(doneLabel, slow_path)
     cCall2(slow_path, cfr, PC)   # This slow_path has a simple protocol: t0 = 0 => no error, t0 != 0 => error
     move t1, cfr
     btiz t0, .continue
-    loadp JITStackFrame::globalData[sp], t1
-    loadp JSGlobalData::callFrameForThrow[t1], t0
-    jmp JSGlobalData::targetMachinePCForThrow[t1]
+    loadp JITStackFrame::vm[sp], t1
+    loadp VM::callFrameForThrow[t1], t0
+    jmp VM::targetMachinePCForThrow[t1]
 .continue:
     # Reload CodeBlock and PC, since the slow_path clobbered it.
     loadp CodeBlock[cfr], t1
@@ -1761,14 +1771,14 @@ _llint_op_catch:
     # the interpreter's throw trampoline (see _llint_throw_trampoline).
     # The JIT throwing protocol calls for the cfr to be in t0. The throwing
     # code must have known that we were throwing to the interpreter, and have
-    # set JSGlobalData::targetInterpreterPCForThrow.
+    # set VM::targetInterpreterPCForThrow.
     move t0, cfr
-    loadp JITStackFrame::globalData[sp], t3
-    loadi JSGlobalData::targetInterpreterPCForThrow[t3], PC
-    loadi JSGlobalData::exception + PayloadOffset[t3], t0
-    loadi JSGlobalData::exception + TagOffset[t3], t1
-    storei 0, JSGlobalData::exception + PayloadOffset[t3]
-    storei EmptyValueTag, JSGlobalData::exception + TagOffset[t3]       
+    loadp JITStackFrame::vm[sp], t3
+    loadi VM::targetInterpreterPCForThrow[t3], PC
+    loadi VM::exception + PayloadOffset[t3], t0
+    loadi VM::exception + TagOffset[t3], t1
+    storei 0, VM::exception + PayloadOffset[t3]
+    storei EmptyValueTag, VM::exception + TagOffset[t3]       
     loadi 4[PC], t2
     storei t0, PayloadOffset[cfr, t2, 8]
     storei t1, TagOffset[cfr, t2, 8]
@@ -1855,16 +1865,16 @@ _llint_throw_from_slow_path_trampoline:
     # When throwing from the interpreter (i.e. throwing from LLIntSlowPaths), so
     # the throw target is not necessarily interpreted code, we come to here.
     # This essentially emulates the JIT's throwing protocol.
-    loadp JITStackFrame::globalData[sp], t1
-    loadp JSGlobalData::callFrameForThrow[t1], t0
-    jmp JSGlobalData::targetMachinePCForThrow[t1]
+    loadp JITStackFrame::vm[sp], t1
+    loadp VM::callFrameForThrow[t1], t0
+    jmp VM::targetMachinePCForThrow[t1]
 
 
 _llint_throw_during_call_trampoline:
     preserveReturnAddressAfterCall(t2)
-    loadp JITStackFrame::globalData[sp], t1
-    loadp JSGlobalData::callFrameForThrow[t1], t0
-    jmp JSGlobalData::targetMachinePCForThrow[t1]
+    loadp JITStackFrame::vm[sp], t1
+    loadp VM::callFrameForThrow[t1], t0
+    jmp VM::targetMachinePCForThrow[t1]
 
 
 macro nativeCallTrampoline(executableOffsetToFunction)
@@ -1874,8 +1884,8 @@ macro nativeCallTrampoline(executableOffsetToFunction)
     storei CellTag, ScopeChain + TagOffset[cfr]
     storei t1, ScopeChain + PayloadOffset[cfr]
     if X86
-        loadp JITStackFrame::globalData + 4[sp], t3 # Additional offset for return address
-        storep cfr, JSGlobalData::topCallFrame[t3]
+        loadp JITStackFrame::vm + 4[sp], t3 # Additional offset for return address
+        storep cfr, VM::topCallFrame[t3]
         peek 0, t1
         storep t1, ReturnPC[cfr]
         move cfr, t2  # t2 = ecx
@@ -1885,10 +1895,10 @@ macro nativeCallTrampoline(executableOffsetToFunction)
         move t0, cfr
         call executableOffsetToFunction[t1]
         addp 16 - 4, sp
-        loadp JITStackFrame::globalData + 4[sp], t3
+        loadp JITStackFrame::vm + 4[sp], t3
     elsif ARM or ARMv7 or ARMv7_TRADITIONAL
-        loadp JITStackFrame::globalData[sp], t3
-        storep cfr, JSGlobalData::topCallFrame[t3]
+        loadp JITStackFrame::vm[sp], t3
+        storep cfr, VM::topCallFrame[t3]
         move t0, t2
         preserveReturnAddressAfterCall(t3)
         storep t3, ReturnPC[cfr]
@@ -1898,10 +1908,10 @@ macro nativeCallTrampoline(executableOffsetToFunction)
         move t2, cfr
         call executableOffsetToFunction[t1]
         restoreReturnAddressBeforeReturn(t3)
-        loadp JITStackFrame::globalData[sp], t3
+        loadp JITStackFrame::vm[sp], t3
     elsif MIPS
-        loadp JITStackFrame::globalData[sp], t3
-        storep cfr, JSGlobalData::topCallFrame[t3]
+        loadp JITStackFrame::vm[sp], t3
+        storep cfr, VM::topCallFrame[t3]
         move t0, t2
         preserveReturnAddressAfterCall(t3)
         storep t3, ReturnPC[cfr]
@@ -1912,10 +1922,23 @@ macro nativeCallTrampoline(executableOffsetToFunction)
         move t0, a0
         call executableOffsetToFunction[t1]
         restoreReturnAddressBeforeReturn(t3)
-        loadp JITStackFrame::globalData[sp], t3
+        loadp JITStackFrame::vm[sp], t3
+    elsif SH4
+        loadp JITStackFrame::vm[sp], t3
+        storep cfr, VM::topCallFrame[t3]
+        move t0, t2
+        preserveReturnAddressAfterCall(t3)
+        storep t3, ReturnPC[cfr]
+        move cfr, t0
+        loadi Callee + PayloadOffset[cfr], t1
+        loadp JSFunction::m_executable[t1], t1
+        move t2, cfr
+        call executableOffsetToFunction[t1]
+        restoreReturnAddressBeforeReturn(t3)
+        loadp JITStackFrame::vm[sp], t3
     elsif C_LOOP
-        loadp JITStackFrame::globalData[sp], t3
-        storep cfr, JSGlobalData::topCallFrame[t3]
+        loadp JITStackFrame::vm[sp], t3
+        storep cfr, VM::topCallFrame[t3]
         move t0, t2
         preserveReturnAddressAfterCall(t3)
         storep t3, ReturnPC[cfr]
@@ -1925,11 +1948,11 @@ macro nativeCallTrampoline(executableOffsetToFunction)
         move t2, cfr
         cloopCallNative executableOffsetToFunction[t1]
         restoreReturnAddressBeforeReturn(t3)
-        loadp JITStackFrame::globalData[sp], t3
+        loadp JITStackFrame::vm[sp], t3
     else  
         error
     end
-    bineq JSGlobalData::exception + TagOffset[t3], EmptyValueTag, .exception
+    bineq VM::exception + TagOffset[t3], EmptyValueTag, .exception
     ret
 .exception:
     preserveReturnAddressAfterCall(t1) # This is really only needed on X86

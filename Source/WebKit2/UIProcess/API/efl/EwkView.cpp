@@ -130,6 +130,15 @@ static inline EwkView* toEwkView(const Ewk_View_Smart_Data* smartData)
     return smartData->priv;
 }
 
+static inline void showEvasObjectsIfNeeded(const Ewk_View_Smart_Data* smartData)
+{
+    ASSERT(smartData);
+
+    if (evas_object_clipees_get(smartData->base.clipper))
+        evas_object_show(smartData->base.clipper);
+    evas_object_show(smartData->image);
+}
+
 // EwkViewEventHandler implementation.
 
 template <Evas_Callback_Type EventType>
@@ -241,7 +250,9 @@ EwkView::EwkView(WKViewRef view, Evas_Object* evasObject)
     , m_evasObject(evasObject)
     , m_context(EwkContext::findOrCreateWrapper(WKPageGetContext(wkPage())))
     , m_pageGroup(EwkPageGroup::findOrCreateWrapper(WKPageGetPageGroup(wkPage())))
+#if USE(ACCELERATED_COMPOSITING)
     , m_pendingSurfaceResize(false)
+#endif
     , m_pageLoadClient(PageLoadClientEfl::create(this))
     , m_pagePolicyClient(PagePolicyClientEfl::create(this))
     , m_pageUIClient(PageUIClientEfl::create(this))
@@ -533,14 +544,17 @@ void EwkView::displayTimerFired(Timer<EwkView>*)
 {
     Ewk_View_Smart_Data* sd = smartData();
 
-    if (m_pendingSurfaceResize) {
 #if USE(ACCELERATED_COMPOSITING)
+    if (m_pendingSurfaceResize) {
         // Create a GL surface here so that Evas has no chance of painting to an empty GL surface.
         if (!createGLSurface())
             return;
-#endif
+        // Make Evas objects visible here in order not to paint empty Evas objects with black color.
+        showEvasObjectsIfNeeded(sd);
+
         m_pendingSurfaceResize = false;
     }
+#endif
 
     if (!m_isAccelerated) {
         RefPtr<cairo_surface_t> surface = createSurfaceForImage(sd->image);
@@ -808,8 +822,6 @@ void EwkView::showContextMenu(WKPoint position, WKArrayRef items)
 {
     Ewk_View_Smart_Data* sd = smartData();
     ASSERT(sd->api);
-
-    ASSERT(contextMenuProxy);
 
     if (!sd->api->context_menu_show)
         return;
@@ -1112,9 +1124,9 @@ void EwkView::handleEvasObjectCalculate(Evas_Object* evasObject)
 #if USE(ACCELERATED_COMPOSITING)
         if (WKPageUseFixedLayout(self->wkPage()))
             self->pageViewportController()->didChangeViewportSize(self->size());
-#endif
 
         self->setNeedsSurfaceResize();
+#endif
     }
 }
 
@@ -1123,9 +1135,8 @@ void EwkView::handleEvasObjectShow(Evas_Object* evasObject)
     Ewk_View_Smart_Data* smartData = toSmartData(evasObject);
     ASSERT(smartData);
 
-    if (evas_object_clipees_get(smartData->base.clipper))
-        evas_object_show(smartData->base.clipper);
-    evas_object_show(smartData->image);
+    if (!toEwkView(smartData)->m_isAccelerated)
+        showEvasObjectsIfNeeded(smartData);
 }
 
 void EwkView::handleEvasObjectHide(Evas_Object* evasObject)

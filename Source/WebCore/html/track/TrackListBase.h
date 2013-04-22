@@ -38,6 +38,7 @@
 namespace WebCore {
 
 class HTMLMediaElement;
+class Element;
 class TrackBase;
 
 class TrackListBase : public RefCounted<TrackListBase>, public EventTarget {
@@ -58,8 +59,9 @@ public:
     DEFINE_ATTRIBUTE_EVENT_LISTENER(change);
     DEFINE_ATTRIBUTE_EVENT_LISTENER(removetrack);
 
-    void clearOwner() { m_owner = 0; }
-    HTMLMediaElement* owner() const { return m_owner; }
+    void clearElement() { m_element = 0; }
+    Element* element() const;
+    HTMLMediaElement* mediaElement() const { return m_element; }
 
     bool isFiringEventListeners() { return m_dispatchingEvents; }
 
@@ -85,7 +87,7 @@ private:
     void asyncEventTimerFired(Timer<TrackListBase>*);
 
     ScriptExecutionContext* m_context;
-    HTMLMediaElement* m_owner;
+    HTMLMediaElement* m_element;
 
     Vector<RefPtr<Event> > m_pendingEvents;
     Timer<TrackListBase> m_pendingEventTimer;

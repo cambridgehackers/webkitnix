@@ -28,9 +28,7 @@
 #include "Chrome.h"
 #include "ChromeClient.h"
 #include "ContainerNodeAlgorithms.h"
-#if ENABLE(DELETION_UI)
-#include "DeleteButtonController.h"
-#endif
+#include "Editor.h"
 #include "EventNames.h"
 #include "ExceptionCode.h"
 #include "FloatRect.h"
@@ -40,23 +38,26 @@
 #include "InlineTextBox.h"
 #include "InsertionPoint.h"
 #include "InspectorInstrumentation.h"
+#include "JSNode.h"
 #include "LoaderStrategy.h"
 #include "MemoryCache.h"
 #include "MutationEvent.h"
 #include "NodeRenderStyle.h"
 #include "NodeTraversal.h"
-#include "ResourceLoadScheduler.h"
 #include "Page.h"
 #include "PlatformStrategies.h"
 #include "RenderBox.h"
 #include "RenderTheme.h"
 #include "RenderWidget.h"
+#include "ResourceLoadScheduler.h"
 #include "RootInlineBox.h"
 #include "TemplateContentDocumentFragment.h"
 #include <wtf/CurrentTime.h>
 #include <wtf/Vector.h>
 
-#include "JSNode.h"
+#if ENABLE(DELETION_UI)
+#include "DeleteButtonController.h"
+#endif
 
 using namespace std;
 
@@ -615,9 +616,9 @@ void ContainerNode::removeChildren()
             while (RefPtr<Node> n = m_firstChild) {
                 Node* next = n->nextSibling();
 
-                // Remove the node from the tree before calling detach or removedFromDocument (4427024, 4129744).
-                // removeChild() does this after calling detach(). There is no explanation for
-                // this discrepancy between removeChild() and its optimized version removeChildren().
+                if (n->attached())
+                    n->detach();
+
                 n->setPreviousSibling(0);
                 n->setNextSibling(0);
                 n->setParentOrShadowHostNode(0);
@@ -626,19 +627,10 @@ void ContainerNode::removeChildren()
                 m_firstChild = next;
                 if (n == m_lastChild)
                     m_lastChild = 0;
-                removedChildren.append(n.release());
-            }
+                else
+                    m_firstChild->setPreviousSibling(0);
 
-            // Detach the nodes only after properly removed from the tree because
-            // a. detaching requires a proper DOM tree (for counters and quotes for
-            // example) and during the previous loop the next sibling still points to
-            // the node being removed while the node being removed does not point back
-            // and does not point to the same parent as its next sibling.
-            // b. destroying Renderers of standalone nodes is sometimes faster.
-            for (size_t i = 0; i < removedChildren.size(); ++i) {
-                Node* removedChild = removedChildren[i].get();
-                if (removedChild->attached())
-                    removedChild->detach();
+                removedChildren.append(n.release());
             }
         }
 

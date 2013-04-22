@@ -57,9 +57,9 @@ JSTestNamedConstructorConstructor::JSTestNamedConstructorConstructor(Structure* 
 
 void JSTestNamedConstructorConstructor::finishCreation(ExecState* exec, JSDOMGlobalObject* globalObject)
 {
-    Base::finishCreation(exec->globalData());
+    Base::finishCreation(exec->vm());
     ASSERT(inherits(&s_info));
-    putDirect(exec->globalData(), exec->propertyNames().prototype, JSTestNamedConstructorPrototype::self(exec, globalObject), DontDelete | ReadOnly);
+    putDirect(exec->vm(), exec->propertyNames().prototype, JSTestNamedConstructorPrototype::self(exec, globalObject), DontDelete | ReadOnly);
 }
 
 bool JSTestNamedConstructorConstructor::getOwnPropertySlot(JSCell* cell, ExecState* exec, PropertyName propertyName, PropertySlot& slot)
@@ -106,7 +106,7 @@ void JSTestNamedConstructorNamedConstructor::finishCreation(ExecState* exec, JSD
 {
     Base::finishCreation(globalObject);
     ASSERT(inherits(&s_info));
-    putDirect(exec->globalData(), exec->propertyNames().prototype, JSTestNamedConstructorPrototype::self(exec, globalObject), None);
+    putDirect(exec->vm(), exec->propertyNames().prototype, JSTestNamedConstructorPrototype::self(exec, globalObject), None);
 }
 
 ConstructType JSTestNamedConstructorNamedConstructor::getConstructData(JSCell*, ConstructData& constructData)
@@ -138,15 +138,15 @@ JSTestNamedConstructor::JSTestNamedConstructor(Structure* structure, JSDOMGlobal
 {
 }
 
-void JSTestNamedConstructor::finishCreation(JSGlobalData& globalData)
+void JSTestNamedConstructor::finishCreation(VM& vm)
 {
-    Base::finishCreation(globalData);
+    Base::finishCreation(vm);
     ASSERT(inherits(&s_info));
 }
 
 JSObject* JSTestNamedConstructor::createPrototype(ExecState* exec, JSGlobalObject* globalObject)
 {
-    return JSTestNamedConstructorPrototype::create(exec->globalData(), globalObject, JSTestNamedConstructorPrototype::createStructure(globalObject->globalData(), globalObject, globalObject->objectPrototype()));
+    return JSTestNamedConstructorPrototype::create(exec->vm(), globalObject, JSTestNamedConstructorPrototype::createStructure(globalObject->vm(), globalObject, globalObject->objectPrototype()));
 }
 
 void JSTestNamedConstructor::destroy(JSC::JSCell* cell)
@@ -243,6 +243,7 @@ JSC::JSValue toJS(JSC::ExecState* exec, JSDOMGlobalObject* globalObject, TestNam
     // by adding the SkipVTableValidation attribute to the interface IDL definition
     RELEASE_ASSERT(actualVTablePointer == expectedVTablePointer);
 #endif
+    ReportMemoryCost<TestNamedConstructor>::reportMemoryCost(exec, impl);
     return createNewWrapper<JSTestNamedConstructor>(exec, globalObject, impl);
 }
 

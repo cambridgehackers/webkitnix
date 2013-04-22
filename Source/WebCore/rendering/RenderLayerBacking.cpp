@@ -419,9 +419,6 @@ bool RenderLayerBacking::shouldClipCompositedBounds() const
     if (m_usingTiledCacheLayer)
         return false;
 
-    if (!compositor()->compositingConsultsOverlap())
-        return false;
-
     if (layerOrAncestorIsTransformedOrUsingCompositedScrolling(m_owningLayer))
         return false;
 
@@ -1446,6 +1443,9 @@ void RenderLayerBacking::updateDirectlyCompositedBackgroundImage(bool isSimpleCo
     if (!GraphicsLayer::supportsContentsTiling())
         return;
 
+    if (isDirectlyCompositedImage())
+        return;
+
     const RenderStyle* style = renderer()->style();
 
     if (!isSimpleContainer || !style->hasBackgroundImage()) {
@@ -1537,7 +1537,7 @@ static bool isRestartedPlugin(RenderObject* renderer)
     if (!element || !element->isPluginElement())
         return false;
 
-    return toHTMLPlugInElement(element)->restartedPlugin();
+    return toHTMLPlugInElement(element)->isRestartedPlugin();
 }
 
 static bool isCompositedPlugin(RenderObject* renderer)

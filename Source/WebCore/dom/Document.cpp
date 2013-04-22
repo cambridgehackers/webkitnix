@@ -695,10 +695,7 @@ void Document::dispose()
     m_cssCanvasElements.clear();
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
-    // FIXME: consider using ActiveDOMObject.
-    if (m_scriptedAnimationController)
-        m_scriptedAnimationController->clearDocumentPointer();
-    m_scriptedAnimationController.clear();
+    clearScriptedAnimationController();
 #endif
 }
 
@@ -2117,10 +2114,7 @@ void Document::detach()
 #endif
 
 #if ENABLE(REQUEST_ANIMATION_FRAME)
-    // FIXME: consider using ActiveDOMObject.
-    if (m_scriptedAnimationController)
-        m_scriptedAnimationController->clearDocumentPointer();
-    m_scriptedAnimationController.clear();
+    clearScriptedAnimationController();
 #endif
 
     RenderObject* render = renderer();
@@ -5627,6 +5621,14 @@ void Document::serviceScriptedAnimations(double monotonicAnimationStartTime)
         return;
     m_scriptedAnimationController->serviceScriptedAnimations(monotonicAnimationStartTime);
 }
+
+void Document::clearScriptedAnimationController()
+{
+    // FIXME: consider using ActiveDOMObject.
+    if (m_scriptedAnimationController)
+        m_scriptedAnimationController->clearDocumentPointer();
+    m_scriptedAnimationController.clear();
+}
 #endif
 
 #if ENABLE(TOUCH_EVENTS)
@@ -5978,6 +5980,11 @@ void Document::updateHoverActiveState(const HitTestRequest& request, Element* in
         for (RenderObject* curr = oldHoverObj; curr && curr != ancestor; curr = curr->hoverAncestor()) {
             if (curr->node() && !curr->isText() && (!mustBeInActiveChain || curr->node()->inActiveChain()))
                 nodesToRemoveFromChain.append(curr->node());
+        }
+        // Unset hovered nodes in sub frame documents if the old hovered node was a frame owner.
+        if (oldHoverNode && oldHoverNode->isFrameOwnerElement()) {
+            if (Document* contentDocument = toFrameOwnerElement(oldHoverNode.get())->contentDocument())
+                contentDocument->updateHoverActiveState(request, 0);
         }
     }
 

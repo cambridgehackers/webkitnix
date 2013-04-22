@@ -54,14 +54,11 @@
 #include <fcntl.h>
 #include <gio/gio.h>
 #include <glib.h>
-#define LIBSOUP_USE_UNSTABLE_REQUEST_API
-#include <libsoup/soup-multipart-input-stream.h>
-#include <libsoup/soup-request-http.h>
-#include <libsoup/soup-requester.h>
 #include <libsoup/soup.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <wtf/CurrentTime.h>
 #include <wtf/SHA1.h>
 #include <wtf/gobject/GRefPtr.h>
 #include <wtf/text/Base64.h>
@@ -288,12 +285,6 @@ static void ensureSessionIsInitialized(SoupSession* session)
         g_object_unref(logger);
     }
 #endif // !LOG_DISABLED
-
-    if (!soup_session_get_feature(session, SOUP_TYPE_REQUESTER)) {
-        SoupRequester* requester = soup_requester_new();
-        soup_session_add_feature(session, SOUP_SESSION_FEATURE(requester));
-        g_object_unref(requester);
-    }
 
     g_object_set_data(G_OBJECT(session), "webkit-init", reinterpret_cast<void*>(0xdeadbeef));
 }
@@ -985,7 +976,6 @@ static bool createSoupMessageForHandleAndRequest(ResourceHandle* handle, const R
 static bool createSoupRequestAndMessageForHandle(ResourceHandle* handle, const ResourceRequest& request, bool isHTTPFamilyRequest)
 {
     ResourceHandleInternal* d = handle->getInternal();
-    SoupRequester* requester = SOUP_REQUESTER(soup_session_get_feature(d->soupSession(), SOUP_TYPE_REQUESTER));
 
     GOwnPtr<GError> error;
 
@@ -993,7 +983,7 @@ static bool createSoupRequestAndMessageForHandle(ResourceHandle* handle, const R
     if (!soupURI)
         return false;
 
-    d->m_soupRequest = adoptGRef(soup_requester_request_uri(requester, soupURI.get(), &error.outPtr()));
+    d->m_soupRequest = adoptGRef(soup_session_request_uri(d->soupSession(), soupURI.get(), &error.outPtr()));
     if (error) {
         d->m_soupRequest.clear();
         return false;

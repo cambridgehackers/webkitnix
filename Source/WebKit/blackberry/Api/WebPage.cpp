@@ -84,6 +84,7 @@
 #include "InspectorOverlay.h"
 #include "JavaScriptVariant_p.h"
 #include "LayerWebKitThread.h"
+#include "LocalFileSystem.h"
 #if ENABLE(NETWORK_INFO)
 #include "NetworkInfoClientBlackBerry.h"
 #endif
@@ -172,6 +173,7 @@
 #include <BlackBerryPlatformMouseEvent.h>
 #include <BlackBerryPlatformScreen.h>
 #include <BlackBerryPlatformSettings.h>
+#include <BlackBerryPlatformWebFileSystem.h>
 #include <JavaScriptCore/APICast.h>
 #include <JavaScriptCore/JSContextRef.h>
 #include <JavaScriptCore/JSStringRef.h>
@@ -429,6 +431,8 @@ WebPagePrivate::WebPagePrivate(WebPage* webPage, WebPageClient* client, const In
 #if ENABLE(NOTIFICATIONS) || ENABLE(LEGACY_NOTIFICATIONS)
     , m_notificationManager(this)
 #endif
+    , m_didStartAnimations(false)
+    , m_animationStartTime(0)
 {
     static bool isInitialized = false;
     if (!isInitialized) {
@@ -510,6 +514,9 @@ Page* WebPagePrivate::core(const WebPage* webPage)
 
 void WebPagePrivate::init(const BlackBerry::Platform::String& pageGroupName)
 {
+    m_webSettings = WebSettings::createFromStandardSettings();
+    m_webSettings->setUserAgentString(defaultUserAgent());
+
     ChromeClientBlackBerry* chromeClient = new ChromeClientBlackBerry(this);
 #if ENABLE(CONTEXT_MENUS)
     ContextMenuClientBlackBerry* contextMenuClient = 0;
@@ -579,8 +586,6 @@ void WebPagePrivate::init(const BlackBerry::Platform::String& pageGroupName)
     WebCore::provideNetworkInfoTo(m_page, new WebCore::NetworkInfoClientBlackBerry(this));
 #endif
 
-    m_webSettings = WebSettings::createFromStandardSettings();
-    m_webSettings->setUserAgentString(defaultUserAgent());
     m_page->setDeviceScaleFactor(m_webSettings->devicePixelRatio());
 
     m_page->addLayoutMilestones(DidFirstVisuallyNonEmptyLayout);
@@ -636,6 +641,14 @@ void WebPagePrivate::init(const BlackBerry::Platform::String& pageGroupName)
 
 #if ENABLE(WEB_TIMING)
     m_page->settings()->setMemoryInfoEnabled(true);
+#endif
+
+#if ENABLE(FILE_SYSTEM)
+    static bool localFileSystemInitialized = false;
+    if (!localFileSystemInitialized) {
+        localFileSystemInitialized = true;
+        WebCore::LocalFileSystem::initializeLocalFileSystem("/");
+    }
 #endif
 
 #if USE(ACCELERATED_COMPOSITING)
@@ -1555,6 +1568,10 @@ void WebPagePrivate::overflowExceedsContentsSize()
 
 void WebPagePrivate::layoutFinished()
 {
+    // If a layout change has occurred, we need to invalidate any current spellcheck requests and trigger a new run.
+    m_inputHandler->stopPendingSpellCheckRequests();
+    m_inputHandler->spellCheckTextBlock();
+
     if (!m_contentsSizeChanged && !m_overflowExceedsContentsSize)
         return;
 
@@ -2144,7 +2161,8 @@ Platform::WebContext WebPagePrivate::webContext(TargetDetectionStrategy strategy
 
     bool nodeAllowSelectionOverride = false;
     Node* linkNode = node->enclosingLinkEventParentOrSelf();
-    if (node->isLink() || (node->isTextNode() && linkNode)) {
+    // Set link url only when the node is linked image, or text inside anchor. Prevent CCM popup when long press non-link element(eg. button) inside an anchor.
+    if ((node == linkNode) || (node->isTextNode() && linkNode)) {
         KURL href;
         if (linkNode->isLink() && linkNode->hasAttributes()) {
             if (const Attribute* attribute = toElement(linkNode)->getAttributeItem(HTMLNames::hrefAttr))
@@ -3246,7 +3264,7 @@ void WebPagePrivate::updateDelegatedOverlays(bool dispatched)
     }
 }
 
-void WebPage::setCaretHighlightStyle(Platform::CaretHighlightStyle style)
+void WebPage::setCaretHighlightStyle(Platform::CaretHighlightStyle)
 {
 }
 
@@ -4785,6 +4803,7 @@ void WebPage::clearBrowsingData()
     clearCookieCache();
     clearHistory();
     clearPluginSiteData();
+    clearWebFileSystem();
 }
 
 void WebPage::clearHistory()
@@ -4825,6 +4844,13 @@ void WebPage::clearNeverRememberSites()
 #if ENABLE(BLACKBERRY_CREDENTIAL_PERSIST)
     if (d->m_webSettings->isCredentialAutofillEnabled())
         credentialManager().clearNeverRememberSites();
+#endif
+}
+
+void WebPage::clearWebFileSystem()
+{
+#if ENABLE(FILE_SYSTEM)
+    Platform::WebFileSystem::deleteAllFileSystems();
 #endif
 }
 
@@ -5374,9 +5400,15 @@ void WebPagePrivate::commitRootLayer(const IntRect& layoutRect, const IntRect& d
 
     if (rootLayer)
         rootLayer->commitOnCompositingThread();
-
     if (overlayLayer)
         overlayLayer->commitOnCompositingThread();
+
+    m_animationStartTime = currentTime();
+    m_didStartAnimations = false;
+    if (rootLayer)
+        m_didStartAnimations |= rootLayer->startAnimations(m_animationStartTime);
+    if (overlayLayer)
+        m_didStartAnimations |= overlayLayer->startAnimations(m_animationStartTime);
 
     scheduleCompositingRun();
 }
@@ -5454,6 +5486,15 @@ bool WebPagePrivate::commitRootLayerIfNeeded()
             layoutRect,
             documentRect,
             drawsRootLayer));
+
+    if (m_didStartAnimations) {
+        if (m_frameLayers && m_frameLayers->hasLayer())
+            m_frameLayers->notifyAnimationsStarted(m_animationStartTime);
+        if (m_overlayLayer)
+            m_overlayLayer->platformLayer()->notifyAnimationsStarted(m_animationStartTime);
+
+        m_didStartAnimations = false;
+    }
 
     didComposite();
     return true;
@@ -5885,7 +5926,7 @@ void WebPagePrivate::didChangeSettings(WebSettings* webSettings)
 
     coreSettings->setShouldUseCrossOriginProtocolCheck(!webSettings->allowCrossSiteRequests());
     coreSettings->setWebSecurityEnabled(!webSettings->allowCrossSiteRequests());
-    coreSettings->setApplyPageScaleFactorInCompositor(webSettings->applyDeviceScaleFactorInCompositor());
+    coreSettings->setApplyDeviceScaleFactorInCompositor(webSettings->applyDeviceScaleFactorInCompositor());
 
     updateBackgroundColor(webSettings->backgroundColor());
 

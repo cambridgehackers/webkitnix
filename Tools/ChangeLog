@@ -1,3 +1,728 @@
+2013-04-22  Xuefei Ren  <xren@blackberry.com>
+
+        fix build warning(unused parameter)
+        https://bugs.webkit.org/show_bug.cgi?id=114855
+
+        Reviewed by Rob Buis.
+
+        remove warning(unused parameter) in
+        Tools/DumpRenderTree/blackberry/EventSender.cpp
+
+        * DumpRenderTree/blackberry/EventSender.cpp:
+        (getDragModeCallback):
+
+2013-04-22  Alberto Garcia  <agarcia@igalia.com>
+
+        [BlackBerry] Add dummy implementation of AccessibilityController::accessibleElementById()
+        https://bugs.webkit.org/show_bug.cgi?id=114939
+
+        Reviewed by Carlos Garcia Campos.
+
+        This was added in r129308.
+
+        * DumpRenderTree/blackberry/AccessibilityControllerBlackBerry.cpp:
+        (AccessibilityController::accessibleElementById):
+
+2013-04-21  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        Unreviewed EFL build fix after r148855.
+
+        * TestWebKitAPI/PlatformEfl.cmake:
+
+2013-04-21  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [EFL][WK2] Mark WKViewClientWebProcessCallbacks API test as failing
+        https://bugs.webkit.org/show_bug.cgi?id=114922
+
+        Reviewed by Gyuyoung Kim.
+
+        Mark WKViewClientWebProcessCallbacks API test as failing on WK2 EFL.
+
+        * TestWebKitAPI/PlatformEfl.cmake:
+
+2013-04-20  Zan Dobersek  <zdobersek@igalia.com>
+
+        [GTK] Fix baseline positioning issue by updating Freetype
+        https://bugs.webkit.org/show_bug.cgi?id=106775
+
+        Reviewed by Martin Robinson.
+
+        * gtk/jhbuild.modules: Bump the Freetype Jhbuild dependency to 2.4.11.
+        * gtk/patches/freetype6-2.4.11-truetype-font-height-fix.patch: Added. This is the Freetype
+        patch (committed as e0469372) that fixes rounding issues for smaller fonts. It is bound to be included
+        in the 2.4.12 release of Freetype (not released yet) but is provided here as its effect on baselines is
+        considered positive and will reduce the amout of future rebaselining.
+
+2013-04-20  Manuel Rego Casasnovas  <rego@igalia.com>
+
+        [GTK] Fix unit test webkit2/WebKitFindController/hide
+        https://bugs.webkit.org/show_bug.cgi?id=89810
+
+        Reviewed by Carlos Garcia Campos.
+
+        * Scripts/run-gtk-tests:
+        (TestRunner): Unskip test webkit2/WebKitFindController/hide.
+
+2013-04-19  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Build fixes for the flakiness dashboard.
+
+        * TestResultServer/static-dashboards/flakiness_dashboard.js:
+
+2013-04-17  Gustavo Noronha Silva  <gns@gnome.org>
+
+        [GTK] Make the 32 bits bot only build and run API tests
+        https://bugs.webkit.org/show_bug.cgi?id=113532
+
+        Reviewed by Martin Robinson.
+
+        * BuildSlaveSupport/build.webkit.org-config/config.json: make the 32 bits bot use the new BuildAndAPITest type
+        * BuildSlaveSupport/build.webkit.org-config/master.cfg:
+        (BuildAndAPITestFactory): new factory that builds and runs API tests, only used by the GTK+ 32 bits bot at the
+        moment;
+        (BuildAndAPITestFactory.__init__): add API tests step for platforms that have it.
+
+2013-04-19  Andras Becsi  <andras.becsi@digia.com>
+
+        [Qt] Only use thin archives on Linux
+
+        Rubber-stamped by Jocelyn Turcotte.
+
+        Since "thin archive" is a feature of GNU's ar
+        we limit the usage to Linux to avoid problems
+        with other configurations (eg. macx-g++).
+
+        * qmake/mkspecs/features/default_pre.prf:
+
+2013-04-19  Krzysztof Czech  <k.czech@samsung.com>
+
+        [GTK][WK2] accessibility/language-attribute.html is failing
+        https://bugs.webkit.org/show_bug.cgi?id=106342
+
+        Reviewed by Gyuyoung Kim.
+
+        Adds support for getting language information.
+
+        * WebKitTestRunner/InjectedBundle/atk/AccessibilityUIElementAtk.cpp:
+        (WTR::AccessibilityUIElement::language):
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove the isToTWebKit member variable from the BuilderGroup interface
+        https://bugs.webkit.org/show_bug.cgi?id=114805
+
+        Reviewed by Benjamin Poulain.
+
+        Remove the isToTWebKit member variable from the BuilderGroup and all its usages as it now defaults to true for every
+        builder group. The isTipOfTreeWebKitBuilder method now returns true by default but should be removed in a follow-up patch.
+        The BuilderGroup constructor does not accept the isToTWebKit parameter anymore so all the callsites are adjusted accordingly.
+
+        * TestResultServer/static-dashboards/builders.js:
+        (BuilderGroup):
+        (loadBuildersList):
+        * TestResultServer/static-dashboards/dashboard_base.js:
+        (isTipOfTreeWebKitBuilder):
+        (expectationsMap):
+        * TestResultServer/static-dashboards/flakiness_dashboard_unittests.js:
+        (test):
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] htmlForIndividualTests unit test should include its dummy builder under the webkit.org builder master
+        https://bugs.webkit.org/show_bug.cgi?id=114804
+
+        Reviewed by Benjamin Poulain.
+
+        The htmlForIndividualTests unit test should include its dummy builder under the sole supported webkit.org builder master
+        just so the unit tests properly functions.
+
+        * TestResultServer/static-dashboards/flakiness_dashboard_unittests.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove Chromium-specific helper functions that were used in the builder-loading code
+        https://bugs.webkit.org/show_bug.cgi?id=114803
+
+        Reviewed by Benjamin Poulain.
+
+        Remove three Chromium-specific helper functions that were used to determine Chromium DEPS, Content Shell and WebKit ToT
+        test runners. These are not required anymore and thus removed along with a couple of unit tests that were testing these
+        methods' correct behavior.
+
+        * TestResultServer/static-dashboards/builders.js:
+        * TestResultServer/static-dashboards/flakiness_dashboard_unittests.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove the Chromium-specific builder masters
+        https://bugs.webkit.org/show_bug.cgi?id=114802
+
+        Reviewed by Benjamin Poulain.
+
+        Remove all the Chromium-specific builder masters, the webkit.org builder master is the only one currently supported.
+
+        * TestResultServer/static-dashboards/builders.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove all the Chromium-specific builder groups
+        https://bugs.webkit.org/show_bug.cgi?id=114801
+
+        Reviewed by Benjamin Poulain.
+
+        Remove all the Chromium-specific builder groups, all of these are not supported anymore.
+
+        * TestResultServer/static-dashboards/builders.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Only accept the 'group' parameter if present in the layout tests builders group
+        https://bugs.webkit.org/show_bug.cgi?id=114799
+
+        Reviewed by Benjamin Poulain.
+
+        The layout tests builder group is the only one supported, all the other Chromium-specific builder groups are
+        bound to be removed.
+
+        * TestResultServer/static-dashboards/history.js:
+        (.):
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove Chromium-specific builder loading code from loadBuildersList
+        https://bugs.webkit.org/show_bug.cgi?id=114797
+
+        Reviewed by Benjamin Poulain.
+
+        Remove anything Chromium-specific from the builder-loading code, specifically removing support for loading builder data
+        for anything other that the layout-tests type and removing support for loading builder data from builders connected
+        to the Chromium-specific builder groups which are no longer supported.
+
+        * TestResultServer/static-dashboards/builders.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] The currentBuilderGroupCategory method should return the layout tests builder groups by default
+        https://bugs.webkit.org/show_bug.cgi?id=114796
+
+        Reviewed by Benjamin Poulain.
+
+        With the Chromium builders no longer uploading results and the layout-tests test type the only one supported by the
+        WebKit's dashboard, the currentBuilderGroupCategory can now return LAYOUT_TESTS_BUILDER_GROUPS as the default builder
+        group category.
+
+        * TestResultServer/static-dashboards/dashboard_base.js:
+        (currentBuilderGroupCategory):
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Narrow down the test types list to only layout-tests
+        https://bugs.webkit.org/show_bug.cgi?id=114795
+
+        Reviewed by Ryosuke Niwa.
+
+        Remove all the redundant test types that the webkit.org builders do not upload results for. All of the removed
+        test types were specific to the Chromium builders.
+
+        * TestResultServer/static-dashboards/dashboard_base.js:
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] The revision rows for aggregate results should no longer include Chromium revisions
+        https://bugs.webkit.org/show_bug.cgi?id=114760
+
+        Reviewed by Benjamin Poulain.
+
+        With the Chromium builders no longer present there's no need to display the Chromium revision range under the
+        aggregate results. Only the first half of the htmlForRevisionRows method (the one returning the table row listing the
+        WebKit revisions) is now relevant - the method is therefor removed and its callsites updated to directly call the
+        htmlForTableRow method that returns the table row containing all the relevant WebKit revisions.
+
+        * TestResultServer/static-dashboards/aggregate_results.js:
+        (htmlForSummaryTable):
+        (htmlForTestType):
+
+2013-04-19  Zan Dobersek  <zdobersek@igalia.com>
+
+        [Dashboard] Remove Chromium-specific cases from the construction of the chart HTML for aggregate results
+        https://bugs.webkit.org/show_bug.cgi?id=114759
+
+        Reviewed by Benjamin Poulain.
+
+        Aggregate results are not viewable for Chromium builders anymore, meaning the WebKit revisions are shown by default.
+        This means the code in the chartHTML method can be simplified, defaulting the revision key to WEBKIT_REVISIONS_KEY
+        and the revision label to 'WebKit Revision'.
+
+        * TestResultServer/static-dashboards/aggregate_results.js:
+        (chartHTML):
+
+2013-04-18  Xuefei Ren  <xren@blackberry.com>
+
+        remove build warning(unused parameter)
+        https://bugs.webkit.org/show_bug.cgi?id=114670
+
+        Reviewed by Rob Buis.
+
+        remove builde warning (unused parameter) in
+        Tools/DumpRenderTree/blackberry
+
+        * DumpRenderTree/blackberry/AccessibilityUIElementBlackBerry.cpp:
+        (AccessibilityUIElement::scrollToMakeVisibleWithSubFocus):
+        (AccessibilityUIElement::scrollToGlobalPoint):
+        * DumpRenderTree/blackberry/DumpRenderTree.cpp:
+        (BlackBerry::WebKit::DumpRenderTree::addMessageToConsole):
+        (BlackBerry::WebKit::DumpRenderTree::didReceiveResponseForFrame):
+        * DumpRenderTree/blackberry/EventSender.cpp:
+        (getDragModeCallback):
+        (setDragModeCallback):
+        (mouseWheelToCallback):
+        (contextClickCallback):
+        (mouseDownCallback):
+        (mouseUpCallback):
+        (mouseMoveToCallback):
+        (beginDragWithFilesCallback):
+        (leapForwardCallback):
+        (keyDownCallback):
+        (textZoomInCallback):
+        (textZoomOutCallback):
+        (zoomPageInCallback):
+        (zoomPageOutCallback):
+        (addTouchPointCallback):
+        (updateTouchPointCallback):
+        (setTouchModifierCallback):
+        (touchStartCallback):
+        (touchCancelCallback):
+        (touchMoveCallback):
+        (touchEndCallback):
+        (clearTouchPointsCallback):
+        (cancelTouchPointCallback):
+        (releaseTouchPointCallback):
+        (scalePageByCallback):
+        * DumpRenderTree/blackberry/TestRunnerBlackBerry.cpp:
+        (TestRunner::authenticateSession):
+        (TestRunner::setSpatialNavigationEnabled):
+        (TestRunner::apiTestNewWindowDataLoadBaseURL):
+        (TestRunner::setPluginsEnabled):
+        (TestRunner::setApplicationCacheOriginQuota):
+        (TestRunner::addMockSpeechInputResult):
+        (TestRunner::setViewModeMediaFeature):
+        (TestRunner::deleteLocalStorageForOrigin):
+        (TestRunner::applicationCacheDiskUsageForOrigin):
+        (TestRunner::grantWebNotificationPermission):
+        (TestRunner::denyWebNotificationPermission):
+        (TestRunner::simulateWebNotificationClick):
+        (TestRunner::simulateLegacyWebNotificationClick):
+
+2013-04-18  Grzegorz Czajkowski  <g.czajkowski@samsung.com>
+
+        [WK2][EFL] Text Checker's settings refactor
+        https://bugs.webkit.org/show_bug.cgi?id=111713
+
+        Reviewed by Andreas Kling.
+
+        * MiniBrowser/efl/main.c:
+        (window_create):
+        Use a new text checker API to enable spell checking.
+
+2013-04-18  Seokju Kwon  <seokju.kwon@gmail.com>
+
+        [EFL] Add a newline to the end of log message
+        https://bugs.webkit.org/show_bug.cgi?id=114659
+
+        Reviewed by Gyuyoung Kim.
+
+        Move a newline to info() definition.
+
+        * EWebLauncher/main.c:
+        (on_load_finished):
+        (on_tooltip_text_set):
+        (on_tooltip_text_unset):
+        (on_inputmethod_changed):
+        (on_focus_out):
+        (on_focus_in):
+        (on_key_down):
+        (windowCreate):
+        * MiniBrowser/efl/main.c:
+        (on_key_down):
+        (on_download_request):
+        (on_download_finished):
+        (on_download_failed):
+        (on_refresh_button_clicked):
+        (on_popup_menu_discarded):
+        (on_popup_menu_item_clicked):
+        (popup_menu_populate):
+        (on_popup_menu_show):
+        (on_window_create):
+        (context_popup_item_selected_cb):
+        (on_context_menu_show):
+        (on_context_menu_hide):
+        (window_create):
+
+2013-04-17  Zan Dobersek  <zandobersek@gmail.com>
+
+        [Dashboard] Remove code for showing 'WebKit roll' annotations in timelines for Chromium builders
+        https://bugs.webkit.org/show_bug.cgi?id=114755
+
+        Reviewed by Ryosuke Niwa.
+
+        The Chromium builders are no longer available to inspect so there's no need for the code that used to show
+        the 'WebKit roll' annotations in the Chromium builders' timeline.
+
+        * TestResultServer/static-dashboards/timeline_explorer.js:
+
+2013-04-17  Zan Dobersek  <zandobersek@gmail.com>
+
+        [Dashboard] Clean up the timeline updating code, removing Chromium-specific cases
+        https://bugs.webkit.org/show_bug.cgi?id=114756
+
+        Reviewed by Ryosuke Niwa.
+
+        Clean up the updating of the timeline in the timeline explorer, defaulting to the webkit.org build master when
+        constructing the results URL and removing the possible row addition containing the Chromium commit range that
+        only applied to Chromium builders in the first place. Also removes the now-redundant shouldShowWebKitRevisionsOnly
+        method.
+
+        * TestResultServer/static-dashboards/timeline_explorer.js:
+
+2013-04-17  Alberto Garcia  <agarcia@igalia.com>
+
+        media-stream and xslt are no longer configurable options in the GTK+ port
+        https://bugs.webkit.org/show_bug.cgi?id=114736
+
+        Reviewed by Martin Robinson.
+
+        media-stream support was removed in r145199 and XSLT is a hard
+        requirement since r145859. Attempting to pass those options to the
+        configure script, only results in a warning.
+
+        * Scripts/webkitdirs.pm:
+        (buildAutotoolsProject):
+
+2013-04-17  Michał Pakuła vel Rutka  <m.pakula@samsung.com>
+
+        [EFL][WK2] Implement context menu in MiniBrowser
+        https://bugs.webkit.org/show_bug.cgi?id=102932
+
+        Reviewed by Gyuyoung Kim.
+
+        Added context menu support for EFL port using Elementary context popup.
+
+        * MiniBrowser/efl/main.c:
+        (_Browser_Window):
+        (context_popup_item_selected_cb):
+        (context_popup_populate):
+        (on_context_menu_show):
+        (on_context_menu_hide):
+        (window_create):
+
+2013-04-17  Csaba Osztrogonác  <ossy@webkit.org>
+
+        REGRESSION(r148588): It broke the Qt WK2 EWS
+        https://bugs.webkit.org/show_bug.cgi?id=114737
+
+        Reviewed by Jocelyn Turcotte.
+
+        * Scripts/webkitpy/common/config/ews.json: "Qt WK2 EWS" should use qt-wk2 port.
+        * Scripts/webkitpy/common/config/ports.py:
+        (DeprecatedPort.port):
+        (QtPort.build_webkit_command): qt port shouldn't build WebKit2.
+        (QtPort.run_webkit_tests_command): qt port runs WK1 tests.
+        (QtWK2Port): Added.
+        (QtWK2Port.build_webkit_command): qt-wk2 port builds WK1 and WK2 too.
+        (QtWK2Port.run_webkit_tests_command): qt-wk2 port runs WK2 tests.
+        * Scripts/webkitpy/common/config/ports_unittest.py:
+        (DeprecatedPortTest.test_qt_port):
+        (DeprecatedPortTest):
+        (DeprecatedPortTest.test_qt_wk2_port):
+
+2013-04-17  Zan Dobersek  <zdobersek@igalia.com>
+
+        Unreviewed.
+
+        * Scripts/webkitpy/common/config/ports_unittest.py:
+        (DeprecatedPortTest.test_efl_port): Adjusting the expected outcome of the EFL build-webkit command after r148589.
+
+2013-04-17  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        [Qt] Enable sub-pixel layout.
+        https://bugs.webkit.org/show_bug.cgi?id=113199
+
+        Reviewed by Jocelyn Turcotte.
+
+        * qmake/mkspecs/features/features.pri:
+
+2013-04-16  Gyuyoung Kim  <gyuyoung.kim@samsung.com>
+
+        Add Efl WebKit2 EWS bot
+        https://bugs.webkit.org/show_bug.cgi?id=114564
+
+        Reviewed by Ryosuke Niwa.
+
+        Added EflWK2EWS, and add myself a watcher for EflWK2EWS.
+        Also add a deprecated EflWK2Port class.
+
+        Besides clean up eflews watchers.
+
+        * QueueStatusServer/config/queues.py:
+        * Scripts/webkitpy/common/config/ews.json:
+        * Scripts/webkitpy/common/config/ports.py:
+        (DeprecatedPort.port):
+        (EflPort.build_webkit_command):
+        (EflWK2Port):
+        (EflWK2Port.build_webkit_command):
+
+2013-04-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Isolate Early Warning System definitions into a JSON
+        https://bugs.webkit.org/show_bug.cgi?id=114558
+
+        Reviewed by Benjamin Poulain.
+
+        Added ews.json to common/config, and made tool/commands/__init__.py call
+        AbstractEarlyWarningSystem.load_ews_classes to instantiate classes based on ews.json.
+
+        Reland the patch since the EWS failure was a false positive.
+
+        * Scripts/webkitpy/common/config/ews.json: Extracted from earlywarningsystem.py.
+        * Scripts/webkitpy/tool/commands/__init__.py:
+        * Scripts/webkitpy/tool/commands/earlywarningsystem.py:
+        (AbstractEarlyWarningSystem):
+        (AbstractEarlyWarningSystem.__init__):
+        (AbstractEarlyWarningSystem.load_ews_classes): Added. Loads ews.json.
+        * Scripts/webkitpy/tool/commands/earlywarningsystem_unittest.py:
+        (EarlyWarningSystemTest._default_expected_logs):
+        (_test_ews):
+        (test_ewses):
+
+2013-04-16  Sam Weinig  <sam@webkit.org>
+
+        Fix fallout after r148545.
+
+        * WebKitTestRunner/TestController.cpp:
+        (WTR::TestController::resetStateToConsistentValues):
+        Remove calls to non-existent API functions.
+
+2013-04-13  Roger Fong  <roger_fong@apple.com>
+
+        Unreviewed. Disable WinEWS tests, simply not enough bots.
+
+        All bots are running consistently now but the queue still keeps growing.
+        Until we get more bots or make the tests faster, it doesn't seem wise to keep running tests.
+
+        * Scripts/webkitpy/tool/commands/earlywarningsystem.py:
+        (WinEWS):
+
+2013-04-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        The list of contributors in committers.py should be a separate JSON
+        https://bugs.webkit.org/show_bug.cgi?id=114673
+
+        Reviewed by Anders Carlsson.
+
+        Added webkitpy/common/config/contributors.json, made CommitterList load it.
+
+        * EWSTools/start-queue-mac.sh:
+        * EWSTools/start-queue.sh:
+        * Scripts/webkitpy/common/checkout/commitinfo.py:
+        (CommitInfo.committer):
+        * Scripts/webkitpy/common/config/contributors.json: Added.
+        * Scripts/webkitpy/common/config/committers.py:
+        (Reviewer.__init__):
+        (CommitterList.__init__):
+        (CommitterList.load_json): Added.
+        (CommitterList.load_json.emails):
+        (CommitterList.load_json.nicks):
+        * Scripts/webkitpy/tool/bot/flakytestreporter_unittest.py:
+        (MockCommitInfo.author):
+
+2013-04-16  Manuel Rego Casasnovas  <rego@igalia.com>
+
+        [EFL] Bump libsoup dependency to 2.42.0
+        https://bugs.webkit.org/show_bug.cgi?id=113927
+
+        Reviewed by Gyuyoung Kim.
+
+        Update libsoup required version to v2.42.0 and GLib to v2.36.0 as
+        required by libsoup for EFL port.
+
+        * efl/jhbuild.modules:
+        * efl/patches/libsoup-2.40-auth-fix.patch: Removed as it's already
+        included in v2.42.0.
+
+2013-04-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Remove Account class from committers.py
+        https://bugs.webkit.org/show_bug.cgi?id=114671
+
+        Reviewed by Csaba Osztrogonác.
+
+        Account class was added to support watch list email addresses that are not associated with
+        a particular contributor but nobody uses these email address since Chromium port forked.
+
+        Remove it.
+
+        Also removed account_by_login from CommitterList since it was never called except its unittests.
+
+        * Scripts/webkitpy/common/checkout/changelog.py:
+        * Scripts/webkitpy/common/config/committers.py:
+        (Contributor):
+        (Contributor.matches_glob):
+        (Reviewer.__init__):
+        (CommitterList.__init__):
+        (CommitterList._email_to_account_map):
+        (CommitterList._login_to_account_map):
+        (CommitterList.contributors_by_fuzzy_match):
+        (CommitterList.contributor_by_email):
+        (CommitterList.contributor_by_name):
+        (CommitterList.committer_by_email):
+        (CommitterList.reviewer_by_email):
+        * Scripts/webkitpy/common/config/committers_unittest.py:
+        (CommittersTest.test_committer_lookup):
+        * Scripts/webkitpy/common/net/bugzilla/bugzilla.py:
+        (Bugzilla._commit_queue_flag):
+        * Scripts/webkitpy/common/net/bugzilla/bugzilla_unittest.py:
+        (test_commit_queue_flag):
+        * Scripts/webkitpy/common/watchlist/watchlistparser.py:
+        (WatchListParser._validate):
+
+2013-04-16  Mike West  <mkwst@chromium.org>
+
+        Unreviewed update to the watchlist.
+
+        Removing 'mkwst+watchlist@chromium.org' from committers.py and the
+        watchist file; moving to 'mkwst@chromium.org' instead.
+
+        * Scripts/webkitpy/common/config/committers.py:
+        * Scripts/webkitpy/common/config/watchlist:
+
+2013-04-16  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Move webkitpy.layout_tests.port to webkitpy.port
+        https://bugs.webkit.org/show_bug.cgi?id=114668
+
+        Reviewed by Maciej Stachowiak.
+
+        Moved. Port objects knows a lot more than just layout_tests. They doesn't belong down in layout_tests.
+
+        * Scripts/webkitpy/common/host.py:
+        * Scripts/webkitpy/common/host_mock.py:
+        * Scripts/webkitpy/layout_tests/controllers/layout_test_runner_unittest.py:
+        * Scripts/webkitpy/layout_tests/controllers/single_test_runner.py:
+        * Scripts/webkitpy/layout_tests/controllers/test_result_writer_unittest.py:
+        * Scripts/webkitpy/layout_tests/layout_package/json_results_generator_unittest.py:
+        * Scripts/webkitpy/layout_tests/lint_test_expectations.py:
+        * Scripts/webkitpy/layout_tests/port: Removed.
+        * Scripts/webkitpy/layout_tests/run_webkit_tests.py:
+        * Scripts/webkitpy/layout_tests/run_webkit_tests_integrationtest.py:
+        * Scripts/webkitpy/layout_tests/servers/apache_http_server_unittest.py:
+        * Scripts/webkitpy/layout_tests/servers/http_server_base_unittest.py:
+        * Scripts/webkitpy/layout_tests/servers/http_server_unittest.py:
+        * Scripts/webkitpy/layout_tests/views/printing_unittest.py:
+        * Scripts/webkitpy/performance_tests/perftest.py:
+        * Scripts/webkitpy/performance_tests/perftest_unittest.py:
+        * Scripts/webkitpy/performance_tests/perftestsrunner_integrationtest.py:
+        * Scripts/webkitpy/performance_tests/perftestsrunner_unittest.py:
+        * Scripts/webkitpy/port: Copied from Tools/Scripts/webkitpy/layout_tests/port.
+        * Scripts/webkitpy/port/apple.py:
+        * Scripts/webkitpy/port/base.py:
+        * Scripts/webkitpy/port/base_unittest.py:
+        * Scripts/webkitpy/port/config_unittest.py:
+        (ConfigTest.test_default_configuration__standalone):
+        * Scripts/webkitpy/port/driver_unittest.py:
+        * Scripts/webkitpy/port/efl.py:
+        * Scripts/webkitpy/port/efl_unittest.py:
+        * Scripts/webkitpy/port/factory.py:
+        * Scripts/webkitpy/port/factory_unittest.py:
+        * Scripts/webkitpy/port/gtk.py:
+        * Scripts/webkitpy/port/gtk_unittest.py:
+        * Scripts/webkitpy/port/image_diff.py:
+        * Scripts/webkitpy/port/image_diff_unittest.py:
+        * Scripts/webkitpy/port/leakdetector_unittest.py:
+        * Scripts/webkitpy/port/mac.py:
+        * Scripts/webkitpy/port/mac_unittest.py:
+        * Scripts/webkitpy/port/mock_drt.py:
+        * Scripts/webkitpy/port/mock_drt_unittest.py:
+        * Scripts/webkitpy/port/port_testcase.py:
+        * Scripts/webkitpy/port/qt.py:
+        * Scripts/webkitpy/port/qt_unittest.py:
+        * Scripts/webkitpy/port/server_process_unittest.py:
+        * Scripts/webkitpy/port/test.py:
+        * Scripts/webkitpy/port/win.py:
+        * Scripts/webkitpy/port/win_unittest.py:
+        * Scripts/webkitpy/port/xvfbdriver.py:
+        * Scripts/webkitpy/port/xvfbdriver_unittest.py:
+        * Scripts/webkitpy/tool/bot/botinfo_unittest.py:
+        * Scripts/webkitpy/tool/commands/gardenomatic.py:
+        * Scripts/webkitpy/tool/commands/perfalizer_unittest.py:
+        * Scripts/webkitpy/tool/commands/queries.py:
+        * Scripts/webkitpy/tool/commands/queries_unittest.py:
+        * Scripts/webkitpy/tool/commands/rebaseline.py:
+        * Scripts/webkitpy/tool/servers/gardeningserver.py:
+        * Scripts/webkitpy/tool/servers/gardeningserver_unittest.py:
+        * Scripts/webkitpy/tool/servers/rebaselineserver.py:
+        * Scripts/webkitpy/tool/servers/rebaselineserver_unittest.py:
+
+2013-04-16  Commit Queue  <rniwa@webkit.org>
+
+        Unreviewed, rolling out r148498.
+        http://trac.webkit.org/changeset/148498
+        https://bugs.webkit.org/show_bug.cgi?id=114669
+
+        Appears to have broken EWS (Requested by rniwa on #webkit).
+
+        * Scripts/webkitpy/common/config/ews.json: Removed.
+        * Scripts/webkitpy/tool/commands/__init__.py:
+        * Scripts/webkitpy/tool/commands/earlywarningsystem.py:
+        (AbstractEarlyWarningSystem):
+        (AbstractEarlyWarningSystem.__init__):
+        (AbstractEarlyWarningSystem.handle_script_error.does):
+        (GtkEWS):
+        (GtkWK2EWS):
+        (EflEWS):
+        (QtEWS):
+        (QtWK2EWS):
+        (WinEWS):
+        (MacEWS):
+        (MacWK2EWS):
+        * Scripts/webkitpy/tool/commands/earlywarningsystem_unittest.py:
+        (EarlyWarningSystemTest._default_expected_logs):
+        (_test_ews):
+        (test_ewses):
+
+2013-04-13  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Isolate Early Warning System definitions into a JSON
+        https://bugs.webkit.org/show_bug.cgi?id=114558
+
+        Reviewed by Benjamin Poulain.
+
+        Added ews.json to common/config, and made tool/commands/__init__.py call
+        AbstractEarlyWarningSystem.load_ews_classes to instantiate classes based on ews.json.
+
+        * Scripts/webkitpy/common/config/ews.json: Extracted from earlywarningsystem.py.
+        * Scripts/webkitpy/tool/commands/__init__.py:
+        * Scripts/webkitpy/tool/commands/earlywarningsystem.py:
+        (AbstractEarlyWarningSystem):
+        (AbstractEarlyWarningSystem.__init__):
+        (AbstractEarlyWarningSystem.load_ews_classes): Added. Loads ews.json.
+        * Scripts/webkitpy/tool/commands/earlywarningsystem_unittest.py:
+        (EarlyWarningSystemTest._default_expected_logs):
+        (_test_ews):
+        (test_ewses):
+
+2013-04-15  Ryosuke Niwa  <rniwa@webkit.org>
+
+        WKR gets stuck when there are many merges
+        https://bugs.webkit.org/show_bug.cgi?id=114632
+
+        Reviewed by Andreas Kling.
+
+        Move the last revision forward when it exists in a branch.
+        Otherwise, we'll be stuck looping over revisions made to merge patches.
+
+        * Scripts/webkitpy/tool/commands/newcommitbot.py:
+        (NewCommitBot.next_work_item):
+
 2013-04-15  Gustavo Noronha Silva  <gns@gnome.org>
 
         [GTK] Missing a few packages for building on stock Fedora

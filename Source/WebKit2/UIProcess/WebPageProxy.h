@@ -353,6 +353,8 @@ public:
     };
     typedef unsigned ViewStateFlags;
     void viewStateDidChange(ViewStateFlags flags);
+    bool isInWindow() const { return m_isInWindow; }
+    void waitForDidUpdateInWindowState();
 
     WebCore::IntSize viewSize() const;
     bool isViewVisible() const { return m_isVisible; }
@@ -504,6 +506,7 @@ public:
     void listenForLayoutMilestones(WebCore::LayoutMilestones);
 
     void setVisibilityState(WebCore::PageVisibilityState, bool isInitialState);
+    void didUpdateInWindowState() { m_waitingForDidUpdateInWindowState = false; }
 
     bool hasHorizontalScrollbar() const { return m_mainFrameHasHorizontalScrollbar; }
     bool hasVerticalScrollbar() const { return m_mainFrameHasVerticalScrollbar; }
@@ -1037,7 +1040,6 @@ private:
 
 #if USE(DICTATION_ALTERNATIVES)
     void showDictationAlternativeUI(const WebCore::FloatRect& boundingBoxOfDictatedText, uint64_t dictationContext);
-    void dismissDictationAlternativeUI();
     void removeDictationAlternatives(uint64_t dictationContext);
     void dictationAlternatives(uint64_t dictationContext, Vector<String>& result);
 #endif
@@ -1064,7 +1066,7 @@ private:
     void sendWheelEvent(const WebWheelEvent&);
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
-    void getPluginPath(const String& mimeType, const String& urlString, const String& frameURLString, const String& pageURLString, String& pluginPath, uint32_t& pluginLoadPolicy);
+    void findPlugin(const String& mimeType, const String& urlString, const String& frameURLString, const String& pageURLString, String& pluginPath, String& newMIMEType, uint32_t& pluginLoadPolicy);
 #endif
 
     PageClient* m_pageClient;
@@ -1275,6 +1277,8 @@ private:
 
     float m_mediaVolume;
     bool m_mayStartMediaWhenInWindow;
+
+    bool m_waitingForDidUpdateInWindowState;
 
 #if PLATFORM(QT)
     WTF::HashSet<RefPtr<QtRefCountedNetworkRequestData> > m_applicationSchemeRequests;

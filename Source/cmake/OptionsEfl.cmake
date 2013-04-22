@@ -9,7 +9,7 @@ if (NOT DEFINED ENABLE_WEBKIT2)
     set(ENABLE_WEBKIT2 ON)
 endif ()
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug" AND NOT SHARED_CORE)
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug" AND NOT SHARED_CORE)
     message(FATAL_ERROR "Turn on the SHARED_CORE flag to make a debug build - e.g.\n build-webkit --efl --debug --cmakeargs=\"-DSHARED_CORE=ON\".\n")
 endif ()
 
@@ -24,9 +24,10 @@ find_package(JPEG REQUIRED)
 find_package(PNG REQUIRED)
 find_package(ZLIB REQUIRED)
 
-find_package(GLIB 2.33.2 REQUIRED COMPONENTS gio gobject gthread)
-find_package(LibSoup 2.40.3 REQUIRED)
+find_package(GLIB 2.36.0 REQUIRED COMPONENTS gio gobject gthread)
+find_package(LibSoup 2.42.0 REQUIRED)
 
+set(WTF_USE_ICU_UNICODE 1)
 set(WTF_USE_SOUP 1)
 
 add_definitions(-DWTF_USE_GLIB=1)

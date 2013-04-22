@@ -21,6 +21,7 @@
 #include "Page.h"
 
 #include "AlternativeTextClient.h"
+#include "AnimationController.h"
 #include "BackForwardController.h"
 #include "BackForwardList.h"
 #include "Chrome.h"
@@ -32,6 +33,7 @@
 #include "DocumentMarkerController.h"
 #include "DocumentStyleSheetCollection.h"
 #include "DragController.h"
+#include "Editor.h"
 #include "EditorClient.h"
 #include "Event.h"
 #include "EventNames.h"
@@ -172,7 +174,7 @@ Page::Page(PageClients& pageClients)
     , m_visibilityState(PageVisibilityStateVisible)
 #endif
     , m_displayID(0)
-    , m_layoutMilestones(0)
+    , m_requestedLayoutMilestones(0)
     , m_isCountingRelevantRepaintedObjects(false)
 #ifndef NDEBUG
     , m_isPainting(false)
@@ -1085,7 +1087,7 @@ void Page::setDebugger(JSC::Debugger* debugger)
 StorageNamespace* Page::sessionStorage(bool optionalCreate)
 {
     if (!m_sessionStorage && optionalCreate)
-        m_sessionStorage = StorageNamespace::sessionStorageNamespace(this, m_settings->sessionStorageQuota());
+        m_sessionStorage = StorageNamespace::sessionStorageNamespace(this);
 
     return m_sessionStorage.get();
 }
@@ -1269,7 +1271,12 @@ PageVisibilityState Page::visibilityState() const
 void Page::addLayoutMilestones(LayoutMilestones milestones)
 {
     // In the future, we may want a function that replaces m_layoutMilestones instead of just adding to it.
-    m_layoutMilestones |= milestones;
+    m_requestedLayoutMilestones |= milestones;
+}
+
+void Page::removeLayoutMilestones(LayoutMilestones milestones)
+{
+    m_requestedLayoutMilestones &= ~milestones;
 }
 
 // These are magical constants that might be tweaked over time.
@@ -1278,7 +1285,7 @@ static double gMaximumUnpaintedAreaRatio = 0.04;
 
 bool Page::isCountingRelevantRepaintedObjects() const
 {
-    return m_isCountingRelevantRepaintedObjects && (m_layoutMilestones & DidHitRelevantRepaintedObjectsAreaThreshold);
+    return m_isCountingRelevantRepaintedObjects && (m_requestedLayoutMilestones & DidHitRelevantRepaintedObjectsAreaThreshold);
 }
 
 void Page::startCountingRelevantRepaintedObjects()

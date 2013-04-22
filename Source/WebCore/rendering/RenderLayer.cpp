@@ -44,6 +44,7 @@
 #include "config.h"
 #include "RenderLayer.h"
 
+#include "AnimationController.h"
 #include "ColumnInfo.h"
 #include "CSSPropertyNames.h"
 #include "Chrome.h"
@@ -2369,13 +2370,10 @@ void RenderLayer::updateCompositingLayersAfterScroll()
         // Our stacking container is guaranteed to contain all of our descendants that may need
         // repositioning, so update compositing layers from there.
         if (RenderLayer* compositingAncestor = stackingContainer()->enclosingCompositingLayer()) {
-            if (compositor()->compositingConsultsOverlap()) {
-                if (usesCompositedScrolling() && !hasOutOfFlowPositionedDescendant())
-                    compositor()->updateCompositingLayers(CompositingUpdateOnCompositedScroll, compositingAncestor);
-                else
-                    compositor()->updateCompositingLayers(CompositingUpdateOnScroll, compositingAncestor);
-            } else
-                compositingAncestor->backing()->updateAfterLayout(RenderLayerBacking::IsUpdateRoot);
+            if (usesCompositedScrolling() && !hasOutOfFlowPositionedDescendant())
+                compositor()->updateCompositingLayers(CompositingUpdateOnCompositedScroll, compositingAncestor);
+            else
+                compositor()->updateCompositingLayers(CompositingUpdateOnScroll, compositingAncestor);
         }
     }
 #endif
@@ -2878,10 +2876,7 @@ PassRefPtr<Scrollbar> RenderLayer::createScrollbar(ScrollbarOrientation orientat
         widget = RenderScrollbar::createCustomScrollbar(this, orientation, actualRenderer->node());
     else {
         widget = Scrollbar::createNativeScrollbar(this, orientation, RegularScrollbar);
-        if (orientation == HorizontalScrollbar)
-            didAddHorizontalScrollbar(widget.get());
-        else 
-            didAddVerticalScrollbar(widget.get());
+        didAddScrollbar(widget.get(), orientation);
     }
     renderer()->document()->view()->addChild(widget.get());        
     return widget.release();
@@ -2893,12 +2888,8 @@ void RenderLayer::destroyScrollbar(ScrollbarOrientation orientation)
     if (!scrollbar)
         return;
 
-    if (!scrollbar->isCustomScrollbar()) {
-        if (orientation == HorizontalScrollbar)
-            willRemoveHorizontalScrollbar(scrollbar.get());
-        else
-            willRemoveVerticalScrollbar(scrollbar.get());
-    }
+    if (!scrollbar->isCustomScrollbar())
+        willRemoveScrollbar(scrollbar.get(), orientation);
 
     scrollbar->removeFromParent();
     scrollbar->disconnectFromScrollableArea();
@@ -6332,9 +6323,15 @@ FilterOperations RenderLayer::computeFilterOperations(const RenderStyle* style)
             RefPtr<CustomFilterProgram> program = customOperation->program();
             if (!program->isLoaded())
                 continue;
-            
-            CustomFilterGlobalContext* globalContext = renderer()->view()->customFilterGlobalContext();
-            RefPtr<CustomFilterValidatedProgram> validatedProgram = globalContext->getValidatedProgram(program->programInfo());
+
+            RefPtr<CustomFilterValidatedProgram> validatedProgram = program->validatedProgram();
+            if (!validatedProgram) {
+                // Lazily create a validated program and store it on the CustomFilterProgram.
+                CustomFilterGlobalContext* globalContext = renderer()->view()->customFilterGlobalContext();
+                validatedProgram = CustomFilterValidatedProgram::create(globalContext, program->programInfo());
+                program->setValidatedProgram(validatedProgram);
+            }
+
             if (!validatedProgram->isInitialized())
                 continue;
 

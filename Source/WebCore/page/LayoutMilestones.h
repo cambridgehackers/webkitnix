@@ -31,7 +31,8 @@ namespace WebCore {
 enum LayoutMilestoneFlag {
     DidFirstLayout = 1 << 0,
     DidFirstVisuallyNonEmptyLayout = 1 << 1,
-    DidHitRelevantRepaintedObjectsAreaThreshold = 1 << 2
+    DidHitRelevantRepaintedObjectsAreaThreshold = 1 << 2,
+    DidFirstFlushForHeaderLayer = 1 << 3
 };
 
 typedef unsigned LayoutMilestones;

@@ -854,11 +854,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\runtime\JSGlobalData.cpp"
+				RelativePath="..\..\runtime\VM.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\runtime\JSGlobalData.h"
+				RelativePath="..\..\runtime\VM.h"
 				>
 			</File>
 			<File
@@ -1370,11 +1370,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\runtime\Terminator.h"
+				RelativePath="..\..\runtime\TypedArrayDescriptor.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\runtime\TypedArrayDescriptor.h"
+				RelativePath="..\..\runtime\Watchdog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\runtime\Watchdog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\runtime\WatchdogNone.cpp"
 				>
 			</File>
 			<File
@@ -2799,6 +2807,10 @@
 			</File>
 			<File
 				RelativePath="..\..\heap\VTableSpectrum.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\heap\Weak.cpp"
 				>
 			</File>
 			<File

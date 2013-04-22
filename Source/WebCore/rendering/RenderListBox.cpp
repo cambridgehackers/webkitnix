@@ -59,6 +59,7 @@
 #include "SpatialNavigation.h"
 #include "StyleResolver.h"
 #include <math.h>
+#include <wtf/StackStats.h>
 
 using namespace std;
 
@@ -849,7 +850,7 @@ PassRefPtr<Scrollbar> RenderListBox::createScrollbar()
         widget = RenderScrollbar::createCustomScrollbar(this, VerticalScrollbar, this->node());
     else {
         widget = Scrollbar::createNativeScrollbar(this, VerticalScrollbar, theme()->scrollbarControlSizeForPart(ListboxPart));
-        didAddVerticalScrollbar(widget.get());
+        didAddScrollbar(widget.get(), VerticalScrollbar);
     }
     document()->view()->addChild(widget.get());        
     return widget.release();
@@ -861,7 +862,7 @@ void RenderListBox::destroyScrollbar()
         return;
 
     if (!m_vBar->isCustomScrollbar())
-        ScrollableArea::willRemoveVerticalScrollbar(m_vBar.get());
+        ScrollableArea::willRemoveScrollbar(m_vBar.get(), VerticalScrollbar);
     m_vBar->removeFromParent();
     m_vBar->disconnectFromScrollableArea();
     m_vBar = 0;

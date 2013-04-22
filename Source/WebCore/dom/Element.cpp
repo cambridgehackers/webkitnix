@@ -44,6 +44,7 @@
 #include "FlowThreadController.h"
 #include "FocusController.h"
 #include "Frame.h"
+#include "FrameSelection.h"
 #include "FrameView.h"
 #include "HTMLCollection.h"
 #include "HTMLDocument.h"
@@ -2556,6 +2557,32 @@ RenderRegion* Element::renderRegion() const
         return toRenderRegion(renderer());
 
     return 0;
+}
+
+bool Element::moveToFlowThreadIsNeeded(RefPtr<RenderStyle>& cachedStyle)
+{
+    Document* doc = document();
+    
+    if (!doc->cssRegionsEnabled())
+        return false;
+
+#if ENABLE(FULLSCREEN_API)
+    if (doc->webkitIsFullScreen() && doc->webkitCurrentFullScreenElement() == this)
+        return false;
+#endif
+
+    if (isInShadowTree())
+        return false;
+
+    if (!cachedStyle)
+        cachedStyle = styleForRenderer();
+    if (!cachedStyle)
+        return false;
+
+    if (cachedStyle->flowThread().isEmpty())
+        return false;
+
+    return !document()->renderView()->flowThreadController()->isContentNodeRegisteredWithAnyNamedFlow(this);
 }
 
 #if ENABLE(CSS_REGIONS)

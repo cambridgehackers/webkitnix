@@ -1099,6 +1099,7 @@ set(WebCore_SOURCES
     css/SVGCSSComputedStyleDeclaration.cpp
     css/SVGCSSParser.cpp
     css/SVGCSSStyleSelector.cpp
+    css/TransformFunctions.cpp
     css/ViewportStyleResolver.cpp
     css/WebKitCSSFilterRule.cpp
     css/WebKitCSSFilterValue.cpp
@@ -2686,14 +2687,20 @@ endif ()
 
 if (ENABLE_VIDEO_TRACK)
     list(APPEND WebCore_IDL_FILES
+        html/track/AudioTrack.idl
+        html/track/AudioTrackList.idl
         html/track/TextTrack.idl
         html/track/TextTrackCue.idl
         html/track/TextTrackCueList.idl
         html/track/TextTrackList.idl
         html/track/TrackEvent.idl
+        html/track/VideoTrack.idl
+        html/track/VideoTrackList.idl
     )
 
     list(APPEND WebCore_SOURCES
+        html/track/AudioTrack.cpp
+        html/track/AudioTrackList.cpp
         html/track/InbandTextTrack.cpp
         html/track/LoadableTextTrack.cpp
         html/track/TextTrack.cpp
@@ -2707,6 +2714,8 @@ if (ENABLE_VIDEO_TRACK)
         html/track/WebVTTElement.cpp
         html/track/WebVTTParser.cpp
         html/track/WebVTTTokenizer.cpp
+        html/track/VideoTrack.cpp
+        html/track/VideoTrackList.cpp
 
         loader/cache/CachedTextTrack.cpp
 
@@ -2733,6 +2742,27 @@ if (ENABLE_QUOTA)
         Modules/quota/StorageQuotaCallback.idl
         Modules/quota/StorageUsageCallback.idl
         Modules/quota/WorkerNavigatorStorageQuota.idl
+    )
+endif ()
+
+
+if (WTF_USE_ICU_UNICODE)
+    list(APPEND WebCore_SOURCES
+        platform/text/TextBreakIteratorICU.cpp
+        platform/text/TextCodecICU.cpp
+        platform/text/TextEncodingDetectorICU.cpp
+    )
+    list(APPEND WebCore_INCLUDE_DIRECTORIES
+        ${ICU_INCLUDE_DIRS}
+    )
+    list(APPEND WebCore_LIBRARIES
+        ${ICU_LIBRARIES}
+    )
+elseif (WTF_USE_WCHAR_UNICODE)
+    list(APPEND WebCore_SOURCES
+        platform/text/TextEncodingDetectorNone.cpp
+
+        platform/text/wchar/TextBreakIteratorWchar.cpp
     )
 endif ()
 
@@ -2948,7 +2978,7 @@ add_custom_command(
     OUTPUT ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorBackendDispatcher.cpp ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorBackendDispatcher.h ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorFrontend.cpp ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorFrontend.h ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorTypeBuilder.cpp ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorTypeBuilder.h
     MAIN_DEPENDENCY inspector/Inspector.json
     DEPENDS ${WEBCORE_DIR}/inspector/CodeGeneratorInspector.py
-    COMMAND ${PYTHON_EXECUTABLE} ${WEBCORE_DIR}/inspector/CodeGeneratorInspector.py ${WEBCORE_DIR}/inspector/Inspector.json --output_h_dir "${DERIVED_SOURCES_WEBCORE_DIR}" --output_cpp_dir "${DERIVED_SOURCES_WEBCORE_DIR}"
+    COMMAND ${PYTHON_EXECUTABLE} ${WEBCORE_DIR}/inspector/CodeGeneratorInspector.py ${WEBCORE_DIR}/inspector/Inspector.json --output_h_dir "${DERIVED_SOURCES_WEBCORE_DIR}" --output_cpp_dir "${DERIVED_SOURCES_WEBCORE_DIR}" --write_always
     VERBATIM)
 list(APPEND WebCore_SOURCES ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorBackendDispatcher.cpp ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorFrontend.cpp ${DERIVED_SOURCES_WEBCORE_DIR}/InspectorTypeBuilder.cpp)
 

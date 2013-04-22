@@ -716,8 +716,11 @@ int AccessibilityNodeObject::headingLevel() const
     if (!node)
         return false;
 
-    if (ariaRoleAttribute() == HeadingRole)
-        return getAttribute(aria_levelAttr).toInt();
+    if (isHeading()) {
+        int ariaLevel = getAttribute(aria_levelAttr).toInt();
+        if (ariaLevel > 0)
+            return ariaLevel;
+    }
 
     if (node->hasTagName(h1Tag))
         return 1;
@@ -742,23 +745,10 @@ int AccessibilityNodeObject::headingLevel() const
 
 String AccessibilityNodeObject::valueDescription() const
 {
-    if (!isARIARange())
+    if (!isRangeControl())
         return String();
 
     return getAttribute(aria_valuetextAttr).string();
-}
-
-bool AccessibilityNodeObject::isARIARange() const
-{
-    switch (m_ariaRole) {
-    case ProgressIndicatorRole:
-    case SliderRole:
-    case ScrollBarRole:
-    case SpinButtonRole:
-        return true;
-    default:
-        return false;
-    }
 }
 
 float AccessibilityNodeObject::valueForRange() const
@@ -769,7 +759,7 @@ float AccessibilityNodeObject::valueForRange() const
             return input->valueAsNumber();
     }
 
-    if (!isARIARange())
+    if (!isRangeControl())
         return 0.0f;
 
     return getAttribute(aria_valuenowAttr).toFloat();
@@ -783,7 +773,7 @@ float AccessibilityNodeObject::maxValueForRange() const
             return input->maximum();
     }
 
-    if (!isARIARange())
+    if (!isRangeControl())
         return 0.0f;
 
     return getAttribute(aria_valuemaxAttr).toFloat();
@@ -797,7 +787,7 @@ float AccessibilityNodeObject::minValueForRange() const
             return input->minimum();
     }
 
-    if (!isARIARange())
+    if (!isRangeControl())
         return 0.0f;
 
     return getAttribute(aria_valueminAttr).toFloat();
@@ -962,7 +952,12 @@ Element* AccessibilityNodeObject::mouseButtonListener() const
 
     // FIXME: Do the continuation search like anchorElement does
     for (Element* element = toElement(node); element; element = element->parentElement()) {
-        if (element->getAttributeEventListener(eventNames().clickEvent) || element->getAttributeEventListener(eventNames().mousedownEvent) || element->getAttributeEventListener(eventNames().mouseupEvent))
+        // If we've reached the body and this is not a control element, do not expose press action for this element.
+        // It can cause false positives, where every piece of text is labeled as accepting press actions. 
+        if (element->hasTagName(bodyTag) && isStaticText())
+            break;
+        
+        if (element->hasEventListeners(eventNames().clickEvent) || element->hasEventListeners(eventNames().mousedownEvent) || element->hasEventListeners(eventNames().mouseupEvent))
             return element;
     }
 

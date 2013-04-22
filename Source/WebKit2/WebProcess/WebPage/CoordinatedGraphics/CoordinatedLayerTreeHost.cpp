@@ -50,6 +50,7 @@
 #include <WebCore/Settings.h>
 #include <WebCore/SurfaceUpdateInfo.h>
 #include <WebCore/TextureMapperPlatformLayer.h>
+#include <wtf/CurrentTime.h>
 #include <wtf/TemporaryChange.h>
 
 #if ENABLE(CSS_SHADERS)
@@ -120,6 +121,10 @@ CoordinatedLayerTreeHost::CoordinatedLayerTreeHost(WebPage* webPage)
     m_rootLayer->addChild(m_nonCompositedContentLayer.get());
 
     CoordinatedSurface::setFactory(createCoordinatedSurface);
+
+    // This is a temporary way to enable this only in the GL case, until TextureMapperImageBuffer is removed.
+    // See https://bugs.webkit.org/show_bug.cgi?id=114869
+    CoordinatedGraphicsLayer::setShouldSupportContentsTiling(true);
 
     if (m_webPage->hasPageOverlay())
         createPageOverlayLayer();

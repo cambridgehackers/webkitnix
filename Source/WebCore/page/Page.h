@@ -352,7 +352,8 @@ public:
     PlatformDisplayID displayID() const { return m_displayID; }
 
     void addLayoutMilestones(LayoutMilestones);
-    LayoutMilestones layoutMilestones() const { return m_layoutMilestones; }
+    void removeLayoutMilestones(LayoutMilestones);
+    LayoutMilestones requestedLayoutMilestones() const { return m_requestedLayoutMilestones; }
 
     bool isCountingRelevantRepaintedObjects() const;
     void startCountingRelevantRepaintedObjects();
@@ -501,7 +502,7 @@ private:
 #endif
     PlatformDisplayID m_displayID;
 
-    LayoutMilestones m_layoutMilestones;
+    LayoutMilestones m_requestedLayoutMilestones;
 
     HashSet<RenderObject*> m_relevantUnpaintedRenderObjects;
     Region m_topRelevantPaintedRegion;

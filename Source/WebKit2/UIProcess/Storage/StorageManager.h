@@ -43,6 +43,8 @@ public:
     static PassRefPtr<StorageManager> create();
     ~StorageManager();
 
+    void setLocalStorageDirectory(const String&);
+
     void createSessionStorageNamespace(uint64_t storageNamespaceID, CoreIPC::Connection* allowedConnection, unsigned quotaInBytes);
     void destroySessionStorageNamespace(uint64_t storageNamespaceID);
     void setAllowedSessionStorageNamespaceConnection(uint64_t storageNamespaceID, CoreIPC::Connection* allowedConnection);
@@ -59,12 +61,15 @@ private:
     virtual void didReceiveSyncMessage(CoreIPC::Connection*, CoreIPC::MessageDecoder&, OwnPtr<CoreIPC::MessageEncoder>& replyEncoder) OVERRIDE;
 
     // Message handlers.
-    void createStorageMap(CoreIPC::Connection*, uint64_t storageMapID, uint64_t storageNamespaceID, const SecurityOriginData&);
+    void createLocalStorageMap(CoreIPC::Connection*, uint64_t storageMapID, uint64_t storageNamespaceID, const SecurityOriginData&);
+    void createSessionStorageMap(CoreIPC::Connection*, uint64_t storageMapID, uint64_t storageNamespaceID, const SecurityOriginData&);
     void destroyStorageMap(CoreIPC::Connection*, uint64_t storageMapID);
     void getValues(CoreIPC::Connection*, uint64_t storageMapID, HashMap<String, String>& values);
     void setItem(CoreIPC::Connection*, uint64_t storageAreaID, uint64_t sourceStorageAreaID, const String& key, const String& value, const String& urlString);
     void removeItem(CoreIPC::Connection*, uint64_t storageMapID, uint64_t sourceStorageAreaID, const String& key, const String& urlString);
     void clear(CoreIPC::Connection*, uint64_t storageMapID, uint64_t sourceStorageAreaID, const String& urlString);
+
+    void setLocalStorageDirectoryInternal(const String&);
 
     void createSessionStorageNamespaceInternal(uint64_t storageNamespaceID, CoreIPC::Connection* allowedConnection, unsigned quotaInBytes);
     void destroySessionStorageNamespaceInternal(uint64_t storageNamespaceID);
@@ -76,7 +81,14 @@ private:
     class StorageArea;
     StorageArea* findStorageArea(CoreIPC::Connection*, uint64_t) const;
 
+    class LocalStorageNamespace;
+    LocalStorageNamespace* getOrCreateLocalStorageNamespace(uint64_t storageNamespaceID);
+
     RefPtr<WorkQueue> m_queue;
+
+    String m_localStorageDirectory;
+
+    HashMap<uint64_t, RefPtr<LocalStorageNamespace> > m_localStorageNamespaces;
 
     class SessionStorageNamespace;
     HashMap<uint64_t, RefPtr<SessionStorageNamespace> > m_sessionStorageNamespaces;

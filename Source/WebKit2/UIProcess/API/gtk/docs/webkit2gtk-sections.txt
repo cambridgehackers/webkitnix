@@ -47,6 +47,7 @@ webkit_web_context_set_tls_errors_policy
 webkit_web_context_get_tls_errors_policy
 webkit_web_context_set_web_extensions_directory
 webkit_web_context_prefetch_dns
+webkit_web_context_set_disk_cache_directory
 
 <SUBSECTION URI Scheme>
 WebKitURISchemeRequestCallback
@@ -75,6 +76,8 @@ WebKitPolicyDecisionType
 WebKitSaveMode
 WebKitViewMode
 WebKitInsecureContentEvent
+WebKitSnapshotOptions
+WebKitSnapshotRegion
 
 <SUBSECTION Editing Commands>
 WEBKIT_EDITING_COMMAND_CUT
@@ -134,6 +137,8 @@ webkit_web_view_download_uri
 webkit_web_view_set_view_mode
 webkit_web_view_get_view_mode
 webkit_web_view_get_tls_info
+webkit_web_view_get_snapshot
+webkit_web_view_get_snapshot_finish
 
 <SUBSECTION WebKitJavascriptResult>
 WebKitJavascriptResult
@@ -330,6 +335,7 @@ webkit_settings_get_type
 WebKitURIRequest
 webkit_uri_request_new
 webkit_uri_request_get_uri
+webkit_uri_request_set_uri
 
 <SUBSECTION Standard>
 WebKitURIRequestClass
@@ -607,18 +613,21 @@ WEBKIT_POLICY_ERROR
 WEBKIT_DOWNLOAD_ERROR
 WEBKIT_PRINT_ERROR
 WEBKIT_JAVASCRIPT_ERROR
+WEBKIT_SNAPSHOT_ERROR
 WebKitNetworkError
 WebKitPluginError
 WebKitPolicyError
 WebKitDownloadError
 WebKitPrintError
 WebKitJavascriptError
+WebKitSnapshotError
 webkit_network_error_quark
 webkit_plugin_error_quark
 webkit_policy_error_quark
 webkit_download_error_quark
 webkit_print_error_quark
 webkit_javascript_error_quark
+webkit_snapshot_error_quark
 </SECTION>
 
 <SECTION>
@@ -954,6 +963,8 @@ webkit_web_extension_get_type
 <FILE>WebKitWebPage</FILE>
 WebKitWebPage
 webkit_web_page_get_dom_document
+webkit_web_page_get_id
+webkit_web_page_get_uri
 
 <SUBSECTION Standard>
 WebKitWebPageClass

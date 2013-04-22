@@ -45,6 +45,7 @@
 #import <PDFKit/PDFKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <WebCore/AXObjectCache.h>
+#import <WebCore/EventHandler.h>
 #import <WebCore/FocusController.h>
 #import <WebCore/Frame.h>
 #import <WebCore/FrameLoader.h>
@@ -836,8 +837,12 @@ void WebPage::setHeaderLayerWithHeight(CALayer *layer, int height)
 
     m_headerLayer = layer;
     GraphicsLayer* parentLayer = frameView->setWantsLayerForHeader(m_headerLayer);
-    if (!parentLayer)
+    if (!parentLayer) {
+        m_page->removeLayoutMilestones(DidFirstFlushForHeaderLayer);
         return;
+    }
+
+    m_page->addLayoutMilestones(DidFirstFlushForHeaderLayer);
 
     m_headerLayer.get().bounds = CGRectMake(0, 0, parentLayer->size().width(), parentLayer->size().height());
     [parentLayer->platformLayer() addSublayer:m_headerLayer.get()];

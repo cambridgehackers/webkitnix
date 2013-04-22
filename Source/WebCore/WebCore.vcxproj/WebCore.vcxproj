@@ -5388,12 +5388,14 @@
     <ClCompile Include="..\css\SVGCSSComputedStyleDeclaration.cpp" />
     <ClCompile Include="..\css\SVGCSSParser.cpp" />
     <ClCompile Include="..\css\SVGCSSStyleSelector.cpp" />
+    <ClCompile Include="..\css\TransformFunctions.cpp" />
     <ClCompile Include="..\css\ViewportStyleResolver.cpp" />
     <ClCompile Include="..\css\WebKitCSSArrayFunctionValue.cpp" />
     <ClCompile Include="..\css\WebKitCSSFilterValue.cpp" />
     <ClCompile Include="..\css\WebKitCSSKeyframeRule.cpp" />
     <ClCompile Include="..\css\WebKitCSSKeyframesRule.cpp" />
     <ClCompile Include="..\css\WebKitCSSMatrix.cpp" />
+    <ClCompile Include="..\css\WebKitCSSMatFunctionValue.cpp" />
     <ClCompile Include="..\css\WebKitCSSMixFunctionValue.cpp" />
     <ClCompile Include="..\css\WebKitCSSRegionRule.cpp" />
     <ClCompile Include="..\css\WebKitCSSShaderValue.cpp" />
@@ -10299,9 +10301,6 @@
     <ClCompile Include="..\storage\StorageTask.cpp" />
     <ClCompile Include="..\storage\StorageThread.cpp" />
     <ClCompile Include="..\storage\StorageTracker.cpp" />
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\AtomicString.cpp" />
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\StringImpl.cpp" />
-    <ClCompile Include="$(ConfigurationBuildDir)\include\private\wtf\text\WTFString.cpp" />
     <ClCompile Include="..\bridge\jsc\BridgeJSC.cpp" />
     <ClCompile Include="..\bridge\c\c_class.cpp" />
     <ClCompile Include="..\bridge\c\c_instance.cpp" />
@@ -11166,7 +11165,7 @@
     <ClInclude Include="..\ForwardingHeaders\runtime\JSDestructibleObject.h" />
     <ClInclude Include="..\ForwardingHeaders\runtime\JSExportMacros.h" />
     <ClInclude Include="..\ForwardingHeaders\runtime\JSFunction.h" />
-    <ClInclude Include="..\ForwardingHeaders\runtime\JSGlobalData.h" />
+    <ClInclude Include="..\ForwardingHeaders\runtime\VM.h" />
     <ClInclude Include="..\ForwardingHeaders\runtime\JSGlobalObject.h" />
     <ClInclude Include="..\ForwardingHeaders\runtime\JSProxy.h" />
     <ClInclude Include="..\ForwardingHeaders\runtime\JSWithScope.h" />
@@ -11828,6 +11827,7 @@
     <ClInclude Include="..\platform\graphics\transforms\TransformState.h" />
     <ClInclude Include="..\platform\graphics\transforms\TranslateTransformOperation.h" />
     <ClInclude Include="..\platform\graphics\filters\CustomFilterArrayParameter.h" />
+    <ClInclude Include="..\platform\graphics\filters\CustomFilterColorParameter.h" />
     <ClInclude Include="..\platform\graphics\filters\CustomFilterCompiledProgram.h" />
     <ClInclude Include="..\platform\graphics\filters\CustomFilterConstants.h" />
     <ClInclude Include="..\platform\graphics\filters\CustomFilterGlobalContext.h" />
@@ -12171,12 +12171,14 @@
     <ClInclude Include="..\css\StyleSheet.h" />
     <ClInclude Include="..\css\StyleSheetContents.h" />
     <ClInclude Include="..\css\StyleSheetList.h" />
+    <ClInclude Include="..\css\TransformFunctions.h" />
     <ClInclude Include="..\css\ViewportStyleResolver.h" />
     <ClInclude Include="..\css\WebKitCSSArrayFunctionValue.h" />
     <ClInclude Include="..\css\WebKitCSSFilterValue.h" />
     <ClInclude Include="..\css\WebKitCSSKeyframeRule.h" />
     <ClInclude Include="..\css\WebKitCSSKeyframesRule.h" />
     <ClInclude Include="..\css\WebKitCSSMatrix.h" />
+    <ClInclude Include="..\css\WebKitCSSMatFunctionValue.h" />
     <ClInclude Include="..\css\WebKitCSSMixFunctionValue.h" />
     <ClInclude Include="..\css\WebKitCSSRegionRule.h" />
     <ClInclude Include="..\css\WebKitCSSShaderValue.h" />

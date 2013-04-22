@@ -40,7 +40,7 @@
 #include <WebCore/Credential.h>
 #include <WebCore/CredentialStorage.h>
 #include <WebCore/DocumentLoader.h>
-#include <WebCore/MouseEvent.h>
+#include <WebCore/EventHandler.h>
 #include <WebCore/FocusController.h>
 #include <WebCore/Frame.h>
 #include <WebCore/FrameLoadRequest.h>
@@ -51,9 +51,11 @@
 #include <WebCore/HTMLPlugInElement.h>
 #include <WebCore/HostWindow.h>
 #include <WebCore/MIMETypeRegistry.h>
+#include <WebCore/MouseEvent.h>
 #include <WebCore/NetscapePlugInStreamLoader.h>
 #include <WebCore/NetworkingContext.h>
 #include <WebCore/Page.h>
+#include <WebCore/PlatformMouseEvent.h>
 #include <WebCore/ProtectionSpace.h>
 #include <WebCore/ProxyServer.h>
 #include <WebCore/RenderEmbeddedObject.h>
@@ -1321,7 +1323,7 @@ NPObject* PluginView::windowScriptNPObject()
         return 0;
     }
 
-    return m_npRuntimeObjectMap.getOrCreateNPObject(*pluginWorld()->globalData(), frame()->script()->windowShell(pluginWorld())->window());
+    return m_npRuntimeObjectMap.getOrCreateNPObject(*pluginWorld()->vm(), frame()->script()->windowShell(pluginWorld())->window());
 }
 
 NPObject* PluginView::pluginElementNPObject()
@@ -1337,7 +1339,7 @@ NPObject* PluginView::pluginElementNPObject()
     JSObject* object = frame()->script()->jsObjectForPluginElement(m_pluginElement.get());
     ASSERT(object);
 
-    return m_npRuntimeObjectMap.getOrCreateNPObject(*pluginWorld()->globalData(), object);
+    return m_npRuntimeObjectMap.getOrCreateNPObject(*pluginWorld()->vm(), object);
 }
 
 bool PluginView::evaluate(NPObject* npObject, const String& scriptString, NPVariant* result, bool allowPopups)
@@ -1638,6 +1640,11 @@ void PluginView::pluginSnapshotTimerFired(DeferrableOneShotTimer<PluginView>*)
 #endif
 
     m_pluginElement->setDisplayState(HTMLPlugInElement::DisplayingSnapshot);
+}
+
+void PluginView::beginSnapshottingRunningPlugin()
+{
+    m_pluginSnapshotTimer.restart();
 }
 
 bool PluginView::shouldAlwaysAutoStart() const

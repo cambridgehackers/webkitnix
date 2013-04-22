@@ -167,6 +167,11 @@ static const int defaultScrollMagnitudeThresholdForPageFlip = 20;
     _pdfPlugin->performWebSearch(string);
 }
 
+- (void)performSpotlightSearch:(NSString *)string
+{
+    _pdfPlugin->performSpotlightSearch(string);
+}
+
 - (void)openWithNativeApplication
 {
     _pdfPlugin->openWithNativeApplication();
@@ -270,14 +275,11 @@ PassRefPtr<Scrollbar> PDFPlugin::createScrollbar(ScrollbarOrientation orientatio
     if (orientation == HorizontalScrollbar) {
         m_horizontalScrollbarLayer.adoptNS([[WKPDFPluginScrollbarLayer alloc] initWithPDFPlugin:this]);
         [m_containerLayer.get() addSublayer:m_horizontalScrollbarLayer.get()];
-        
-        didAddHorizontalScrollbar(widget.get());
     } else {
         m_verticalScrollbarLayer.adoptNS([[WKPDFPluginScrollbarLayer alloc] initWithPDFPlugin:this]);
         [m_containerLayer.get() addSublayer:m_verticalScrollbarLayer.get()];
-        
-        didAddVerticalScrollbar(widget.get());
     }
+    didAddScrollbar(widget.get(), orientation);
     pluginView()->frame()->view()->addChild(widget.get());
     return widget.release();
 }
@@ -303,10 +305,10 @@ void PDFPlugin::pdfDocumentDidLoad()
 
     setPDFDocument(document);
 
+    updatePageAndDeviceScaleFactors();
+
     [m_pdfLayerController.get() setFrameSize:size()];
     m_pdfLayerController.get().document = document.get();
-
-    updatePageAndDeviceScaleFactors();
 
     if (handlesPageScaleFactor())
         pluginView()->setPageScaleFactor([m_pdfLayerController.get() contentScaleFactor], IntPoint());
@@ -982,6 +984,11 @@ String PDFPlugin::getSelectionString() const
 void PDFPlugin::performWebSearch(NSString *string)
 {
     webFrame()->page()->send(Messages::WebPageProxy::SearchTheWeb(string));
+}
+
+void PDFPlugin::performSpotlightSearch(NSString *string)
+{
+    webFrame()->page()->send(Messages::WebPageProxy::SearchWithSpotlight(string));
 }
 
 bool PDFPlugin::handleWheelEvent(const WebWheelEvent& event)

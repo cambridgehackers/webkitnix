@@ -89,10 +89,6 @@ inspector/elements/edit-dom-actions.html
 inspector/extensions/extensions-events.html
 inspector/styles/styles-computed-trace.html
 
-# [WK2][WTR] svg/animations/animate-text-nested-transforms.html fails
-# https://bugs.webkit.org/show_bug.cgi?id=95191
-svg/animations/animate-text-nested-transforms.html
-
 # WebKitTestRunner needs overridePreference for non-boolean values
 # (zero-font-size.html passes because overridePreference does not work)
 webkit.org/b/42197 fast/harness/override-preferences-2.html [ Failure ]
@@ -240,11 +236,6 @@ http/tests/globalhistory/history-delegate-basic-refresh-redirect.html
 http/tests/globalhistory/history-delegate-basic-title.html
 http/tests/globalhistory/history-delegate-basic-visited-links.html
 
-# These tests crash the WebProcess when run under WebKitTestRunner.
-# <https://bugs.webkit.org/show_bug.cgi?id=44479>
-fast/parser/remove-misnested-iframe-in-beforeload.html
-fast/parser/remove-misnested-iframe-parent-in-beforeload.html
-
 # transitions/default-timing-function.html failing on WebKit2 since it was added
 # <https://bugs.webkit.org/show_bug.cgi?id=56531>
 transitions/default-timing-function.html
@@ -258,34 +249,7 @@ plugins/open-and-close-window-with-plugin.html
 # http://webkit.org/b/56530
 http/tests/inspector/resource-har-conversion.html
 
-# WebKitTestRunner needs support for interactive validation tests
-# http://webkit.org/b/57450
-fast/forms/interactive-validation-assertion-by-validate-twice.html
-fast/forms/interactive-validation-crash-by-style-override.html
-fast/forms/interactive-validation-prevented.html
-fast/forms/interactive-validation-select-crash.html
-
-# WebKitTestRunner needs support for validation message bubble tests
-# http://webkit.org/b/57455
-fast/forms/validation-message-appearance.html
-fast/forms/validation-message-clone.html
-fast/forms/validation-message-on-checkbox.html
-fast/forms/validation-message-on-listbox.html
-fast/forms/validation-message-on-menulist.html
-fast/forms/validation-message-on-radio.html
-fast/forms/validation-message-on-range.html
-fast/forms/validation-message-on-textarea.html
-
 platform/mac/accessibility/search-predicate.html
-
-# [WK2] CSP reporting doesn't work
-# https://bugs.webkit.org/show_bug.cgi?id=59192
-http/tests/security/contentSecurityPolicy/report-uri-from-child-frame.html
-
-# WebKitTestRunner needs an implementation of allowRoundingHacks
-# http://webkit.org/b/63477
-platform/mac/fast/text/rounding-hacks.html
-platform/mac/fast/text/rounding-hacks-expansion.html
 
 # Sometimes fails
 # http://webkit.org/b/58990
@@ -325,14 +289,13 @@ webkit.org/b/100324 css3/supports-dom-api.html
 # https://bugs.webkit.org/show_bug.cgi?id=84186
 fast/text-autosizing
 
-# setMockGeolocationPosition not defined in WKTR
-# https://bugs.webkit.org/show_bug.cgi?id=94554
-inspector/geolocation-error.html
-inspector/geolocation-success.html
-
 # WebKitTestRunner needs to implement testRunner.closeIdleLocalStorageDatabases().
 # https://bugs.webkit.org/show_bug.cgi?id=103861
 storage/domstorage/localstorage/close-idle-localstorage-databases-immediately.html
+
+# WKTR needs a implementation of setStorageDatabaseIdleInterval
+# https://bugs.webkit.org/show_bug.cgi?id=91778
+storage/domstorage/storage-close-database-on-idle.html
 
 # [WK2] The new npruntime/embed-property-iframe-equality.html fails
 # https://bugs.webkit.org/show_bug.cgi?id=105266
@@ -687,7 +650,6 @@ http/tests/navigation/anchor-frames-same-origin.html
 
 # Unexplained plugin failures
 platform/mac/plugins/testplugin-onnew-onpaint.html
-plugins/no-mime-with-valid-extension.html
 
 # Unexplained plugin failures that were formerly in the NPRuntime support for out-of-process plug-ins
 # list.
@@ -862,6 +824,7 @@ fast/forms/file/get-file-upload.html
 fast/forms/file/input-file-re-render.html
 fast/forms/file/input-file-entries.html
 fast/forms/file/recover-file-input-in-unposted-form.html
+fast/forms/file/selected-files-from-history-state.html
 http/tests/local/fileapi/file-last-modified-after-delete.html
 http/tests/local/fileapi/file-last-modified.html
 http/tests/local/fileapi/send-dragged-file.html

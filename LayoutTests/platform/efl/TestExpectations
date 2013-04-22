@@ -642,6 +642,18 @@ webkit.org/b/110546 fast/parser/document-write-fighting-eof.html [ Crash ]
 
 webkit.org/b/111521 editing/selection/selection-invalid-offset.html [ Crash Pass ]
 
+# ASSERTION FAILED: m_state.drawsContent && m_state.contentsVisible && !m_state.size.isEmpty().
+webkit.org/b/114731 compositing [ Crash Pass ]
+webkit.org/b/114731 css1/box_properties/acid_test.html [ Crash Pass ]
+webkit.org/b/114731 css1/cascade/cascade_order.html [ Crash Pass ]
+webkit.org/b/114731 ietestcenter/css3/grid/display-grid-001.htm [ Crash Pass ]
+webkit.org/b/114731 fast/canvas/webgl [ Crash Pass ]
+webkit.org/b/114731 http/tests/canvas/webgl [ Crash Pass ]
+webkit.org/b/114731 http/tests/inspector/styles/xsl-transformed.xml [ Crash Pass ]
+webkit.org/b/114731 media/track/track-text-track-cue-list.html [ Crash Pass ]
+webkit.org/b/114731 media/video-display-toggle.html [ Crash Pass ]
+webkit.org/b/114731 webgl [ Crash Pass ]
+
 #////////////////////////////////////////////////////////////////////////////////////////
 # FLAKY TESTS
 #////////////////////////////////////////////////////////////////////////////////////////
@@ -683,7 +695,9 @@ webkit.org/b/91958 http/tests/inspector-enabled/injected-script-discard.html [ F
 webkit.org/b/85615 http/tests/inspector/resource-har-pages.html [ Failure Pass ]
 Bug(EFL) http/tests/inspector/search/resources-search-match-index.html [ Failure Pass ]
 webkit.org/b/93820 inspector/console/console-format-collections.html [ Failure Pass ]
-webkit.org/b/96886 inspector/debugger/dynamic-script-tag.html [ Failure Pass ]
+webkit.org/b/96886 [ Release ] inspector/debugger/dynamic-script-tag.html [ Failure Pass ]
+webkit.org/b/114160 [ Debug ] inspector/debugger/dynamic-script-tag.html [ Crash Failure Pass ]
+
 Bug(EFL) inspector/profiler/heap-snapshot.html [ Failure Pass ]
 Bug(EFL) inspector/timeline/timeline-enum-stability.html [ Failure Pass ]
 
@@ -777,6 +791,12 @@ webkit.org/b/107024 compositing/video-page-visibility.html [ Pass Failure ]
 # Fails, test times out in testLoadErrorGC()
 webkit.org/b/78819 fast/workers/shared-worker-load-error.html [ Failure Pass ]
 
+# Libsoup 2.42.0 regressions
+webkit.org/b/114918 http/tests/cache/reload-main-resource.php [ Failure ]
+webkit.org/b/114918 http/tests/cache/xhr-vary-header.html [ Failure ]
+webkit.org/b/114918 http/tests/xmlhttprequest/cache-override.html [ Failure Pass ]
+webkit.org/b/114918 http/tests/xmlhttprequest/range-test.html [ Failure Pass ]
+
 #////////////////////////////////////////////////////////////////////////////////////////
 # PASSING TESTS WITH INCORRECT EXPECTATIONS
 #////////////////////////////////////////////////////////////////////////////////////////
@@ -803,9 +823,7 @@ webkit.org/b/102367 fast/forms/zoomed-controls.html [ Pass ]
 # Crashing IndexedDB tests
 webkit.org/b/112578 storage/indexeddb/transaction-coordination-across-databases.html [ Crash ]
 webkit.org/b/107194 storage/indexeddb/pending-activity.html [ Crash ]
-
-# Sometimes hits an assertion.
-webkit.org/b/114160 [ Debug ] inspector/debugger/dynamic-script-tag.html [ Crash Pass ]
+webkit.org/b/107194 [ Release ] storage/indexeddb/cursor-advance.html [ Crash ]
 
 # Flaky IndexedDB tests
 webkit.org/b/107194 storage/indexeddb/index-multientry.html [ Failure Pass ]
@@ -1007,7 +1025,7 @@ webkit.org/b/84338 fast/events/clipboard-dataTransferItemList.html [ Failure ]
 webkit.org/b/84338 fast/forms/input-paste-undo.html [ Failure ]
 webkit.org/b/84338 fast/forms/textarea-paste-newline.html [ Failure ]
 webkit.org/b/84338 editing/pasteboard/paste-table-003.html [ Failure ]
-webkit.org/b/84338 editing/pasteboard/paste-text-004.html [ Failure ]
+webkit.org/b/84338 editing/pasteboard/paste-text-004.html [ Missing Failure ]
 webkit.org/b/84338 editing/pasteboard/paste-text-005.html [ Failure ]
 webkit.org/b/84338 editing/pasteboard/paste-text-006.html [ Failure ]
 webkit.org/b/84338 editing/pasteboard/paste-text-007.html [ Failure ]
@@ -1158,7 +1176,7 @@ webkit.org/b/79766 compositing/tiling/huge-layer.html [ Failure ]
 webkit.org/b/79766 compositing/tiling/tile-cache-zoomed.html [ Failure ]
 webkit.org/b/79766 compositing/video/video-poster.html [ Failure ]
 webkit.org/b/79766 compositing/geometry/fixed-position-composited-switch.html [ Failure ]
-webkit.org/b/79766 compositing/visibility/visibility-image-layers-dynamic.html [ Failure ]
+webkit.org/b/79766 compositing/visibility/visibility-image-layers-dynamic.html [ Failure Crash ]
 
 # LAYER_TREE_INCLUDES_VISIBLE_RECTS option to layerTreeAsText is only applicable to Mac.
 compositing/visible-rect [ Skip ]
@@ -1243,7 +1261,7 @@ webkit.org/b/85484 fast/css/resize-corner-tracking.html [ Failure ]
 
 webkit.org/b/73766 css3/unicode-bidi-isolate-aharon-failing.html [ Failure ImageOnlyFailure ]
 
-webkit.org/b/85466 css3/images/cross-fade-background-size.html [ Failure ]
+webkit.org/b/85466 css3/images/cross-fade-background-size.html [ Failure Crash ]
 
 webkit.org/b/85492 css3/zoom-coords.xhtml [ Failure ]
 
@@ -1802,6 +1820,9 @@ webkit.org/b/114150 fast/forms/datalist/update-range-with-datalist.html [ ImageO
 webkit.org/b/111172 compositing/overlap-blending/children-opacity-huge.html [ ImageOnlyFailure ]
 webkit.org/b/111172 compositing/overlap-blending/children-opacity-no-overlap.html [ ImageOnlyFailure ]
 
+# Newly added tests in r148115 is failing.
+webkit.org/b/114338 compositing/overlap-blending/nested-overlap-overflow.html [ ImageOnlyFailure ]
+
 # Select element popup is not shown.
 webkit.org/b/114154 fast/forms/select/popup-closes-on-blur.html [ Failure ]
 
@@ -1825,6 +1846,11 @@ webkit.org/b/98696 plugins/snapshotting [ Skip ]
 webkit.org/b/101400 svg/css/shadow-changes.svg [ Failure ]
 webkit.org/b/101400 svg/css/composite-shadow-text.svg [ Failure ]
 
+# Regression (r148032 - r148103).
+webkit.org/b/114919 fast/multicol/shadow-breaking.html [ Failure ]
+webkit.org/b/114920 fast/repaint/moving-shadow-on-container.html [ Failure ]
+webkit.org/b/114920 fast/repaint/moving-shadow-on-path.html [ Failure ]
+
 # Failing IndexedDB tests
 webkit.org/b/82776 storage/indexeddb/dont-commit-on-blocked.html [ Failure ]
 webkit.org/b/82776 storage/indexeddb/pending-version-change-stuck.html [ Failure ]
@@ -1832,3 +1858,18 @@ webkit.org/b/82776 storage/indexeddb/pending-version-change-stuck-works-with-ter
 webkit.org/b/106732 storage/indexeddb/transaction-complete-workers.html [ Failure ]
 webkit.org/b/106507 storage/indexeddb/database-quota.html [ Failure ]
 webkit.org/b/107194 storage/indexeddb/pending-activity-workers.html [ Failure ]
+
+# Compositing reftests added in r148172 fail on EFL
+webkit.org/b/114739 compositing/patterns/direct-pattern-compositing-contain.html [ ImageOnlyFailure Crash ]
+webkit.org/b/114739 compositing/patterns/direct-pattern-compositing-cover.html [ ImageOnlyFailure Crash ]
+webkit.org/b/114739 compositing/patterns/direct-pattern-compositing-padding.html [ ImageOnlyFailure Crash ]
+webkit.org/b/114739 compositing/patterns/direct-pattern-compositing-position.html [ ImageOnlyFailure Crash ]
+webkit.org/b/114739 compositing/patterns/direct-pattern-compositing-size.html [ ImageOnlyFailure Crash ]
+
+# Newly added test in r148131 is failing.
+webkit.org/b/114876 media/click-volume-bar-not-pausing.html [ Failure ]
+
+# Newly added test in r148136 is failing.
+webkit.org/b/114877 accessibility/link-inside-button-accessible-text.html [ Failure ]
+
+webkit.org/b/114612 editing/style/block-style-005.html [ Failure ]

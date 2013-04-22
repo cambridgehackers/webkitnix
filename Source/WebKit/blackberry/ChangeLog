@@ -1,3 +1,397 @@
+2013-04-22  Otto Derek Cheung  <otcheung@rim.com>
+
+        [BlackBerry] Update BatteryClientBlackBerry to use our port's new listener interface
+        https://bugs.webkit.org/show_bug.cgi?id=114892
+
+        Reviewed by Rob Buis.
+        PR 328147
+
+        Modify the client so we only have one listener for battery change events.
+        The dispatch of different event listeners are handled by BatteryController.
+
+        * WebCoreSupport/BatteryClientBlackBerry.cpp:
+        (WebCore::BatteryClientBlackBerry::BatteryClientBlackBerry):
+        (WebCore::BatteryClientBlackBerry::startUpdating):
+        (WebCore::BatteryClientBlackBerry::stopUpdating):
+        (WebCore::BatteryClientBlackBerry::onStatusChange):
+        * WebCoreSupport/BatteryClientBlackBerry.h:
+        (BatteryClientBlackBerry):
+
+2013-04-22  Xuefei Ren  <xren@blackberry.com>
+
+        fix build warning(unused parameter)
+        https://bugs.webkit.org/show_bug.cgi?id=114855
+
+        Reviewed by Rob Buis.
+
+        remove warning(unused parameter) in
+        Source/WebKit/blackberry/WebKitSupport/InputHandler.cpp
+
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::extractedTextRequest):
+
+2013-04-22  Xan Lopez  <xlopez@igalia.com>
+
+        [BlackBerry] ASSERT in FrameLoaderClient::convertMainResourceLoadToDownload
+        https://bugs.webkit.org/show_bug.cgi?id=114741
+
+        Reviewed by George Staikos.
+
+        Consider the case where a ResourceHandle won't have a FilterStream
+        object associated (for example, Blob objects) instead of ASSERTing
+        pointlessly when asking our network layer for such an object.
+
+        This partially fixes fast/dom/HTMLAnchorElement/anchor-nodownload-set.html
+
+        * WebCoreSupport/FrameLoaderClientBlackBerry.cpp:
+        (WebCore::FrameLoaderClientBlackBerry::convertMainResourceLoadToDownload):
+
+2013-04-22  Mike Fenton  <mifenton@rim.com>
+
+        [BlackBerry] Add additional datalist support.
+        https://bugs.webkit.org/show_bug.cgi?id=114883
+
+        Reviewed by Rob Buis.
+
+        PR 210083.
+
+        Properly set state when opening a Date/Time popup and simplify
+        the logic for showing datalist options.
+
+        Internally Reviewed by Otto Cheung.
+
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::openDatePopup):
+        (BlackBerry::WebKit::InputHandler::showTextInputTypeSuggestionBox):
+
+2013-04-19  Andy Chen  <andchen@blackberry.com>
+
+        [BlackBerry] Find-on-page should do the scoping again when highlight policy changed 
+        https://bugs.webkit.org/show_bug.cgi?id=114885
+
+        Reviewed by Rob Buis.
+
+        PR 195773
+        Internally reviewed by Mike Fenton.
+        For find on page, we need to treat it as a new search if highlightAllMatches
+        changes but the text is not changed.
+
+        * WebKitSupport/InPageSearchManager.cpp:
+        (BlackBerry::WebKit::InPageSearchManager::findNextString):
+        (BlackBerry::WebKit::InPageSearchManager::findAndMarkText):
+
+2013-04-19  Xuefei Ren  <xren@blackberry.com>
+
+        fixed debug broken from previous patch 
+        https://bugs.webkit.org/show_bug.cgi?id=114844
+
+        Reviewed by Rob Buis.
+
+        * WebKitSupport/RenderQueue.cpp:
+        (BlackBerry::WebKit::RenderQueue::scrollZoomJobsCompleted):
+
+        Add the parameter outstandingJobs which is used in ASSERT(),it was
+        removed in the r148677 by misstake.now I need to fix it.
+
+2013-04-19  Alberto Garcia  <agarcia@igalia.com>
+
+        [BlackBerry] EditorClientBlackBerry: Fix parameter name
+        https://bugs.webkit.org/show_bug.cgi?id=114856
+
+        Reviewed by Carlos Garcia Campos.
+
+        Build fix due to a typo in a parameter name.
+
+        * WebCoreSupport/EditorClientBlackBerry.cpp:
+        (WebCore::EditorClientBlackBerry::requestCheckingOfString):
+
+2013-04-18 Nima Ghanavatian <nghanavatian@blackberry.com>
+
+        [BlackBerry] Invalidate spell checking requests in platform code
+        https://bugs.webkit.org/show_bug.cgi?id=114830
+
+        Reviewed by Rob Buis.
+
+        Internally reviewed by Mike Fenton.
+
+        Cache the value of the last requested sequence id at focus change.
+        All requests prior to this point will be rejected upon processing.
+
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::InputHandler):
+        (BlackBerry::WebKit::InputHandler::requestCheckingOfString):
+        (BlackBerry::WebKit::InputHandler::stopPendingSpellCheckRequests):
+        * WebKitSupport/InputHandler.h:
+        (InputHandler):
+
+2013-04-17  Geoffrey Garen  <ggaren@apple.com>
+
+        Renamed JSGlobalData to VM
+        https://bugs.webkit.org/show_bug.cgi?id=114777
+
+        Reviewed by Phil Pizlo.
+
+        * Api/BlackBerryGlobal.cpp:
+        (BlackBerry::WebKit::clearMemoryCaches):
+        * WebKitSupport/AboutData.cpp:
+        * WebKitSupport/DumpRenderTreeSupport.cpp:
+        (DumpRenderTreeSupport::javaScriptObjectsCount):
+
+2013-04-18  Ed Baker  <edbaker@blackberry.com>
+
+        [BlackBerry] Should pass through an actual error code when calling notifyLoadFinished
+        https://bugs.webkit.org/show_bug.cgi?id=114815
+
+        Reviewed by Rob Buis.
+
+        PR #318079
+
+        * WebCoreSupport/FrameLoaderClientBlackBerry.cpp:
+        (WebCore::FrameLoaderClientBlackBerry::postProgressFinishedNotification):
+
+2013-04-18  Xuefei Ren  <xren@blackberry.com>
+
+        remove build warning(unused parameter)
+        https://bugs.webkit.org/show_bug.cgi?id=114670
+
+        Reviewed by Rob Buis.
+
+        remove builde warning (unused parameter) in
+        Source/WebKit/blackberry 
+
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::spellCheckingRequestCancelled):
+        (BlackBerry::WebKit::InputHandler::spellCheckingRequestProcessed):
+        (BlackBerry::WebKit::InputHandler::spannableTextInRange):
+        * WebKitSupport/RenderQueue.cpp:
+        (BlackBerry::WebKit::RenderQueue::backingStoreRectChanging):
+        (BlackBerry::WebKit::RenderQueue::scrollZoomJobsCompleted):
+        * WebKitSupport/SurfacePool.cpp:
+        (BlackBerry::WebKit::SurfacePool::destroyPlatformGraphicsContext):
+        (BlackBerry::WebKit::SurfacePool::waitForBuffer):
+        (BlackBerry::WebKit::SurfacePool::notifyBuffersComposited):
+        (BlackBerry::WebKit::SurfacePool::destroyPlatformSync):
+
+2013-04-18  Xuefei Ren  <xren@blackberry.com>
+
+        remove build warning(unused parameter)
+        https://bugs.webkit.org/show_bug.cgi?id=114670
+
+        Reviewed by Rob Buis.
+
+        remove build warning in Source/WebKit/blackberry/Api
+
+        * Api/BackingStore.cpp:
+        (BlackBerry::WebKit::BackingStorePrivate::scroll):
+        (BlackBerry::WebKit::BackingStorePrivate::clearAndUpdateTileOfNotRenderedRegion):
+        (BlackBerry::WebKit::BackingStorePrivate::paintDefaultBackground):
+        (BlackBerry::WebKit::BackingStorePrivate::blitTileRect):
+        (BlackBerry::WebKit::BackingStorePrivate::actualVisibleSizeChanged):
+        * Api/BlackBerryGlobal.cpp:
+        (BlackBerry::WebKit::clearAppCache):
+        (BlackBerry::WebKit::clearDatabase):
+        * Api/WebOverlay.cpp:
+        (BlackBerry::WebKit::WebOverlayPrivateWebKitThread::setContentsToImage):
+        (BlackBerry::WebKit::WebOverlayLayerCompositingThreadClient::layerVisibilityChanged):
+        (BlackBerry::WebKit::WebOverlayLayerCompositingThreadClient::drawTextures):
+        (BlackBerry::WebKit::WebOverlayPrivateCompositingThread::setContentsToImage):
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPage::setCaretHighlightStyle):
+        * Api/WebPageCompositor.cpp:
+        (BlackBerry::WebKit::WebPageCompositor::cleanup):
+
+2013-04-18  Xuefei Ren  <xren@blackberry.com>
+
+        removei build  warning (unused parameter )
+        https://bugs.webkit.org/show_bug.cgi?id=114670
+
+        Reviewed by Rob Buis.
+
+        remove warning (unused parameter ) in
+        Source/WebKit/blackberry/WebCoreSupport
+
+        * WebCoreSupport/ChromeClientBlackBerry.cpp:
+        (WebCore::ChromeClientBlackBerry::mouseDidMoveOverElement):
+        (WebCore::ChromeClientBlackBerry::needTouchEvents):
+        (WebCore::ChromeClientBlackBerry::reachedMaxAppCacheSize):
+        * WebCoreSupport/DatePickerClient.cpp:
+        (WebCore::DatePickerClient::setValue):
+        * WebCoreSupport/EditorClientBlackBerry.cpp:
+        (WebCore::EditorClientBlackBerry::checkSpellingOfString):
+        (WebCore::EditorClientBlackBerry::getAutoCorrectSuggestionForMisspelledWord):
+        * WebCoreSupport/FrameLoaderClientBlackBerry.cpp:
+        (WebCore::FrameLoaderClientBlackBerry::dispatchDecidePolicyForNewWindowAction):
+        (WebCore::FrameLoaderClientBlackBerry::dispatchDidReceiveResponse):
+        (WebCore::FrameLoaderClientBlackBerry::shouldUseCredentialStorage):
+        * WebCoreSupport/InspectorClientBlackBerry.cpp:
+        (WebCore::InspectorClientBlackBerry::updateInspectorStateCookie):
+        * WebCoreSupport/NetworkInfoClientBlackBerry.cpp:
+        (WebCore::NetworkInfoClientBlackBerry::onCurrentNetworkTypeChange):
+        (WebCore::NetworkInfoClientBlackBerry::onCurrentCellularTypeChange):
+        * WebCoreSupport/SelectPopupClient.cpp:
+        (WebCore::SelectPopupClient::generateHTML):
+        * WebCoreSupport/UserMediaClientImpl.cpp:
+        (WebCore::UserMediaClientImpl::requestUserMedia):
+
+2013-04-17  Nima Ghanavatian  <nghanavatian@blackberry.com>
+
+        Clean up spellcheck state when changing focus.
+        https://bugs.webkit.org/show_bug.cgi?id=114758
+
+        Reviewed by Rob Buis.
+
+        Internally reviewed by Mike Fenton and Gen Mak.
+
+        PR325941
+        If we lose focus while waiting for a spellcheck request to return, we will
+        never see the reply and continue to queue up future requests. By clearing
+        the queue we ensure that all requests being processed and waiting to fire
+        are valid.
+
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::setElementUnfocused):
+        * WebKitSupport/SpellingHandler.cpp:
+        (BlackBerry::WebKit::SpellingHandler::spellCheckTextBlock):
+
+2013-04-17  Tiancheng Jiang  <tijiang@rim.com>
+
+        [BlackBerry] Check image node with usemap attribute isLink failed
+        https://bugs.webkit.org/show_bug.cgi?id=114751
+
+        Reviewed by Rob Buis.
+
+        PR 326780
+        Internally Reviewed by Liam Quinn.
+
+        An image node with usemap will crash when call isLink.
+        If the node is linkNode, bring up the CCM(eg. linked image).
+        Also use toElement method as agomes suggested in pr 113957.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::webContext):
+        * WebKitSupport/FatFingers.cpp:
+        (BlackBerry::WebKit::FatFingers::findBestPoint):
+
+2013-04-16  Nima Ghanavatian  <nghanavatian@blackberry.com>
+
+        Redo spellchecking of a field if the layout has changed
+        https://bugs.webkit.org/show_bug.cgi?id=114700
+
+        Reviewed by Rob Buis.
+        Internally reviewed by Mike Fenton.
+
+        PR258637
+        If we insert a child node during spellchecking, the current request along
+        with the requests in queue become stale. The offsets were calculated when
+        they were created are no longer valid. We clear the queue by setting sequence
+        id to -1 and trigger spell checking again. We only trigger re-checking
+        if the layout change occurred during processing of a request. This is
+        maintained with the m_request pointer as it should be cleared after use.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::layoutFinished):
+        * WebCoreSupport/EditorClientBlackBerry.cpp:
+        (WebCore::EditorClientBlackBerry::requestCheckingOfString):
+        * WebKitSupport/InputHandler.cpp:
+        (BlackBerry::WebKit::InputHandler::requestCheckingOfString):
+        (BlackBerry::WebKit::InputHandler::spellCheckingRequestCancelled):
+        (BlackBerry::WebKit::InputHandler::spellCheckingRequestProcessed):
+        (BlackBerry::WebKit::InputHandler::setElementFocused):
+        (BlackBerry::WebKit::InputHandler::spellCheckTextBlock):
+        (WebKit):
+        (BlackBerry::WebKit::InputHandler::stopPendingSpellCheckRequests):
+        * WebKitSupport/InputHandler.h:
+        (InputHandler):
+
+2013-04-16  Jacky Jiang  <zhajiang@blackberry.com>
+
+        [BlackBerry] Viewport not rendered correctly
+        https://bugs.webkit.org/show_bug.cgi?id=114704
+
+        Reviewed by Rob Buis.
+        Internally reviewed by Konrad Piascik.
+
+        PR: 326260
+        The applyDeviceScaleFactorInCompositor setting is now generated from
+        Settings.in after rebase, the setter should be setApplyDeviceScaleFactorInCompositor()
+        instead of setApplyPageScaleFactorInCompositor().
+        The setting can be removed from WebSettings and use a simpler way
+        instead in the future if there are no issues when TextAutoSizer is
+        enabled. Just keep it for now.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::didChangeSettings):
+        * Api/WebSettings.cpp:
+        (BlackBerry::WebKit::WebSettings::setApplyDeviceScaleFactorInCompositor):
+        * Api/WebSettings.h:
+
+2013-04-16  Leo Yang  <leoyang@rim.com>
+
+        [BlackBerry] Update WebPage.{h, cpp} for supporting web filesystem
+        https://bugs.webkit.org/show_bug.cgi?id=114698
+
+        Reviewed by Rob Buis.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::init):
+        (BlackBerry::WebKit::WebPage::clearBrowsingData):
+        (BlackBerry::WebKit::WebPage::clearWebFileSystem):
+        (WebKit):
+        * Api/WebPage.h:
+
+2013-04-16  Arvid Nilsson  <anilsson@rim.com>
+
+        [BlackBerry] Accelerated animation regression with GL renderer
+        https://bugs.webkit.org/show_bug.cgi?id=114685
+
+        Reviewed by Rob Buis.
+
+        Internally reviewed by Filip Spacek.
+
+        GL renderer changed the assumption made in accelerated animation
+        code that rendering the contents of AC layer tiles would be the
+        slow operation. By starting animations after the slow operation,
+        the appearance of the animation could be made smooth.
+
+        Rendering tiles may still be slow, but now something else can be
+        slow too: drawing display lists to backing. And it's running on
+        the compositing thread, can happen at any time and will interrupt
+        accelerated animations.
+
+        Improved the situation by calling an API for updating backing to
+        schedule the delay at a convenient time. We try to update backing
+        before starting animations. However, future backing updates can
+        still interrupt the running animation and cause dropped frames.
+
+        Further improvements to animation smoothness will probably require
+        optimizations in the GL renderer.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::WebPagePrivate):
+        (BlackBerry::WebKit::WebPagePrivate::commitRootLayer):
+        (BlackBerry::WebKit::WebPagePrivate::commitRootLayerIfNeeded):
+        * Api/WebPage_p.h:
+        (WebPagePrivate):
+        * WebKitSupport/FrameLayers.cpp:
+        (BlackBerry::WebKit::FrameLayers::notifyAnimationsStarted):
+        (WebKit):
+        * WebKitSupport/FrameLayers.h:
+        (FrameLayers):
+
+2013-04-15  Liam Quinn  <lquinn@blackberry.com>
+
+        [BlackBerry] Crash from null m_webSettings in WebPagePrivate
+        https://bugs.webkit.org/show_bug.cgi?id=114633
+        RIM PR 303745
+
+        Reviewed by Rob Buis.
+        Internally reviewed by Leo Yang.
+
+        Speculative fix suggested by George Staikos--initialize m_webSettings first thing in the init() method.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::init):
+
 2013-04-15  Andy Chen  <andchen@blackberry.com>
 
         [BlackBerry] Forward userGesture when creating a new window

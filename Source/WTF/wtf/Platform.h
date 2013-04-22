@@ -732,21 +732,13 @@
 #define ENABLE_DISASSEMBLER 1
 #endif
 
-/* On the GTK+ port we take an extra precaution for LLINT support:
- * We disable it on x86 builds if the build target doesn't support SSE2
- * instructions (LLINT requires SSE2 on this platform). */
-#if !defined(ENABLE_LLINT) && PLATFORM(GTK) && CPU(X86) && COMPILER(GCC) \
-    && !defined(__SSE2__)
-#define ENABLE_LLINT 0
-#endif
-
 /* On some of the platforms where we have a JIT, we want to also have the 
    low-level interpreter. */
 #if !defined(ENABLE_LLINT) \
     && ENABLE(JIT) \
     && (OS(DARWIN) || OS(LINUX)) \
     && (PLATFORM(MAC) || PLATFORM(IOS) || PLATFORM(GTK) || PLATFORM(QT)) \
-    && (CPU(X86) || CPU(X86_64) || CPU(ARM_THUMB2) || CPU(ARM_TRADITIONAL) || CPU(MIPS))
+    && (CPU(X86) || CPU(X86_64) || CPU(ARM_THUMB2) || CPU(ARM_TRADITIONAL) || CPU(MIPS) || CPU(SH4))
 #define ENABLE_LLINT 1
 #endif
 
@@ -1019,5 +1011,22 @@
 #if !PLATFORM(IOS) && PLATFORM(MAC) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1080
 #define WTF_USE_CONTENT_FILTERING 1
 #endif
+
+
+#define WTF_USE_GRAMMAR_CHECKING 1
+
+#if PLATFORM(MAC) || PLATFORM(BLACKBERRY) || PLATFORM(EFL)
+#define WTF_USE_UNIFIED_TEXT_CHECKING 1
+#endif
+#if PLATFORM(MAC)
+#define WTF_USE_AUTOMATIC_TEXT_REPLACEMENT 1
+#endif
+
+#if PLATFORM(MAC) && (PLATFORM(IOS) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070)
+/* Some platforms provide UI for suggesting autocorrection. */
+#define WTF_USE_AUTOCORRECTION_PANEL 1
+/* Some platforms use spelling and autocorrection markers to provide visual cue. On such platform, if word with marker is edited, we need to remove the marker. */
+#define WTF_USE_MARKER_REMOVAL_UPON_EDITING 1
+#endif /* #if PLATFORM(MAC) && (PLATFORM(IOS) || __MAC_OS_X_VERSION_MIN_REQUIRED >= 1070) */
 
 #endif /* WTF_Platform_h */

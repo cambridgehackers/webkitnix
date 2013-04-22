@@ -29902,6 +29902,10 @@
 				Name="graphics"
 				>
 				<File
+					RelativePath="..\platform\graphics\AudioTrackPrivate.h"
+					>
+				</File>
+				<File
 					RelativePath="..\platform\graphics\BitmapImage.cpp"
 					>
 				</File>
@@ -30375,6 +30379,10 @@
 				</File>
 				<File
 					RelativePath="..\platform\graphics\UnitBezier.h"
+					>
+				</File>
+				<File
+					RelativePath="..\platform\graphics\VideoTrackPrivate.h"
 					>
 				</File>
 				<File
@@ -32422,6 +32430,10 @@
 					>
 					<File
 						RelativePath="..\platform\graphics\filters\CustomFilterArrayParameter.h"
+						>
+					</File>
+					<File
+						RelativePath="..\platform\graphics\filters\CustomFilterColorParameter.h"
 						>
 					</File>
 					<File
@@ -38943,6 +38955,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\css\TransformFunctions.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\css\TransformFunctions.h"
+				>
+			</File>
+			<File
 				RelativePath="..\css\ViewportStyleResolver.cpp"
 				>
 			</File>
@@ -38988,6 +39008,14 @@
 			</File>
 			<File
 				RelativePath="..\css\WebKitCSSMatrix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\css\WebKitCSSMatFunctionValue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\css\WebKitCSSMatFunctionValue.h"
 				>
 			</File>
 			<File
@@ -65746,6 +65774,22 @@
 				Name="track"
 				>
 				<File
+					RelativePath="..\html\track\AudioTrack.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\AudioTrack.h"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\AudioTrackList.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\AudioTrackList.h"
+					>
+				</File>
+				<File
 					RelativePath="..\html\track\InbandTextTrack.cpp"
 					>
 				</File>
@@ -65823,6 +65867,22 @@
 				</File>
 				<File
 					RelativePath="..\html\track\TrackListBase.h"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\VideoTrack.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\VideoTrack.h"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\VideoTrackList.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\html\track\VideoTrackList.h"
 					>
 				</File>
 				<File
@@ -75408,22 +75468,6 @@
 			</File>
 			<File
 				RelativePath="..\storage\StorageTracker.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="strings"
-			>
-			<File
-				RelativePath="$(ConfigurationBuildDir)\include\private\wtf\text\AtomicString.cpp"
-				>
-			</File>
-			<File
-				RelativePath="$(ConfigurationBuildDir)\include\private\wtf\text\StringImpl.cpp"
-				>
-			</File>
-			<File
-				RelativePath="$(ConfigurationBuildDir)\include\private\wtf\text\WTFString.cpp"
 				>
 			</File>
 		</Filter>

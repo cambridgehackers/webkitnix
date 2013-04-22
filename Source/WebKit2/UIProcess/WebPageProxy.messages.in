@@ -290,7 +290,6 @@ messages -> WebPageProxy {
 
 #if USE(DICTATION_ALTERNATIVES)
     ShowDictationAlternativeUI(WebCore::FloatRect boundingBoxOfDictatedText, uint64_t dictationContext)
-    DismissDictationAlternativeUI()
     RemoveDictationAlternatives(uint64_t dictationContext)
     DictationAlternatives(uint64_t dictationContext) -> (Vector<String> alternatives)
 #endif
@@ -318,7 +317,8 @@ messages -> WebPageProxy {
 #endif
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
-    GetPluginPath(WTF::String mimeType, WTF::String urlString, WTF::String frameURLString, WTF::String pageURLString) -> (WTF::String pluginPath, uint32_t pluginLoadPolicy)
+    FindPlugin(WTF::String mimeType, WTF::String urlString, WTF::String frameURLString, WTF::String pageURLString) -> (WTF::String pluginPath, WTF::String newMIMEType, uint32_t pluginLoadPolicy)
 #endif
 
+    DidUpdateInWindowState()
 }

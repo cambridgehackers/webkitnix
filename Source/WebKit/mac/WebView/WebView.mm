@@ -112,6 +112,7 @@
 #import <JavaScriptCore/APICast.h>
 #import <JavaScriptCore/JSValueRef.h>
 #import <WebCore/AlternativeTextUIController.h>
+#import <WebCore/AnimationController.h>
 #import <WebCore/ApplicationCacheStorage.h>
 #import <WebCore/BackForwardListImpl.h>
 #import <WebCore/MemoryCache.h>
@@ -672,6 +673,13 @@ static bool shouldRespectPriorityInCSSAttributeSetters()
     return isIAdProducerNeedingAttributeSetterQuirk;
 }
 
+static bool shouldUseLegacyBackgroundSizeShorthandBehavior()
+{
+    static bool shouldUseLegacyBackgroundSizeShorthandBehavior = applicationIsVersions()
+        && !WebKitLinkedOnOrAfter(WEBKIT_FIRST_VERSION_WITHOUT_LEGACY_BACKGROUNDSIZE_SHORTHAND_BEHAVIOR);
+    return shouldUseLegacyBackgroundSizeShorthandBehavior;
+}
+
 - (void)_commonInitializationWithFrameName:(NSString *)frameName groupName:(NSString *)groupName
 {
     WebCoreThreadViolationCheckRoundTwo();
@@ -742,6 +750,7 @@ static bool shouldRespectPriorityInCSSAttributeSetters()
 
     _private->page->setCanStartMedia([self window]);
     _private->page->settings()->setLocalStorageDatabasePath([[self preferences] _localStorageDatabasePath]);
+    _private->page->settings()->setUseLegacyBackgroundSizeShorthandBehavior(shouldUseLegacyBackgroundSizeShorthandBehavior());
 
     if (needsOutlookQuirksScript()) {
         _private->page->settings()->setShouldInjectUserScriptsInInitialEmptyDocument(true);
@@ -2930,7 +2939,7 @@ static Vector<String> toStringVector(NSArray* patterns)
     if (!page)
         return 0;
 
-    return kitLayoutMilestones(page->layoutMilestones());
+    return kitLayoutMilestones(page->requestedLayoutMilestones());
 }
 
 - (void)_setVisibilityState:(WebPageVisibilityState)visibilityState isInitialState:(BOOL)isInitialState
@@ -6508,11 +6517,6 @@ static void glibContextIterationCallback(CFRunLoopObserverRef, CFRunLoopActivity
     _private->m_alternativeTextUIController->showAlternatives(self, [self _convertRectFromRootView:boundingBoxOfDictatedText], dictationContext, ^(NSString* acceptedAlternative) {
         [self handleAcceptedAlternativeText:acceptedAlternative];
     });
-}
-
-- (void)_dismissDictationAlternativeUI
-{
-    _private->m_alternativeTextUIController->dismissAlternatives();
 }
 
 - (void)_removeDictationAlternatives:(uint64_t)dictationContext

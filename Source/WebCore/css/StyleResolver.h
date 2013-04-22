@@ -304,8 +304,6 @@ public:
     bool usesSiblingRules() const { return !m_ruleSets.features().siblingRules.isEmpty(); }
     bool usesFirstLineRules() const { return m_ruleSets.features().usesFirstLineRules; }
     bool usesBeforeAfterRules() const { return m_ruleSets.features().usesBeforeAfterRules; }
-
-    static bool createTransformOperations(CSSValue* inValue, RenderStyle* inStyle, RenderStyle* rootStyle, TransformOperations& outOperations);
     
     void invalidateMatchedPropertiesCache();
 
@@ -316,7 +314,8 @@ public:
     StyleShader* cachedOrPendingStyleShaderFromValue(WebKitCSSShaderValue*);
     bool parseCustomFilterParameterList(CSSValue*, CustomFilterParameterList&);
     PassRefPtr<CustomFilterParameter> parseCustomFilterParameter(const String& name, CSSValue*);
-    PassRefPtr<CustomFilterParameter> parseCustomFilterArrayParameter(const String& name, CSSValueList*);
+    PassRefPtr<CustomFilterParameter> parseCustomFilterColorParameter(const String& name, CSSValueList*);
+    PassRefPtr<CustomFilterParameter> parseCustomFilterArrayParameter(const String& name, CSSValueList*, bool);
     PassRefPtr<CustomFilterParameter> parseCustomFilterNumberParameter(const String& name, CSSValueList*);
     PassRefPtr<CustomFilterParameter> parseCustomFilterTransformParameter(const String& name, CSSValueList*);
     PassRefPtr<CustomFilterOperation> createCustomFilterOperationWithAtRuleReferenceSyntax(WebKitCSSFilterValue*);
@@ -559,8 +558,8 @@ public:
     bool applyPropertyToRegularStyle() const { return m_state.applyPropertyToRegularStyle(); }
     bool applyPropertyToVisitedLinkStyle() const { return m_state.applyPropertyToVisitedLinkStyle(); }
 
-    static Length convertToIntLength(CSSPrimitiveValue*, RenderStyle*, RenderStyle* rootStyle, double multiplier = 1);
-    static Length convertToFloatLength(CSSPrimitiveValue*, RenderStyle*, RenderStyle* rootStyle, double multiplier = 1);
+    static Length convertToIntLength(const CSSPrimitiveValue*, const RenderStyle*, const RenderStyle* rootStyle, double multiplier = 1);
+    static Length convertToFloatLength(const CSSPrimitiveValue*, const RenderStyle*, const RenderStyle* rootStyle, double multiplier = 1);
 
     CSSToStyleMap* styleMap() { return &m_styleMap; }
     InspectorCSSOMWrappers& inspectorCSSOMWrappers() { return m_inspectorCSSOMWrappers; }

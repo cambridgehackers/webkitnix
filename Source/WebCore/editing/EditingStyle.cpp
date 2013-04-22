@@ -34,6 +34,7 @@
 #include "CSSStyleRule.h"
 #include "CSSValueKeywords.h"
 #include "CSSValueList.h"
+#include "Editor.h"
 #include "Frame.h"
 #include "FrameSelection.h"
 #include "HTMLFontElement.h"
@@ -594,8 +595,8 @@ void EditingStyle::removeStyleAddedByNode(Node* node)
         return;
     RefPtr<MutableStylePropertySet> parentStyle = editingStyleFromComputedStyle(CSSComputedStyleDeclaration::create(node->parentNode()), AllEditingProperties);
     RefPtr<MutableStylePropertySet> nodeStyle = editingStyleFromComputedStyle(CSSComputedStyleDeclaration::create(node), AllEditingProperties);
-    nodeStyle->removeEquivalentProperties(parentStyle->ensureCSSStyleDeclaration());
-    m_mutableStyle->removeEquivalentProperties(nodeStyle->ensureCSSStyleDeclaration());
+    nodeStyle->removeEquivalentProperties(parentStyle.get());
+    m_mutableStyle->removeEquivalentProperties(nodeStyle.get());
 }
 
 void EditingStyle::removeStyleConflictingWithStyleOfNode(Node* node)
@@ -605,7 +606,7 @@ void EditingStyle::removeStyleConflictingWithStyleOfNode(Node* node)
 
     RefPtr<MutableStylePropertySet> parentStyle = editingStyleFromComputedStyle(CSSComputedStyleDeclaration::create(node->parentNode()), AllEditingProperties);
     RefPtr<MutableStylePropertySet> nodeStyle = editingStyleFromComputedStyle(CSSComputedStyleDeclaration::create(node), AllEditingProperties);
-    nodeStyle->removeEquivalentProperties(parentStyle->ensureCSSStyleDeclaration());
+    nodeStyle->removeEquivalentProperties(parentStyle.get());
 
     unsigned propertyCount = nodeStyle->propertyCount();
     for (unsigned i = 0; i < propertyCount; ++i)

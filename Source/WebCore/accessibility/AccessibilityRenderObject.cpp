@@ -1247,6 +1247,9 @@ bool AccessibilityRenderObject::computeAccessibilityIsIgnored() const
             // informal standard is to ignore images with zero-length alt strings
             if (!alt.isNull())
                 return true;
+            // If an image has a title attribute on it, accessibility should be lenient and allow it to appear in the hierarchy (according to WAI-ARIA).
+            if (!getAttribute(titleAttr).isEmpty())
+                return false;
         }
         
         if (isNativeImage()) {
@@ -1299,6 +1302,10 @@ bool AccessibilityRenderObject::computeAccessibilityIsIgnored() const
     if (!getAttribute(MathMLNames::alttextAttr).isEmpty())
         return false;
 #endif
+
+    // Other non-ignored host language elements
+    if (node && node->hasTagName(dfnTag))
+        return false;
     
     // By default, objects should be ignored so that the AX hierarchy is not 
     // filled with unnecessary items.
@@ -2531,6 +2538,9 @@ AccessibilityRole AccessibilityRenderObject::determineAccessibilityRole()
 
     if (node && node->hasTagName(labelTag))
         return LabelRole;
+
+    if (node && node->hasTagName(dfnTag))
+        return DefinitionRole;
 
     if (node && node->hasTagName(divTag))
         return DivRole;

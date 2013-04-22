@@ -79,6 +79,7 @@ SOURCES += \
      bindings/js/Dictionary.cpp \
      bindings/js/GCController.cpp \
      bindings/js/JSArrayBufferCustom.cpp \
+     bindings/js/JSAudioBufferCustom.cpp \
      bindings/js/JSAttrCustom.cpp \
      bindings/js/JSBlobCustom.cpp \
      bindings/js/JSCDATASectionCustom.cpp \
@@ -342,6 +343,7 @@ SOURCES += \
     css/StyleSheet.cpp \
     css/StyleSheetContents.cpp \
     css/StyleSheetList.cpp \
+    css/TransformFunctions.cpp \
     css/ViewportStyleResolver.cpp \
     css/WebKitCSSArrayFunctionValue.cpp \
     css/WebKitCSSFilterRule.cpp \
@@ -349,6 +351,7 @@ SOURCES += \
     css/WebKitCSSKeyframeRule.cpp \
     css/WebKitCSSKeyframesRule.cpp \
     css/WebKitCSSMatrix.cpp \
+    css/WebKitCSSMatFunctionValue.cpp \
     css/WebKitCSSMixFunctionValue.cpp \
     css/WebKitCSSRegionRule.cpp \
     css/WebKitCSSSVGDocumentValue.cpp \
@@ -1582,6 +1585,7 @@ HEADERS += \
     css/StyleSheet.h \
     css/StyleSheetContents.h \
     css/StyleSheetList.h \
+    css/TransformFunctions.h \
     css/ViewportStyleResolver.h \
     css/WebKitCSSArrayFunctionValue.h \
     css/WebKitCSSFilterRule.h \
@@ -1589,6 +1593,7 @@ HEADERS += \
     css/WebKitCSSKeyframeRule.h \
     css/WebKitCSSKeyframesRule.h \
     css/WebKitCSSMatrix.h \
+    css/WebKitCSSMatFunctionValue.h \
     css/WebKitCSSMixFunctionValue.h \
     css/WebKitCSSRegionRule.h \
     css/WebKitCSSSVGDocumentValue.h \
@@ -2185,6 +2190,7 @@ HEADERS += \
     platform/graphics/CrossfadeGeneratedImage.h \
     platform/graphics/filters/texmap/TextureMapperPlatformCompiledProgram.h \
     platform/graphics/filters/CustomFilterArrayParameter.h \
+    platform/graphics/filters/CustomFilterColorParameter.h \
     platform/graphics/filters/CustomFilterConstants.h \
     platform/graphics/filters/CustomFilterGlobalContext.h \
     platform/graphics/filters/CustomFilterMesh.h \
@@ -3966,9 +3972,10 @@ enable?(JAVASCRIPT_DEBUGGER) {
 
 enable?(VIDEO_TRACK) {
     HEADERS += \
-        bindings/js/JSTextTrackCustom.h \
         bindings/js/JSTrackCustom.h \
         html/HTMLTrackElement.h \
+        html/track/AudioTrack.h \
+        html/track/AudioTrackList.h \
         html/track/InbandTextTrack.h \
         html/track/LoadableTextTrack.h \
         html/track/TextTrack.h \
@@ -3979,20 +3986,30 @@ enable?(VIDEO_TRACK) {
         html/track/TrackBase.h \
         html/track/TrackEvent.h \
         html/track/TrackListBase.h \
+        html/track/VideoTrack.h \
+        html/track/VideoTrackList.h \
         html/track/WebVTTParser.h \
         html/track/WebVTTToken.h \
         html/track/WebVTTTokenizer.h \
         loader/TextTrackLoader.h \
+        platform/graphics/AudioTrackPrivate.h \
         platform/graphics/InbandTextTrackPrivate.h \
         platform/graphics/InbandTextTrackPrivateClient.h
+        platform/graphics/VideoTrackPrivate.h \
 
     SOURCES += \
+        bindings/js/JSAudioTrackCustom.cpp \
+        bindings/js/JSAudioTrackListCustom.cpp \
         bindings/js/JSTextTrackCueCustom.cpp \
         bindings/js/JSTextTrackCustom.cpp \
         bindings/js/JSTrackCustom.cpp \
         bindings/js/JSTrackEventCustom.cpp \
         bindings/js/JSTextTrackListCustom.cpp \
+        bindings/js/JSVideoTrackCustom.cpp \
+        bindings/js/JSVideoTrackListCustom.cpp \
         html/HTMLTrackElement.cpp \
+        html/track/AudioTrack.cpp \
+        html/track/AudioTrackList.cpp \
         html/track/InbandTextTrack.cpp \
         html/track/LoadableTextTrack.cpp \
         html/track/TextTrack.cpp \
@@ -4003,6 +4020,8 @@ enable?(VIDEO_TRACK) {
         html/track/TrackBase.cpp \
         html/track/TrackEvent.cpp \
         html/track/TrackListBase.cpp \
+        html/track/VideoTrack.cpp \
+        html/track/VideoTrackList.cpp \
         html/track/WebVTTElement.cpp \
         html/track/WebVTTParser.cpp \
         html/track/WebVTTTokenizer.cpp \

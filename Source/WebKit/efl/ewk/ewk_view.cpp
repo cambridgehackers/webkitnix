@@ -32,12 +32,14 @@
 #include "DocumentLoader.h"
 #include "DragClientEfl.h"
 #include "DumpRenderTreeSupportEfl.h"
+#include "Editor.h"
 #include "EditorClientEfl.h"
 #include "EflScreenUtilities.h"
 #include "EventHandler.h"
 #include "FocusController.h"
 #include "Frame.h"
 #include "FrameLoaderClientEfl.h"
+#include "FrameSelection.h"
 #include "FrameView.h"
 #include "GraphicsContext.h"
 #include "HTMLElement.h"
@@ -81,7 +83,7 @@
 #include <Evas.h>
 #include <eina_safety_checks.h>
 #include <inttypes.h>
-#include <libsoup/soup-session.h>
+#include <libsoup/soup.h>
 #include <limits>
 #include <math.h>
 #include <sys/time.h>

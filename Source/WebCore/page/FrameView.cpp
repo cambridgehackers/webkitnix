@@ -28,6 +28,7 @@
 #include "FrameView.h"
 
 #include "AXObjectCache.h"
+#include "AnimationController.h"
 #include "BackForwardController.h"
 #include "CachedImage.h"
 #include "CachedResourceLoader.h"
@@ -43,6 +44,7 @@
 #include "FrameActionScheduler.h"
 #include "FrameLoader.h"
 #include "FrameLoaderClient.h"
+#include "FrameSelection.h"
 #include "FrameTree.h"
 #include "GraphicsContext.h"
 #include "HTMLDocument.h"
@@ -63,6 +65,7 @@
 #include "RenderPart.h"
 #include "RenderScrollbar.h"
 #include "RenderScrollbarPart.h"
+#include "RenderStyle.h"
 #include "RenderTheme.h"
 #include "RenderView.h"
 #include "ScrollAnimator.h"
@@ -1432,7 +1435,8 @@ void FrameView::addWidgetToUpdate(RenderObject* object)
     Node* node = object->node();
     if (node->hasTagName(objectTag) || node->hasTagName(embedTag)) {
         HTMLPlugInImageElement* pluginElement = toHTMLPlugInImageElement(node);
-        pluginElement->setNeedsWidgetUpdate(true);
+        if (!pluginElement->needsCheckForSizeChange())
+            pluginElement->setNeedsWidgetUpdate(true);
     }
 
     m_widgetUpdateSet->add(object);
@@ -1851,6 +1855,11 @@ bool FrameView::scrollToAnchor(const String& name)
         return false;
 
     maintainScrollPositionAtAnchor(anchorNode ? static_cast<Node*>(anchorNode) : m_frame->document());
+    
+    // If the anchor accepts keyboard focus, move focus there to aid users relying on keyboard navigation.
+    if (anchorNode && anchorNode->isFocusable())
+        m_frame->document()->setFocusedNode(anchorNode);
+    
     return true;
 }
 
@@ -2605,7 +2614,7 @@ void FrameView::updateWidget(RenderObject* object)
         if (object->isSnapshottedPlugIn()) {
             if (ownerElement->hasTagName(objectTag) || ownerElement->hasTagName(embedTag)) {
                 HTMLPlugInImageElement* pluginElement = toHTMLPlugInImageElement(ownerElement);
-                pluginElement->updateSnapshotInfo();
+                pluginElement->checkSnapshotStatus();
             }
             return;
         }
@@ -2614,6 +2623,10 @@ void FrameView::updateWidget(RenderObject* object)
         // updateWidget(PluginCreationOption) on HTMLElement.
         if (ownerElement->hasTagName(objectTag) || ownerElement->hasTagName(embedTag) || ownerElement->hasTagName(appletTag)) {
             HTMLPlugInImageElement* pluginElement = toHTMLPlugInImageElement(ownerElement);
+            if (pluginElement->needsCheckForSizeChange()) {
+                pluginElement->checkSnapshotStatus();
+                return;
+            }
             if (pluginElement->needsWidgetUpdate())
                 pluginElement->updateWidget(CreateAnyWidgetType);
         }
@@ -2684,17 +2697,17 @@ void FrameView::performPostLayoutTasks()
     m_frame->selection()->setCaretRectNeedsUpdate();
     m_frame->selection()->updateAppearance();
 
-    LayoutMilestones milestonesOfInterest = 0;
+    LayoutMilestones requestedMilestones = 0;
     LayoutMilestones milestonesAchieved = 0;
     Page* page = m_frame->page();
     if (page)
-        milestonesOfInterest = page->layoutMilestones();
+        requestedMilestones = page->requestedLayoutMilestones();
 
     if (m_nestedLayoutCount <= 1) {
         if (m_firstLayoutCallbackPending) {
             m_firstLayoutCallbackPending = false;
             m_frame->loader()->didFirstLayout();
-            if (milestonesOfInterest & DidFirstLayout)
+            if (requestedMilestones & DidFirstLayout)
                 milestonesAchieved |= DidFirstLayout;
             if (page) {
                 if (page->mainFrame() == m_frame)
@@ -2709,7 +2722,7 @@ void FrameView::performPostLayoutTasks()
         // If the layout was done with pending sheets, we are not in fact visually non-empty yet.
         if (m_isVisuallyNonEmpty && !m_frame->document()->didLayoutWithPendingStylesheets() && m_firstVisuallyNonEmptyLayoutCallbackPending) {
             m_firstVisuallyNonEmptyLayoutCallbackPending = false;
-            if (milestonesOfInterest & DidFirstVisuallyNonEmptyLayout)
+            if (requestedMilestones & DidFirstVisuallyNonEmptyLayout)
                 milestonesAchieved |= DidFirstVisuallyNonEmptyLayout;
         }
     }
@@ -3790,7 +3803,7 @@ IntRect FrameView::convertFromRenderer(const RenderObject* renderer, const IntRe
 
     // Convert from page ("absolute") to FrameView coordinates.
     if (!delegatesScrolling())
-        rect.moveBy(-scrollPosition());
+        rect.moveBy(-scrollPosition() + IntPoint(0, headerHeight()));
 
     return rect;
 }
@@ -3801,7 +3814,7 @@ IntRect FrameView::convertToRenderer(const RenderObject* renderer, const IntRect
     
     // Convert from FrameView coords into page ("absolute") coordinates.
     if (!delegatesScrolling())
-        rect.moveBy(scrollPosition());
+        rect.moveBy(scrollPositionRelativeToDocument());
 
     // FIXME: we don't have a way to map an absolute rect down to a local quad, so just
     // move the rect for now.
@@ -3815,7 +3828,7 @@ IntPoint FrameView::convertFromRenderer(const RenderObject* renderer, const IntP
 
     // Convert from page ("absolute") to FrameView coordinates.
     if (!delegatesScrolling())
-        point.moveBy(-scrollPosition());
+        point.moveBy(-scrollPosition() + IntPoint(0, headerHeight()));
     return point;
 }
 
@@ -3825,7 +3838,7 @@ IntPoint FrameView::convertToRenderer(const RenderObject* renderer, const IntPoi
 
     // Convert from FrameView coords into page ("absolute") coordinates.
     if (!delegatesScrolling())
-        point += IntSize(scrollX(), scrollY());
+        point = point + scrollPositionRelativeToDocument();
 
     return roundedIntPoint(renderer->absoluteToLocal(point, UseTransforms));
 }
@@ -4114,6 +4127,22 @@ void FrameView::setScrollingPerformanceLoggingEnabled(bool flag)
 #else
     UNUSED_PARAM(flag);
 #endif
+}
+
+void FrameView::didAddScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orientation)
+{
+    ScrollableArea::didAddScrollbar(scrollbar, orientation);
+    if (AXObjectCache* cache = axObjectCache())
+        cache->handleScrollbarUpdate(this);
+}
+
+void FrameView::willRemoveScrollbar(Scrollbar* scrollbar, ScrollbarOrientation orientation)
+{
+    ScrollableArea::willRemoveScrollbar(scrollbar, orientation);
+    if (AXObjectCache* cache = axObjectCache()) {
+        cache->remove(scrollbar);
+        cache->handleScrollbarUpdate(this);
+    }
 }
 
 } // namespace WebCore

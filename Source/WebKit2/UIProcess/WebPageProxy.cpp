@@ -309,6 +309,7 @@ WebPageProxy::WebPageProxy(PageClient* pageClient, PassRefPtr<WebProcessProxy> p
     , m_minimumLayoutWidth(0)
     , m_mediaVolume(1)
     , m_mayStartMediaWhenInWindow(true)
+    , m_waitingForDidUpdateInWindowState(false)
 #if ENABLE(PAGE_VISIBILITY_API)
     , m_visibilityState(PageVisibilityStateVisible)
 #endif
@@ -1048,6 +1049,20 @@ void WebPageProxy::viewStateDidChange(ViewStateFlags flags)
     updateBackingStoreDiscardableState();
 }
 
+void WebPageProxy::waitForDidUpdateInWindowState()
+{
+    // If we have previously timed out with no response from the WebProcess, don't block the UIProcess again until it starts responding.
+    if (m_waitingForDidUpdateInWindowState)
+        return;
+
+    m_waitingForDidUpdateInWindowState = true;
+
+    if (!m_process->isLaunching()) {
+        const double inWindowStateUpdateTimeout = 0.25;
+        m_process->connection()->waitForAndDispatchImmediately<Messages::WebPageProxy::DidUpdateInWindowState>(m_pageID, inWindowStateUpdateTimeout);
+    }
+}
+
 IntSize WebPageProxy::viewSize() const
 {
     return m_pageClient->viewSize();
@@ -1338,11 +1353,11 @@ void WebPageProxy::handleKeyboardEvent(const NativeWebKeyboardEvent& event)
 }
 
 #if ENABLE(NETSCAPE_PLUGIN_API)
-void WebPageProxy::getPluginPath(const String& mimeType, const String& urlString, const String& frameURLString, const String& pageURLString, String& pluginPath, uint32_t& pluginLoadPolicy)
+void WebPageProxy::findPlugin(const String& mimeType, const String& urlString, const String& frameURLString, const String& pageURLString, String& pluginPath, String& newMimeType, uint32_t& pluginLoadPolicy)
 {
     MESSAGE_CHECK_URL(urlString);
 
-    String newMimeType = mimeType.lower();
+    newMimeType = mimeType.lower();
 
     pluginLoadPolicy = PluginModuleLoadNormally;
     PluginModuleInfo plugin = m_process->context()->pluginInfoStore().findPlugin(newMimeType, KURL(KURL(), urlString));
@@ -4424,11 +4439,6 @@ void WebPageProxy::handleAlternativeTextUIResult(const String& result)
 void WebPageProxy::showDictationAlternativeUI(const WebCore::FloatRect& boundingBoxOfDictatedText, uint64_t dictationContext)
 {
     m_pageClient->showDictationAlternativeUI(boundingBoxOfDictatedText, dictationContext);
-}
-
-void WebPageProxy::dismissDictationAlternativeUI()
-{
-    m_pageClient->dismissDictationAlternativeUI();
 }
 
 void WebPageProxy::removeDictationAlternatives(uint64_t dictationContext)

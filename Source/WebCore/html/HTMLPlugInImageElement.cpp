@@ -81,7 +81,11 @@ HTMLPlugInImageElement::HTMLPlugInImageElement(const QualifiedName& tagName, Doc
     , m_swapRendererTimer(this, &HTMLPlugInImageElement::swapRendererTimerFired)
     , m_removeSnapshotTimer(this, &HTMLPlugInImageElement::removeSnapshotTimerFired)
     , m_createdDuringUserGesture(ScriptController::processingUserGesture())
-    , m_restartedPlugin(false)
+    , m_isRestartedPlugin(false)
+    , m_needsCheckForSizeChange(false)
+    , m_plugInWasCreated(false)
+    , m_deferredPromotionToPrimaryPlugIn(false)
+    , m_snapshotDecision(SnapshotNotYetDecided)
 {
     setHasCustomStyleCallbacks();
 }
@@ -96,7 +100,8 @@ void HTMLPlugInImageElement::setDisplayState(DisplayState state)
 {
 #if PLATFORM(MAC)
     if (state == RestartingWithPendingMouseClick || state == Restarting) {
-        m_restartedPlugin = true;
+        m_isRestartedPlugin = true;
+        m_snapshotDecision = NeverSnapshot;
         if (displayState() == DisplayingSnapshot)
             m_removeSnapshotTimer.startOneShot(removeSnapshotTimerDelay);
     }
@@ -336,8 +341,14 @@ static AtomicString classNameForShadowRoot(const Node* node)
     return plugInLargeSizeClassName;
 }
 
-void HTMLPlugInImageElement::updateSnapshotInfo()
+void HTMLPlugInImageElement::checkSnapshotStatus()
 {
+    if (!renderer()->isSnapshottedPlugIn()) {
+        if (displayState() == Playing)
+            checkSizeChangeForSnapshotting();
+        return;
+    }
+
     ShadowRoot* root = userAgentShadowRoot();
     if (!root)
         return;
@@ -417,7 +428,7 @@ void HTMLPlugInImageElement::swapRendererTimerFired(Timer<HTMLPlugInImageElement
 void HTMLPlugInImageElement::removeSnapshotTimerFired(Timer<HTMLPlugInImageElement>*)
 {
     m_snapshotImage = nullptr;
-    m_restartedPlugin = false;
+    m_isRestartedPlugin = false;
     if (renderer())
         renderer()->repaint();
 }
@@ -428,7 +439,7 @@ static void addPlugInsFromNodeListMatchingPlugInOrigin(HTMLPlugInImageElementLis
         Node* node = collection->item(i);
         if (node->isPluginElement()) {
             HTMLPlugInElement* plugInElement = toHTMLPlugInElement(node);
-            if (plugInElement->isPlugInImageElement() && plugInElement->displayState() <= HTMLPlugInElement::DisplayingSnapshot) {
+            if (plugInElement->isPlugInImageElement()) {
                 HTMLPlugInImageElement* plugInImageElement = toHTMLPlugInImageElement(node);
                 const KURL& loadedURL = plugInImageElement->loadedUrl();
                 String otherMimeType = plugInImageElement->loadedMimeType();
@@ -446,29 +457,35 @@ void HTMLPlugInImageElement::restartSimilarPlugIns()
 
     String plugInOrigin = m_loadedUrl.host();
     String mimeType = loadedMimeType();
-    HTMLPlugInImageElementList pluginsNeedingRestart;
+    HTMLPlugInImageElementList similarPlugins;
 
     if (!document()->page())
         return;
 
     for (Frame* frame = document()->page()->mainFrame(); frame; frame = frame->tree()->traverseNext()) {
-        if (frame->loader()->subframeLoader()->containsPlugins()) {
-            if (!frame->document())
-                continue;
+        if (!frame->loader()->subframeLoader()->containsPlugins())
+            continue;
+        
+        if (!frame->document())
+            continue;
 
-            RefPtr<NodeList> plugins = frame->document()->getElementsByTagName(embedTag.localName());
-            if (plugins)
-                addPlugInsFromNodeListMatchingPlugInOrigin(pluginsNeedingRestart, plugins, plugInOrigin, mimeType);
+        RefPtr<NodeList> plugIns = frame->document()->getElementsByTagName(embedTag.localName());
+        if (plugIns)
+            addPlugInsFromNodeListMatchingPlugInOrigin(similarPlugins, plugIns, plugInOrigin, mimeType);
 
-            plugins = frame->document()->getElementsByTagName(objectTag.localName());
-            if (plugins)
-                addPlugInsFromNodeListMatchingPlugInOrigin(pluginsNeedingRestart, plugins, plugInOrigin, mimeType);
-        }
+        plugIns = frame->document()->getElementsByTagName(objectTag.localName());
+        if (plugIns)
+            addPlugInsFromNodeListMatchingPlugInOrigin(similarPlugins, plugIns, plugInOrigin, mimeType);
     }
 
-    for (size_t i = 0, length = pluginsNeedingRestart.size(); i < length; i++) {
-        pluginsNeedingRestart[i]->setDisplayState(Playing);
-        pluginsNeedingRestart[i]->restartSnapshottedPlugIn();
+    for (size_t i = 0, length = similarPlugins.size(); i < length; ++i) {
+        HTMLPlugInImageElement* plugInToRestart = similarPlugins[i].get();
+        if (plugInToRestart->displayState() <= HTMLPlugInElement::DisplayingSnapshot) {
+            LOG(Plugins, "%p Plug-in looks similar to a restarted plug-in. Restart.", plugInToRestart);
+            plugInToRestart->setDisplayState(Playing);
+            plugInToRestart->restartSnapshottedPlugIn();
+        }
+        plugInToRestart->m_snapshotDecision = NeverSnapshot;
     }
 }
 
@@ -481,6 +498,7 @@ void HTMLPlugInImageElement::userDidClickSnapshot(PassRefPtr<MouseEvent> event, 
     if (document()->page() && !SchemeRegistry::shouldTreatURLSchemeAsLocal(document()->page()->mainFrame()->document()->baseURL().protocol()) && document()->page()->settings()->autostartOriginPlugInSnapshottingEnabled())
         document()->page()->plugInClient()->didStartFromOrigin(document()->page()->mainFrame()->document()->baseURL().host(), plugInOrigin, loadedMimeType());
 
+    LOG(Plugins, "%p User clicked on snapshotted plug-in. Restart.", this);
     restartSnapshottedPlugIn();
     restartSimilarPlugIns();
 }
@@ -491,16 +509,23 @@ void HTMLPlugInImageElement::setIsPrimarySnapshottedPlugIn(bool isPrimarySnapsho
         return;
 
     if (isPrimarySnapshottedPlugIn) {
-        restartSnapshottedPlugIn();
-        restartSimilarPlugIns();
+        if (m_plugInWasCreated) {
+            LOG(Plugins, "%p Plug-in was detected as the primary element in the page. Restart.", this);
+            restartSnapshottedPlugIn();
+            restartSimilarPlugIns();
+        } else {
+            LOG(Plugins, "%p Plug-in was detected as the primary element in the page, but is not yet created. Will restart later.", this);
+            m_deferredPromotionToPrimaryPlugIn = true;
+        }
     }
 }
 
 void HTMLPlugInImageElement::restartSnapshottedPlugIn()
 {
-    if (displayState() != RestartingWithPendingMouseClick)
-        setDisplayState(Restarting);
+    if (displayState() >= RestartingWithPendingMouseClick)
+        return;
 
+    setDisplayState(Restarting);
     reattach();
 }
 
@@ -521,25 +546,69 @@ void HTMLPlugInImageElement::simulatedMouseClickTimerFired(DeferrableOneShotTime
     m_pendingClickEventFromSnapshot = nullptr;
 }
 
+static bool documentHadRecentUserGesture(Document* document)
+{
+    double lastKnownUserGestureTimestamp = document->lastHandledUserGestureTimestamp();
+
+    if (document->frame() != document->page()->mainFrame() && document->page()->mainFrame() && document->page()->mainFrame()->document())
+        lastKnownUserGestureTimestamp = std::max(lastKnownUserGestureTimestamp, document->page()->mainFrame()->document()->lastHandledUserGestureTimestamp());
+
+    if (currentTime() - lastKnownUserGestureTimestamp < autostartSoonAfterUserGestureThreshold)
+        return true;
+
+    return false;
+}
+
+void HTMLPlugInImageElement::checkSizeChangeForSnapshotting()
+{
+    if (!m_needsCheckForSizeChange || m_snapshotDecision != MaySnapshotWhenResized || documentHadRecentUserGesture(document()))
+        return;
+
+    m_needsCheckForSizeChange = false;
+    LayoutRect contentBoxRect = toRenderBox(renderer())->contentBoxRect();
+    int contentWidth = contentBoxRect.width();
+    int contentHeight = contentBoxRect.height();
+
+    if (contentWidth <= sizingTinyDimensionThreshold || contentHeight <= sizingTinyDimensionThreshold)
+        return;
+
+    LOG(Plugins, "%p Plug-in originally avoided snapshotting because it was sized %dx%d. Now it is %dx%d. Tell it to snapshot.\n", this, m_sizeWhenSnapshotted.width(), m_sizeWhenSnapshotted.height(), contentWidth, contentHeight);
+    setDisplayState(WaitingForSnapshot);
+    m_snapshotDecision = Snapshotted;
+    Widget* widget = pluginWidget();
+    if (widget && widget->isPluginViewBase())
+        toPluginViewBase(widget)->beginSnapshottingRunningPlugin();
+}
+
 void HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn(const KURL& url)
 {
     LOG(Plugins, "%p Plug-in URL: %s", this, m_url.utf8().data());
     LOG(Plugins, "   Loaded URL: %s", url.string().utf8().data());
 
     m_loadedUrl = url;
+    m_plugInWasCreated = false;
+    m_deferredPromotionToPrimaryPlugIn = false;
 
-    if (!document()->page()
-        || !document()->page()->settings()->plugInSnapshottingEnabled())
+    if (!document()->page() || !document()->page()->settings()->plugInSnapshottingEnabled()) {
+        m_snapshotDecision = NeverSnapshot;
         return;
+    }
 
     if (displayState() == Restarting) {
-        setDisplayState(Playing);
         LOG(Plugins, "%p Plug-in is explicitly restarting", this);
+        m_snapshotDecision = NeverSnapshot;
+        setDisplayState(Playing);
         return;
     }
 
     if (displayState() == RestartingWithPendingMouseClick) {
         LOG(Plugins, "%p Plug-in is explicitly restarting but also waiting for a click", this);
+        m_snapshotDecision = NeverSnapshot;
+        return;
+    }
+
+    if (m_snapshotDecision == NeverSnapshot) {
+        LOG(Plugins, "%p Plug-in is blessed, allow it to start", this);
         return;
     }
 
@@ -547,30 +616,38 @@ void HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn(const KURL& url)
 
     if (document()->isPluginDocument() && inMainFrame) {
         LOG(Plugins, "%p Plug-in document in main frame", this);
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
     if (ScriptController::processingUserGesture()) {
         LOG(Plugins, "%p Script is currently processing user gesture, set to play", this);
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
     if (m_createdDuringUserGesture) {
         LOG(Plugins, "%p Plug-in was created when processing user gesture, set to play", this);
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
-    double lastKnownUserGestureTimestamp = document()->lastHandledUserGestureTimestamp();
-    if (!inMainFrame && document()->page()->mainFrame() && document()->page()->mainFrame()->document())
-        lastKnownUserGestureTimestamp = std::max(lastKnownUserGestureTimestamp, document()->page()->mainFrame()->document()->lastHandledUserGestureTimestamp());
-    if (currentTime() - lastKnownUserGestureTimestamp < autostartSoonAfterUserGestureThreshold) {
+    if (documentHadRecentUserGesture(document())) {
         LOG(Plugins, "%p Plug-in was created shortly after a user gesture, set to play", this);
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
     if (document()->page()->settings()->snapshotAllPlugIns()) {
         LOG(Plugins, "%p Plug-in forced to snapshot by user preference", this);
+        m_snapshotDecision = Snapshotted;
         setDisplayState(WaitingForSnapshot);
+        return;
+    }
+
+    if (document()->page()->settings()->autostartOriginPlugInSnapshottingEnabled() && document()->page()->plugInClient()->shouldAutoStartFromOrigin(document()->page()->mainFrame()->document()->baseURL().host(), url.host(), loadedMimeType())) {
+        LOG(Plugins, "%p Plug-in from (%s, %s) is marked to auto-start, set to play", this, document()->page()->mainFrame()->document()->baseURL().host().utf8().data(), url.host().utf8().data());
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
@@ -588,36 +665,45 @@ void HTMLPlugInImageElement::subframeLoaderWillCreatePlugIn(const KURL& url)
         && styleHeight.isPercent() && (styleHeight.percent() == 100)
         && (static_cast<float>(contentArea) / visibleArea > sizingFullPageAreaRatioThreshold)) {
         LOG(Plugins, "%p Plug-in is top level full page, set to play", this);
+        m_snapshotDecision = NeverSnapshot;
         return;
     }
 
     if (contentWidth <= sizingTinyDimensionThreshold || contentHeight <= sizingTinyDimensionThreshold) {
         LOG(Plugins, "%p Plug-in is very small %dx%d, set to play", this, contentWidth, contentHeight);
+        m_sizeWhenSnapshotted = IntSize(contentBoxRect.width().toInt(), contentBoxRect.height().toInt());
+        m_snapshotDecision = MaySnapshotWhenResized;
         return;
     }
 
     if (!document()->page()->plugInClient()) {
+        LOG(Plugins, "%p There is no plug-in client. Set to wait for snapshot", this);
+        m_snapshotDecision = NeverSnapshot;
         setDisplayState(WaitingForSnapshot);
         return;
     }
 
-    if (document()->page()->settings()->autostartOriginPlugInSnapshottingEnabled() && document()->page()->plugInClient()->shouldAutoStartFromOrigin(document()->page()->mainFrame()->document()->baseURL().host(), url.host(), loadedMimeType())) {
-        LOG(Plugins, "%p Plug-in from (%s, %s) is marked to auto-start, set to play", this, document()->page()->mainFrame()->document()->baseURL().host().utf8().data(), url.host().utf8().data());
-        return;
-    }
-
     LOG(Plugins, "%p Plug-in from (%s, %s) is not auto-start, sized at %dx%d, set to wait for snapshot", this, document()->page()->mainFrame()->document()->baseURL().host().utf8().data(), url.host().utf8().data(), contentWidth, contentHeight);
+    m_snapshotDecision = Snapshotted;
     setDisplayState(WaitingForSnapshot);
 }
 
 void HTMLPlugInImageElement::subframeLoaderDidCreatePlugIn(const Widget* widget)
 {
-    if (!widget->isPluginViewBase()
-        || !static_cast<const PluginViewBase*>(widget)->shouldAlwaysAutoStart())
-        return;
+    m_plugInWasCreated = true;
 
-    LOG(Plugins, "%p Plug-in should auto-start, set to play", this);
-    setDisplayState(Playing);
+    if (widget->isPluginViewBase() && toPluginViewBase(widget)->shouldAlwaysAutoStart()) {
+        LOG(Plugins, "%p Plug-in should auto-start, set to play", this);
+        m_snapshotDecision = NeverSnapshot;
+        setDisplayState(Playing);
+        return;
+    }
+
+    if (m_deferredPromotionToPrimaryPlugIn) {
+        LOG(Plugins, "%p Plug-in was created, previously deferred promotion to primary. Will promote", this);
+        setIsPrimarySnapshottedPlugIn(true);
+        m_deferredPromotionToPrimaryPlugIn = false;
+    }
 }
 
 } // namespace WebCore

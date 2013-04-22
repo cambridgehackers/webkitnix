@@ -155,7 +155,7 @@ private:
 };
 
 struct CompositingState {
-    CompositingState(RenderLayer* compAncestor, bool testOverlap)
+    CompositingState(RenderLayer* compAncestor, bool testOverlap = true)
         : m_compositingAncestor(compAncestor)
         , m_subtreeIsCompositing(false)
         , m_testingOverlap(testOverlap)
@@ -202,7 +202,6 @@ RenderLayerCompositor::RenderLayerCompositor(RenderView* renderView)
     , m_showDebugBorders(false)
     , m_showRepaintCounter(false)
     , m_acceleratedDrawingEnabled(false)
-    , m_compositingConsultsOverlap(true)
     , m_reevaluateCompositingAfterLayout(false)
     , m_compositing(false)
     , m_compositingLayersNeedRebuild(false)
@@ -217,6 +216,7 @@ RenderLayerCompositor::RenderLayerCompositor(RenderView* renderView)
     , m_layerFlushThrottlingEnabled(false)
     , m_layerFlushThrottlingTemporarilyDisabledForInteraction(false)
     , m_hasPendingLayerFlush(false)
+    , m_headerLayerAwaitingFirstFlush(false)
 #if !LOG_DISABLED
     , m_rootLayerUpdateCount(0)
     , m_obligateCompositedLayerCount(0)
@@ -375,6 +375,16 @@ void RenderLayerCompositor::flushPendingLayerChanges(bool isFlushRoot)
     ASSERT(m_flushingLayers);
     m_flushingLayers = false;
 
+    if (m_headerLayerAwaitingFirstFlush) {
+        m_headerLayerAwaitingFirstFlush = false;
+        if (Page* page = this->page()) {
+            if (page->requestedLayoutMilestones() & DidFirstFlushForHeaderLayer) {
+                if (Frame* frame = page->mainFrame())
+                    frame->loader()->didLayout(DidFirstFlushForHeaderLayer);
+            }
+        }
+    }
+
     if (!m_viewportConstrainedLayersNeedingUpdate.isEmpty()) {
         HashSet<RenderLayer*>::const_iterator end = m_viewportConstrainedLayersNeedingUpdate.end();
         for (HashSet<RenderLayer*>::const_iterator it = m_viewportConstrainedLayersNeedingUpdate.begin(); it != end; ++it)
@@ -501,8 +511,7 @@ void RenderLayerCompositor::updateCompositingLayers(CompositingUpdateType update
         checkForHierarchyUpdate = true;
         break;
     case CompositingUpdateOnScroll:
-        if (m_compositingConsultsOverlap)
-            checkForHierarchyUpdate = true; // Overlap can change with scrolling, so need to check for hierarchy updates.
+        checkForHierarchyUpdate = true; // Overlap can change with scrolling, so need to check for hierarchy updates.
 
         needGeometryUpdate = true;
         break;
@@ -516,11 +525,10 @@ void RenderLayerCompositor::updateCompositingLayers(CompositingUpdateType update
 
     bool needHierarchyUpdate = m_compositingLayersNeedRebuild;
     bool isFullUpdate = !updateRoot;
-    if (!updateRoot || m_compositingConsultsOverlap) {
-        // Only clear the flag if we're updating the entire hierarchy.
-        m_compositingLayersNeedRebuild = false;
-        updateRoot = rootRenderLayer();
-    }
+
+    // Only clear the flag if we're updating the entire hierarchy.
+    m_compositingLayersNeedRebuild = false;
+    updateRoot = rootRenderLayer();
 
     if (isFullUpdate && updateType == CompositingUpdateAfterLayout)
         m_reevaluateCompositingAfterLayout = false;
@@ -536,15 +544,11 @@ void RenderLayerCompositor::updateCompositingLayers(CompositingUpdateType update
     if (checkForHierarchyUpdate) {
         // Go through the layers in presentation order, so that we can compute which RenderLayers need compositing layers.
         // FIXME: we could maybe do this and the hierarchy udpate in one pass, but the parenting logic would be more complex.
-        CompositingState compState(updateRoot, m_compositingConsultsOverlap);
+        CompositingState compState(updateRoot);
         bool layersChanged = false;
         bool saw3DTransform = false;
-        if (m_compositingConsultsOverlap) {
-            OverlapMap overlapTestRequestMap;
-            computeCompositingRequirements(0, updateRoot, &overlapTestRequestMap, compState, layersChanged, saw3DTransform);
-        } else
-            computeCompositingRequirements(0, updateRoot, 0, compState, layersChanged, saw3DTransform);
-        
+        OverlapMap overlapTestRequestMap;
+        computeCompositingRequirements(0, updateRoot, &overlapTestRequestMap, compState, layersChanged, saw3DTransform);
         needHierarchyUpdate |= layersChanged;
     }
 
@@ -557,8 +561,7 @@ void RenderLayerCompositor::updateCompositingLayers(CompositingUpdateType update
 
         Frame* frame = m_renderView->frameView()->frame();
         bool isMainFrame = !m_renderView->document()->ownerElement();
-        LOG(Compositing, "\nUpdate %d of %s. Overlap testing is %s\n", m_rootLayerUpdateCount, isMainFrame ? "main frame" : frame->tree()->uniqueName().string().utf8().data(),
-            m_compositingConsultsOverlap ? "on" : "off");
+        LOG(Compositing, "\nUpdate %d of %s.\n", m_rootLayerUpdateCount, isMainFrame ? "main frame" : frame->tree()->uniqueName().string().utf8().data());
     }
 #endif
 
@@ -2514,6 +2517,7 @@ GraphicsLayer* RenderLayerCompositor::updateLayerForHeader(bool wantsLayer)
         m_layerForHeader->setName("header");
 #endif
         m_scrollLayer->addChildBelow(m_layerForHeader.get(), m_rootContentLayer.get());
+        m_headerLayerAwaitingFirstFlush = true;
     }
 
     m_layerForHeader->setPosition(FloatPoint(0, 0));

@@ -1,3 +1,54 @@
+2013-04-21  Benjamin Poulain  <benjamin@webkit.org>
+
+        Improve StringImpl code density for older ARM hardware
+        https://bugs.webkit.org/show_bug.cgi?id=114898
+
+        Reviewed by Geoffrey Garen.
+
+        * WebKit.vcproj/WebKitExports.def.in:
+
+2013-04-17  Geoffrey Garen  <ggaren@apple.com>
+
+        Renamed JSGlobalData to VM
+        https://bugs.webkit.org/show_bug.cgi?id=114777
+
+        Reviewed by Phil Pizlo.
+
+        * WebCoreStatistics.cpp:
+        (WebCoreStatistics::javaScriptObjectsCount):
+        (WebCoreStatistics::javaScriptGlobalObjectsCount):
+        (WebCoreStatistics::javaScriptProtectedObjectsCount):
+        (WebCoreStatistics::javaScriptProtectedGlobalObjectsCount):
+        (WebCoreStatistics::javaScriptProtectedObjectTypeCounts):
+        * WebJavaScriptCollector.cpp:
+        (WebJavaScriptCollector::objectCount):
+
+2013-04-13  Roger Fong  <roger_fong@apple.com>
+
+        Unreviewed. Build fix for Windows.
+
+        * WebCoreSupport/WebContextMenuClient.cpp:
+        * WebCoreSupport/WebDragClient.cpp:
+        * WebFrame.cpp:
+
+2013-04-16  Brent Fulgham  <bfulgham@webkit.org>
+
+        [Windows] Unreviewed build correction.
+
+        * WebKit.vcproj/WebKitExportGeneratorCommon.vsprops: Add correct
+        ICU link library to avoid mixture of ICU 4.0 and 4.6 symbols
+        during link.
+
+2013-04-15  peavo@outlook.com  <peavo@outlook.com>
+
+        Crash when favicon is requested
+        https://bugs.webkit.org/show_bug.cgi?id=114624
+
+        Reviewed by Brent Fulgham.
+
+        * WebIconDatabase.cpp:
+        (WebIconDatabase::getOrCreateDefaultIconBitmap): Added NULL pointer check.
+
 2013-04-12  Anders Carlsson  <andersca@apple.com>
 
         All tests crash on Windows

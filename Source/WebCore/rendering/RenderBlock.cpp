@@ -27,6 +27,7 @@
 #include "AXObjectCache.h"
 #include "ColumnInfo.h"
 #include "Document.h"
+#include "Editor.h"
 #include "Element.h"
 #include "FloatQuad.h"
 #include "Frame.h"
@@ -59,8 +60,8 @@
 #include "RenderTextFragment.h"
 #include "RenderTheme.h"
 #include "RenderView.h"
-#include "Settings.h"
 #include "SVGTextRunRenderingContext.h"
+#include "Settings.h"
 #include "ShadowRoot.h"
 #include "TransformState.h"
 #include "WebCoreMemoryInstrumentation.h"
@@ -72,6 +73,7 @@
 #include <wtf/MemoryInstrumentationHashMap.h>
 #include <wtf/MemoryInstrumentationHashSet.h>
 #include <wtf/MemoryInstrumentationListHashSet.h>
+#include <wtf/StackStats.h>
 #include <wtf/TemporaryChange.h>
 
 using namespace std;
@@ -4285,7 +4287,7 @@ inline void RenderBlock::FloatIntervalSearchAdapter<FloatTypeValue>::collectIfNe
         return;
 
     // All the objects returned from the tree should be already placed.
-    ASSERT(r->isPlaced() && rangesIntersect(m_renderer->pixelSnappedLogicalTopForFloat(r), m_renderer->pixelSnappedLogicalBottomForFloat(r), m_lowValue, m_highValue));
+    ASSERT(r->isPlaced() && rangesIntersect(m_renderer->logicalTopForFloat(r), m_renderer->logicalBottomForFloat(r), m_lowValue, m_highValue));
 
     if (FloatTypeValue == FloatingObject::FloatLeft 
         && m_renderer->logicalRightForFloat(r) > m_offset) {
@@ -7905,8 +7907,8 @@ inline void RenderBlock::FloatingObjects::decreaseObjectsCount(FloatingObject::T
 inline RenderBlock::FloatingObjectInterval RenderBlock::FloatingObjects::intervalForFloatingObject(FloatingObject* floatingObject)
 {
     if (m_horizontalWritingMode)
-        return RenderBlock::FloatingObjectInterval(floatingObject->frameRect().pixelSnappedY(), floatingObject->frameRect().pixelSnappedMaxY(), floatingObject);
-    return RenderBlock::FloatingObjectInterval(floatingObject->frameRect().pixelSnappedX(), floatingObject->frameRect().pixelSnappedMaxX(), floatingObject);
+        return RenderBlock::FloatingObjectInterval(floatingObject->frameRect().y(), floatingObject->frameRect().maxY(), floatingObject);
+    return RenderBlock::FloatingObjectInterval(floatingObject->frameRect().x(), floatingObject->frameRect().maxX(), floatingObject);
 }
 
 void RenderBlock::FloatingObjects::addPlacedObject(FloatingObject* floatingObject)
@@ -8124,7 +8126,7 @@ String ValueToString<int>::string(const int value)
 
 String ValueToString<RenderBlock::FloatingObject*>::string(const RenderBlock::FloatingObject* floatingObject)
 {
-    return String::format("%p (%dx%d %dx%d)", floatingObject, floatingObject->frameRect().pixelSnappedX(), floatingObject->frameRect().pixelSnappedY(), floatingObject->frameRect().pixelSnappedMaxX(), floatingObject->frameRect().pixelSnappedMaxY());
+    return String::format("%p (%ix%i %ix%i)", floatingObject, floatingObject->frameRect().x().toInt(), floatingObject->frameRect().y().toInt(), floatingObject->frameRect().maxX().toInt(), floatingObject->frameRect().maxY().toInt());
 }
 
 #endif

@@ -261,6 +261,9 @@
     <ClCompile Include="..\heap\VTableSpectrum.cpp">
       <Filter>heap</Filter>
     </ClCompile>
+    <ClCompile Include="..\heap\Weak.cpp">
+      <Filter>heap</Filter>
+    </ClCompile>
     <ClCompile Include="..\heap\WeakBlock.cpp">
       <Filter>heap</Filter>
     </ClCompile>
@@ -552,7 +555,7 @@
     <ClCompile Include="..\runtime\JSFunction.cpp">
       <Filter>runtime</Filter>
     </ClCompile>
-    <ClCompile Include="..\runtime\JSGlobalData.cpp">
+    <ClCompile Include="..\runtime\VM.cpp">
       <Filter>runtime</Filter>
     </ClCompile>
     <ClCompile Include="..\runtime\JSGlobalObject.cpp">
@@ -712,6 +715,12 @@
       <Filter>runtime</Filter>
     </ClCompile>
     <ClCompile Include="..\runtime\SymbolTable.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\runtime\Watchdog.cpp">
+      <Filter>runtime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\runtime\WatchdogNone.cpp">
       <Filter>runtime</Filter>
     </ClCompile>
     <ClCompile Include="..\tools\CodeProfile.cpp">
@@ -1577,7 +1586,7 @@
     <ClInclude Include="..\runtime\JSFunction.h">
       <Filter>runtime</Filter>
     </ClInclude>
-    <ClInclude Include="..\runtime\JSGlobalData.h">
+    <ClInclude Include="..\runtime\VM.h">
       <Filter>runtime</Filter>
     </ClInclude>
     <ClInclude Include="..\runtime\JSGlobalObject.h">
@@ -1787,9 +1796,6 @@
     <ClInclude Include="..\runtime\SymbolTable.h">
       <Filter>runtime</Filter>
     </ClInclude>
-    <ClInclude Include="..\runtime\Terminator.h">
-      <Filter>runtime</Filter>
-    </ClInclude>
     <ClInclude Include="..\runtime\Tracing.h">
       <Filter>runtime</Filter>
     </ClInclude>
@@ -1797,6 +1803,9 @@
       <Filter>runtime</Filter>
     </ClInclude>
     <ClInclude Include="..\runtime\Uint16WithFraction.h">
+      <Filter>runtime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\runtime\Watchdog.h">
       <Filter>runtime</Filter>
     </ClInclude>
     <ClInclude Include="..\runtime\WeakGCMap.h">
