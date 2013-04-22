@@ -130,9 +130,6 @@ list(APPEND WebCore_SOURCES
     plugins/PluginViewNone.cpp
 
     editing/SmartReplaceICU.cpp
-    platform/text/TextEncodingDetectorICU.cpp
-    platform/text/TextBreakIteratorICU.cpp
-    platform/text/TextCodecICU.cpp
     platform/text/LocaleNone.cpp
 
     platform/nix/support/WebAudioBus.cpp
@@ -211,7 +208,6 @@ list(APPEND WebCore_LIBRARIES
     ${CAIRO_LIBRARIES}
     ${FONTCONFIG_LIBRARIES}
     ${FREETYPE_LIBRARIES}
-    ${ICU_LIBRARIES}
     ${JPEG_LIBRARY}
     ${LIBXML2_LIBRARIES}
     ${LIBXSLT_LIBRARIES}
@@ -231,7 +227,6 @@ list(APPEND WebCore_INCLUDE_DIRECTORIES
     ${FONTCONFIG_INCLUDE_DIR}
     ${CAIRO_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
-    ${ICU_INCLUDE_DIRS}
     ${LIBXML2_INCLUDE_DIR}
     ${LIBXSLT_INCLUDE_DIR}
     ${SQLITE_INCLUDE_DIR}
