@@ -28,8 +28,8 @@ from copy import deepcopy
 from webkitpy.common.system.executive_mock import MockExecutive, MockExecutive2
 from webkitpy.common.system.outputcapture import OutputCapture
 from webkitpy.common.system.systemhost_mock import MockSystemHost
-from webkitpy.layout_tests.port import port_testcase
-from webkitpy.layout_tests.port.nix import NixPort
+from webkitpy.port import port_testcase
+from webkitpy.port.nix import NixPort
 from webkitpy.tool.mocktool import MockOptions
 
 
