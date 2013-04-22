@@ -137,6 +137,8 @@ list(APPEND WebCore_SOURCES
 
     css/WebKitCSSArrayFunctionValue.cpp
     css/WebKitCSSMixFunctionValue.cpp
+    css/WebKitCSSMatrix.cpp
+    css/WebKitCSSMatFunctionValue.cpp
     rendering/style/StyleCachedShader.cpp
     rendering/style/StyleCustomFilterProgram.cpp
     rendering/style/StyleCustomFilterProgramCache.cpp
