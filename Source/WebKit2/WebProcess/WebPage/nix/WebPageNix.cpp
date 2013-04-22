@@ -26,6 +26,7 @@
 #include "config.h"
 #include "WebPage.h"
 
+#include "EventHandler.h"
 #include "NotImplemented.h"
 #include "WebEvent.h"
 #include "WindowsKeyboardCodes.h"
