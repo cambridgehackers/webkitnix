@@ -27,15 +27,12 @@
 #include "config.h"
 #include "WebProcessMainNix.h"
 
-#define LIBSOUP_USE_UNSTABLE_REQUEST_API
-
 #include "ProxyResolverSoup.h"
 #include "WKBase.h"
 #include <WebCore/CoordinatedGraphicsLayer.h>
 #include <WebCore/ResourceHandle.h>
 #include <WebCore/RunLoop.h>
 #include <WebKit2/WebProcess.h>
-#include <libsoup/soup-cache.h>
 #include <libsoup/soup.h>
 #include <runtime/InitializeThreading.h>
 #include <unistd.h>
