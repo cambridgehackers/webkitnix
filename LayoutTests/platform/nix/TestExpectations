@@ -4094,6 +4094,24 @@ fast/dom/shadow/insertion-parent-shadow.html [ Failure ]
 fast/workers/shared-worker-storagequota-query-usage.html [ Failure ]
 fast/workers/worker-storagequota-query-usage.html [ Failure ]
 
+# Failing or flakey tests after merge f6080a8 eddb086
+perf/show-hide-table-rows.html [ Failure Pass ]
+compositing/patterns/direct-pattern-compositing-change.html [ ImageOnlyFailure Pass ]
+css3/filters/custom-with-at-rule-syntax/parsing-custom-function-invalid.html [ Failure ]
+fast/events/touch/frame-hover-update.html [ Failure ]
+fast/exclusions/shape-inside/shape-inside-polygon-layout.html [ Failure ]
+fast/forms/validation-message-on-range.html [ Failure ]
+svg/animations/animate-text-nested-transforms.html [ Failure ]
+perf/show-hide-table-rows.html [ Failure Pass ]
+animations/unanimated-style.html [ Crash ]
+compositing/patterns/direct-pattern-compositing-contain.html [ Crash ]
+fast/frames/set-parent-src-synchronously.html [ Crash ]
+fast/parser/document-write-basic.html [ Crash ]
+storage/indexeddb/keypath-intrinsic-properties.html [ Crash ]
+storage/indexeddb/mozilla/remove-objectstore.html [ Crash ]
+fast/forms/validation-message-appearance.html [ Missing ]
+
+
 # Flakey tests when running pixel tests.
 compositing/background-color/background-color-padding-change.html [ ImageOnlyFailure Pass ]
 compositing/scrollbar-painting.html [ ImageOnlyFailure Crash Pass ]
