@@ -186,4 +186,44 @@ void DefaultWebThemeEngine::paintMenuList(WebCanvas* canvas, State state, const 
     cairo_restore(canvas);
 }
 
+WebSize DefaultWebThemeEngine::getProgressBarSize() const
+{
+    return WebSize(2000, 300);
+}
+
+void DefaultWebThemeEngine::paintProgressBar(WebCanvas* canvas, State state, const WebRect& rect, const ProgressBarExtraParams& params) const
+{
+    cairo_save(canvas);
+    
+    if (params.isDeterminate) {
+        // Background
+        setupBorder(canvas, state);
+        cairo_rectangle(canvas, rect.x, rect.y, rect.width, rect.height);
+        cairo_fill(canvas);
+        // Progress
+        cairo_rectangle(canvas, rect.x, rect.y, rect.width * params.position, rect.height);
+        gradientFill(canvas, rect.y, rect.height);
+    } else {
+        cairo_rectangle(canvas, rect.x, rect.y, rect.width, rect.height);
+        gradientFill(canvas, rect.y, rect.height, true);
+    }
+
+    cairo_restore(canvas);
+}
+
+// These values have been copied from RenderThemeChromiumSkia.cpp
+static const int progressActivityBlocks = 5;
+static const int progressAnimationFrames = 10;
+static const double progressAnimationInterval = 0.125;
+
+double DefaultWebThemeEngine::getAnimationRepeatIntervalForProgressBar() const
+{
+    return progressAnimationInterval;
+}
+
+double DefaultWebThemeEngine::getAnimationDurationForProgressBar() const
+{
+    return progressAnimationInterval * progressAnimationFrames * 2; // "2" for back and forth;
+}
+
 }

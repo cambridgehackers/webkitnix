@@ -32,6 +32,9 @@
 #include "public/WebThemeEngine.h"
 #include "public/WebRect.h"
 #include "public/Platform.h"
+#if ENABLE(PROGRESS_ELEMENT)
+#include "RenderProgress.h"
+#endif
 
 namespace WebCore {
 
@@ -184,5 +187,39 @@ void RenderThemeNix::adjustMenuListStyle(StyleResolver*, RenderStyle* style, Ele
     style->setPaddingBottom(Length(paddingBottom, Fixed));
     style->setPaddingLeft(Length(paddingLeft, Fixed));
 }
+
+#if ENABLE(PROGRESS_ELEMENT)
+void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle* style, Element *) const
+{
+}
+
+bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInfo& i, const IntRect& rect)
+{
+    RenderProgress* renderProgress = toRenderProgress(renderObject);
+    WebKit::WebThemeEngine::ProgressBarExtraParams extraParams;
+    extraParams.isDeterminate = renderProgress->isDeterminate();
+    extraParams.position = renderProgress->position();
+    extraParams.animationProgress = renderProgress->animationProgress();
+    extraParams.animationStartTime = renderProgress->animationStartTime();
+    
+    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
+    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();    
+    themeEngine->paintProgressBar(canvas, getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
+
+    return false;
+}
+
+double RenderThemeNix::animationRepeatIntervalForProgressBar(RenderProgress*) const
+{
+    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
+    return themeEngine->getAnimationRepeatIntervalForProgressBar();
+}
+
+double RenderThemeNix::animationDurationForProgressBar(RenderProgress*) const
+{
+    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
+    return themeEngine->getAnimationDurationForProgressBar();
+}
+#endif
 
 }
