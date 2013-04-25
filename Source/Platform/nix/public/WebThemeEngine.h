@@ -92,11 +92,10 @@ public:
 
     // Extra parameters for PartProgressBar
     struct ProgressBarExtraParams {
-        bool determinate;
-        int valueRectX;
-        int valueRectY;
-        int valueRectWidth;
-        int valueRectHeight;
+        bool isDeterminate;
+        double position;
+        double animationProgress;
+        double animationStartTime;
     };
 
     virtual void paintButton(WebCanvas*, State, const WebRect&, const ButtonExtraParams&) const = 0;
@@ -108,6 +107,9 @@ public:
     virtual void paintTextArea(WebCanvas*, State, const WebRect&) const = 0;
     virtual void getMenuListPadding(int& paddingTop, int& paddingLeft, int& paddingBottom, int& paddingRight) const = 0;
     virtual void paintMenuList(WebCanvas*, State, const WebRect&) const = 0;
+    virtual void paintProgressBar(WebCanvas*, State, const WebRect&, const ProgressBarExtraParams&) const = 0;
+    virtual double getAnimationRepeatIntervalForProgressBar() const = 0;
+    virtual double getAnimationDurationForProgressBar() const = 0;
 };
 
 } // namespace WebKit

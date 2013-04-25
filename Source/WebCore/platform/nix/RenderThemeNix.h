@@ -38,6 +38,13 @@ public:
 
     virtual void systemFont(int cssValueId, FontDescription&) const;
 
+#if ENABLE(PROGRESS_ELEMENT)
+    // Returns the repeat interval of the animation for the progress bar.
+    virtual double animationRepeatIntervalForProgressBar(RenderProgress*) const;
+    // Returns the duration of the animation for the progress bar.
+    virtual double animationDurationForProgressBar(RenderProgress*) const;
+#endif
+
 protected:
 
     virtual bool paintButton(RenderObject*, const PaintInfo&, const IntRect&);
@@ -53,6 +60,12 @@ protected:
     virtual bool paintMenuList(RenderObject*, const PaintInfo&, const IntRect&);
     virtual void adjustMenuListStyle(StyleResolver*, RenderStyle*, Element*) const;
     virtual bool paintMenuListButton(RenderObject* o, const PaintInfo& i, const IntRect& r) { return paintMenuList(o, i, r); }
+
+#if ENABLE(PROGRESS_ELEMENT)
+    virtual void adjustProgressBarStyle(StyleResolver*, RenderStyle*, Element*) const;
+    virtual bool paintProgressBar(RenderObject*, const PaintInfo&, const IntRect&) OVERRIDE;
+#endif
+
 private:
     RenderThemeNix();
 };

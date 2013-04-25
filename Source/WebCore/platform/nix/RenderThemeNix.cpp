@@ -32,6 +32,9 @@
 #include "public/WebThemeEngine.h"
 #include "public/WebRect.h"
 #include "public/Platform.h"
+#if ENABLE(PROGRESS_ELEMENT)
+#include "RenderProgress.h"
+#endif
 
 namespace WebCore {
 
@@ -45,6 +48,10 @@ static void setSizeIfAuto(RenderStyle* style, const IntSize& size)
         style->setHeight(Length(size.height(), Fixed));
 }
 
+static WebKit::WebThemeEngine* themeEngine()
+{
+    return WebKit::Platform::current()->themeEngine();
+}
 
 PassRefPtr<RenderTheme> RenderTheme::themeForPage(Page*)
 {
@@ -93,8 +100,7 @@ bool RenderThemeNix::paintButton(RenderObject* o, const PaintInfo& i, const IntR
         extraParams.backgroundColor = o->style()->visitedDependentColor(CSSPropertyBackgroundColor).rgb();
 
     WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
-    themeEngine->paintButton(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintButton(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -106,8 +112,7 @@ bool RenderThemeNix::paintTextField(RenderObject* o, const PaintInfo& i, const I
         return true;
 
     WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
-    themeEngine->paintTextField(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
+    themeEngine()->paintTextField(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
     return false;
 }
 
@@ -123,8 +128,7 @@ bool RenderThemeNix::paintCheckbox(RenderObject* o, const PaintInfo& i, const In
     extraParams.indeterminate = isIndeterminate(o);
 
     WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
-    themeEngine->paintCheckbox(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintCheckbox(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -134,7 +138,7 @@ void RenderThemeNix::setCheckboxSize(RenderStyle* style) const
     if (!style->width().isIntrinsicOrAuto() && !style->height().isAuto())
         return;
 
-    IntSize size = WebKit::Platform::current()->themeEngine()->getCheckboxSize();
+    IntSize size = themeEngine()->getCheckboxSize();
     setSizeIfAuto(style, size);
 }
 
@@ -145,8 +149,7 @@ bool RenderThemeNix::paintRadio(RenderObject* o, const PaintInfo& i, const IntRe
     extraParams.indeterminate = isIndeterminate(o);
 
     WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
-    themeEngine->paintRadio(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintRadio(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -156,15 +159,14 @@ void RenderThemeNix::setRadioSize(RenderStyle* style) const
     if (!style->width().isIntrinsicOrAuto() && !style->height().isAuto())
         return;
 
-    IntSize size = WebKit::Platform::current()->themeEngine()->getRadioSize();
+    IntSize size = themeEngine()->getRadioSize();
     setSizeIfAuto(style, size);
 }
 
 bool RenderThemeNix::paintMenuList(RenderObject* o, const PaintInfo& i, const IntRect& rect)
 {
     WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
-    themeEngine->paintMenuList(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
+    themeEngine()->paintMenuList(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
     return false;
 }
 
@@ -173,16 +175,46 @@ void RenderThemeNix::adjustMenuListStyle(StyleResolver*, RenderStyle* style, Ele
     style->resetBorder();
     style->setWhiteSpace(PRE);
 
-    WebKit::WebThemeEngine* themeEngine = WebKit::Platform::current()->themeEngine();
     int paddingTop = 0;
     int paddingLeft = 0;
     int paddingBottom = 0;
     int paddingRight = 0;
-    themeEngine->getMenuListPadding(paddingTop, paddingLeft, paddingBottom, paddingRight);
+    themeEngine()->getMenuListPadding(paddingTop, paddingLeft, paddingBottom, paddingRight);
     style->setPaddingTop(Length(paddingTop, Fixed));
     style->setPaddingRight(Length(paddingRight, Fixed));
     style->setPaddingBottom(Length(paddingBottom, Fixed));
     style->setPaddingLeft(Length(paddingLeft, Fixed));
 }
+
+#if ENABLE(PROGRESS_ELEMENT)
+void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle* style, Element *) const
+{
+}
+
+bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInfo& i, const IntRect& rect)
+{
+    RenderProgress* renderProgress = toRenderProgress(renderObject);
+    WebKit::WebThemeEngine::ProgressBarExtraParams extraParams;
+    extraParams.isDeterminate = renderProgress->isDeterminate();
+    extraParams.position = renderProgress->position();
+    extraParams.animationProgress = renderProgress->animationProgress();
+    extraParams.animationStartTime = renderProgress->animationStartTime();
+    
+    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
+    themeEngine()->paintProgressBar(canvas, getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
+
+    return false;
+}
+
+double RenderThemeNix::animationRepeatIntervalForProgressBar(RenderProgress*) const
+{
+    return themeEngine()->getAnimationRepeatIntervalForProgressBar();
+}
+
+double RenderThemeNix::animationDurationForProgressBar(RenderProgress*) const
+{
+    return themeEngine()->getAnimationDurationForProgressBar();
+}
+#endif
 
 }

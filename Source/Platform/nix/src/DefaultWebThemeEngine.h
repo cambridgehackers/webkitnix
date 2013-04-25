@@ -16,6 +16,10 @@ public:
     virtual void paintRadio(WebCanvas*, State, const WebRect&, const ButtonExtraParams&) const;
     virtual void paintMenuList(WebCanvas *, State, const WebRect &) const;
     virtual void getMenuListPadding(int& paddingTop, int& paddingLeft, int& paddingBottom, int& paddingRight) const;
+    virtual WebSize getProgressBarSize() const;
+    virtual void paintProgressBar(WebCanvas*, State, const WebRect&, const ProgressBarExtraParams&) const;
+    virtual double getAnimationRepeatIntervalForProgressBar() const;
+    virtual double getAnimationDurationForProgressBar() const;
 };
 
 }
