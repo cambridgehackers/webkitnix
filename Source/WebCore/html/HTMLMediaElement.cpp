@@ -79,11 +79,9 @@
 #include "Settings.h"
 #include "ShadowRoot.h"
 #include "TimeRanges.h"
-#include "WebCoreMemoryInstrumentation.h"
 #include <limits>
 #include <wtf/CurrentTime.h>
 #include <wtf/MathExtras.h>
-#include <wtf/MemoryInstrumentationVector.h>
 #include <wtf/NonCopyingSort.h>
 #include <wtf/Uint8Array.h>
 #include <wtf/text/CString.h>
@@ -3195,6 +3193,9 @@ void HTMLMediaElement::configureTextTrackGroup(const TrackGroup& group)
 
         int trackScore = captionPreferences ? captionPreferences->textTrackSelectionScore(textTrack.get(), this) : 0;
         if (trackScore) {
+
+            LOG(Media, "HTMLMediaElement::configureTextTrackGroup -  '%s' track with language '%s' has score %i", String(textTrack->kind()).utf8().data(), String(textTrack->language()).utf8().data(), trackScore);
+
             // * If the text track kind is { [subtitles or captions] [descriptions] } and the user has indicated an interest in having a
             // track with this text track kind, text track language, and text track label enabled, and there is no
             // other text track in the media element's list of text tracks with a text track kind of either subtitles
@@ -3238,6 +3239,11 @@ void HTMLMediaElement::configureTextTrackGroup(const TrackGroup& group)
     if (!trackToEnable && fallbackTrack)
         trackToEnable = fallbackTrack;
 
+    if (!defaultTrack && trackToEnable && trackToEnable != fallbackTrack && m_captionDisplayMode != CaptionUserPreferences::AlwaysOn)
+        m_forcedOrAutomaticSubtitleTrackLanguage = trackToEnable->language();
+    else
+        m_forcedOrAutomaticSubtitleTrackLanguage = emptyString();
+    
     if (currentlyEnabledTracks.size()) {
         for (size_t i = 0; i < currentlyEnabledTracks.size(); ++i) {
             RefPtr<TextTrack> textTrack = currentlyEnabledTracks[i];
@@ -3794,6 +3800,12 @@ void HTMLMediaElement::mediaPlayerCharacteristicChanged(MediaPlayer*)
     LOG(Media, "HTMLMediaElement::mediaPlayerCharacteristicChanged");
     
     beginProcessingMediaPlayerCallback();
+
+#if ENABLE(VIDEO_TRACK)
+    if (m_forcedOrAutomaticSubtitleTrackLanguage != m_player->languageOfPrimaryAudioTrack())
+        markCaptionAndSubtitleTracksAsUnconfigured(AfterDelay);
+#endif
+
     if (hasMediaControls())
         mediaControls()->reset();
     if (renderer())
@@ -4417,8 +4429,7 @@ void HTMLMediaElement::setClosedCaptionsVisible(bool closedCaptionVisible)
 
 #if ENABLE(VIDEO_TRACK)
     if (RuntimeEnabledFeatures::webkitVideoTrackEnabled()) {
-        m_processingPreferenceChange = true;
-        markCaptionAndSubtitleTracksAsUnconfigured();
+        markCaptionAndSubtitleTracksAsUnconfigured(Immediately);
         updateTextTrackDisplay();
     }
 #else
@@ -4637,7 +4648,7 @@ void HTMLMediaElement::captionPreferencesChanged()
     setClosedCaptionsVisible(m_captionDisplayMode == CaptionUserPreferences::AlwaysOn);
 }
 
-void HTMLMediaElement::markCaptionAndSubtitleTracksAsUnconfigured()
+void HTMLMediaElement::markCaptionAndSubtitleTracksAsUnconfigured(ReconfigureMode mode)
 {
     if (!m_textTracks)
         return;
@@ -4657,7 +4668,13 @@ void HTMLMediaElement::markCaptionAndSubtitleTracksAsUnconfigured()
         if (kind == TextTrack::subtitlesKeyword() || kind == TextTrack::captionsKeyword())
             textTrack->setHasBeenConfigured(false);
     }
-    configureTextTracks();
+
+    m_processingPreferenceChange = true;
+    m_pendingActionFlags &= ~ConfigureTextTracks;
+    if (mode == Immediately)
+        configureTextTracks();
+    else
+        scheduleDelayedAction(ConfigureTextTracks);
 }
 
 #endif
@@ -5003,47 +5020,6 @@ CachedResourceLoader* HTMLMediaElement::mediaPlayerCachedResourceLoader()
 void HTMLMediaElement::removeBehaviorsRestrictionsAfterFirstUserGesture()
 {
     m_restrictions = NoRestrictions;
-}
-
-void HTMLMediaElement::reportMemoryUsage(MemoryObjectInfo* memoryObjectInfo) const
-{
-    MemoryClassInfo info(memoryObjectInfo, this, WebCoreMemoryTypes::DOM);
-    HTMLElement::reportMemoryUsage(memoryObjectInfo);
-    ActiveDOMObject::reportMemoryUsage(memoryObjectInfo);
-    info.addMember(m_loadTimer, "loadTimer");
-    info.addMember(m_progressEventTimer, "progressEventTimer");
-    info.addMember(m_playbackProgressTimer, "playbackProgressTimer");
-    info.addMember(m_playedTimeRanges, "playedTimeRanges");
-    info.addMember(m_asyncEventQueue, "asyncEventQueue");
-    info.addMember(m_currentSrc, "currentSrc");
-    info.addMember(m_error, "error");
-    info.addMember(m_currentSourceNode, "currentSourceNode");
-    info.addMember(m_nextChildNodeToConsider, "nextChildNodeToConsider");
-    info.addMember(m_player, "player");
-#if ENABLE(PLUGIN_PROXY_FOR_VIDEO)
-    info.addMember(m_proxyWidget, "proxyWidget");
-#endif
-#if ENABLE(MEDIA_SOURCE)
-    info.addMember(m_mediaSource, "mediaSource");
-#endif
-#if ENABLE(VIDEO_TRACK)
-    info.addMember(m_audioTracks, "audioTracks");
-    info.addMember(m_textTracks, "textTracks");
-    info.addMember(m_videoTracks, "videoTracks");
-    info.addMember(m_textTracksWhenResourceSelectionBegan, "textTracksWhenResourceSelectionBegan");
-    info.addMember(m_cueTree, "cueTree");
-    info.addMember(m_currentlyActiveCues, "currentlyActiveCues");
-#endif
-    info.addMember(m_mediaGroup, "mediaGroup");
-    info.addMember(m_mediaController, "mediaController");
-
-#if PLATFORM(MAC)
-    info.addMember(m_sleepDisabler, "sleepDisabler");
-#endif
-#if ENABLE(WEB_AUDIO)
-    info.addMember(m_audioSourceNode, "audioSourceNode");
-#endif
-
 }
 
 }

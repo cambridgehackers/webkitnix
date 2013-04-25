@@ -64,7 +64,12 @@
 #include <wtf/UnusedParam.h>
 
 #if OS(WINDOWS)
-#include <intrin.h>
+#if OS(WINCE)
+#include <cmnintrin.h>
+#else
+extern "C" void _ReadWriteBarrier(void);
+#pragma intrinsic(_ReadWriteBarrier)
+#endif
 #include <windows.h>
 #elif OS(QNX)
 #include <atomic.h>

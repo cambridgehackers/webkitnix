@@ -2331,9 +2331,6 @@
     <ClCompile Include="..\loader\SubresourceLoader.cpp">
       <Filter>loader</Filter>
     </ClCompile>
-    <ClCompile Include="..\loader\SubstituteData.cpp">
-      <Filter>loader</Filter>
-    </ClCompile>
     <ClCompile Include="..\loader\TextResourceDecoder.cpp">
       <Filter>loader</Filter>
     </ClCompile>
@@ -2551,9 +2548,6 @@
       <Filter>platform</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\PlatformInstrumentation.cpp">
-      <Filter>platform</Filter>
-    </ClCompile>
-    <ClCompile Include="..\platform\PlatformMemoryInstrumentation.cpp">
       <Filter>platform</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\PlatformStrategies.cpp">
@@ -3688,9 +3682,6 @@
       <Filter>css</Filter>
     </ClCompile>
     <ClCompile Include="..\css\CSSValuePool.cpp">
-      <Filter>css</Filter>
-    </ClCompile>
-    <ClCompile Include="..\css\DeprecatedStyleBuilder.cpp">
       <Filter>css</Filter>
     </ClCompile>
     <ClCompile Include="..\css\FontFeatureValue.cpp">
@@ -4918,9 +4909,6 @@
       <Filter>dom</Filter>
     </ClCompile>
     <ClCompile Include="..\dom\ViewportArguments.cpp">
-      <Filter>dom</Filter>
-    </ClCompile>
-    <ClCompile Include="..\dom\WebCoreMemoryInstrumentation.cpp">
       <Filter>dom</Filter>
     </ClCompile>
     <ClCompile Include="..\dom\WebKitAnimationEvent.cpp">
@@ -6399,9 +6387,6 @@
     <ClCompile Include="..\inspector\DOMPatchSupport.cpp">
       <Filter>inspector</Filter>
     </ClCompile>
-    <ClCompile Include="..\inspector\HeapGraphSerializer.cpp">
-      <Filter>inspector</Filter>
-    </ClCompile>
     <ClCompile Include="..\inspector\IdentifiersFactory.cpp">
       <Filter>inspector</Filter>
     </ClCompile>
@@ -6535,9 +6520,6 @@
       <Filter>inspector</Filter>
     </ClCompile>
     <ClCompile Include="..\inspector\InstrumentingAgents.cpp">
-      <Filter>inspector</Filter>
-    </ClCompile>
-    <ClCompile Include="..\inspector\MemoryInstrumentationImpl.cpp">
       <Filter>inspector</Filter>
     </ClCompile>
     <ClCompile Include="..\inspector\NetworkResourcesData.cpp">
@@ -6854,6 +6836,18 @@
       <Filter>platform\graphics\cg</Filter>
     </ClCompile>
     <ClCompile Include="..\html\track\TrackListBase.cpp">
+      <Filter>html\track</Filter>
+    </ClCompile>
+    <ClCompile Include="..\html\track\AudioTrack.cpp">
+      <Filter>html\track</Filter>
+    </ClCompile>
+    <ClCompile Include="..\html\track\AudioTrackList.cpp">
+      <Filter>html\track</Filter>
+    </ClCompile>
+    <ClCompile Include="..\html\track\VideoTrack.cpp">
+      <Filter>html\track</Filter>
+    </ClCompile>
+    <ClCompile Include="..\html\track\VideoTrackList.cpp">
       <Filter>html\track</Filter>
     </ClCompile>
   </ItemGroup>
@@ -9393,9 +9387,6 @@
     <ClInclude Include="..\platform\PlatformKeyboardEvent.h">
       <Filter>platform</Filter>
     </ClInclude>
-    <ClInclude Include="..\platform\PlatformMemoryInstrumentation.h">
-      <Filter>platform</Filter>
-    </ClInclude>
     <ClInclude Include="..\platform\PlatformMenuDescription.h">
       <Filter>platform</Filter>
     </ClInclude>
@@ -10477,9 +10468,6 @@
       <Filter>css</Filter>
     </ClInclude>
     <ClInclude Include="..\css\DashboardRegion.h">
-      <Filter>css</Filter>
-    </ClInclude>
-    <ClInclude Include="..\css\DeprecatedStyleBuilder.h">
       <Filter>css</Filter>
     </ClInclude>
     <ClInclude Include="..\css\FontFeatureValue.h">
@@ -11821,9 +11809,6 @@
       <Filter>dom</Filter>
     </ClInclude>
     <ClInclude Include="..\dom\ViewportArguments.h">
-      <Filter>dom</Filter>
-    </ClInclude>
-    <ClInclude Include="..\dom\WebCoreMemoryInstrumentation.h">
       <Filter>dom</Filter>
     </ClInclude>
     <ClInclude Include="..\dom\WebKitAnimationEvent.h">
@@ -13740,9 +13725,6 @@
     <ClInclude Include="..\inspector\DOMPatchSupport.h">
       <Filter>inspector</Filter>
     </ClInclude>
-    <ClInclude Include="..\inspector\HeapGraphSerializer.h">
-      <Filter>inspector</Filter>
-    </ClInclude>
     <ClInclude Include="..\inspector\IdentifiersFactory.h">
       <Filter>inspector</Filter>
     </ClInclude>
@@ -13894,9 +13876,6 @@
       <Filter>inspector</Filter>
     </ClInclude>
     <ClInclude Include="..\inspector\InstrumentingAgents.h">
-      <Filter>inspector</Filter>
-    </ClInclude>
-    <ClInclude Include="..\inspector\MemoryInstrumentationImpl.h">
       <Filter>inspector</Filter>
     </ClInclude>
     <ClInclude Include="..\inspector\NetworkResourcesData.h">
@@ -14381,9 +14360,31 @@
     <ClInclude Include="..\platform\graphics\cg\SubimageCacheWithTimer.h">
       <Filter>platform\graphics\cg</Filter>
     </ClInclude>
-    <ClInclude Include="..\loader\cache\CachedRawResourceClient.h" />
-    <ClInclude Include="..\platform\VisitedLinkStrategy.h" />
     <ClInclude Include="..\html\track\TrackListBase.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\loader\cache\CachedRawResourceClient.h">
+      <Filter>loader\cache</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\VisitedLinkStrategy.h">
+      <Filter>platform</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\graphics\AudioTrackPrivate.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\graphics\VideoTrackPrivate.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\html\track\AudioTrack.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\html\track\AudioTrackList.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\html\track\VideoTrack.h">
+      <Filter>html\track</Filter>
+    </ClInclude>
+    <ClInclude Include="..\html\track\VideoTrackList.h">
       <Filter>html\track</Filter>
     </ClInclude>
   </ItemGroup>

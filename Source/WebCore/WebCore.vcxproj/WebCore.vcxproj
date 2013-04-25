@@ -3605,8 +3605,12 @@
     </ClCompile>
     <ClCompile Include="..\html\canvas\CanvasPathMethods.cpp" />
     <ClCompile Include="..\html\parser\HTMLIdentifier.cpp" />
+    <ClCompile Include="..\html\track\AudioTrack.cpp" />
+    <ClCompile Include="..\html\track\AudioTrackList.cpp" />
     <ClCompile Include="..\html\track\TextTrackCueGeneric.cpp" />
     <ClCompile Include="..\html\track\TrackListBase.cpp" />
+    <ClCompile Include="..\html\track\VideoTrack.cpp" />
+    <ClCompile Include="..\html\track\VideoTrackList.cpp" />
     <ClCompile Include="..\html\track\WebVTTElement.cpp" />
     <ClCompile Include="..\inspector\TimelineTraceEventProcessor.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
@@ -4013,7 +4017,6 @@
     <ClCompile Include="..\loader\SinkDocument.cpp" />
     <ClCompile Include="..\loader\SubframeLoader.cpp" />
     <ClCompile Include="..\loader\SubresourceLoader.cpp" />
-    <ClCompile Include="..\loader\SubstituteData.cpp" />
     <ClCompile Include="..\loader\TextResourceDecoder.cpp" />
     <ClCompile Include="..\loader\TextTrackLoader.cpp" />
     <ClCompile Include="..\loader\ThreadableLoader.cpp" />
@@ -4116,7 +4119,6 @@
     <ClCompile Include="..\platform\NotImplemented.cpp" />
     <ClCompile Include="..\platform\PlatformEvent.cpp" />
     <ClCompile Include="..\platform\PlatformInstrumentation.cpp" />
-    <ClCompile Include="..\platform\PlatformMemoryInstrumentation.cpp" />
     <ClCompile Include="..\platform\PlatformStrategies.cpp" />
     <ClCompile Include="..\platform\RunLoop.cpp" />
     <ClCompile Include="..\platform\RuntimeApplicationChecks.cpp" />
@@ -5346,14 +5348,6 @@
     <ClCompile Include="..\css\RGBColor.cpp" />
     <ClCompile Include="..\css\SelectorChecker.cpp" />
     <ClCompile Include="..\css\ShadowValue.cpp" />
-    <ClCompile Include="..\css\StyleBuilder.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_WinCairo|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='DebugSuffix|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\css\StyleInvalidationAnalysis.cpp" />
     <ClCompile Include="..\css\StyleMedia.cpp" />
     <ClCompile Include="..\css\StylePropertySet.cpp">
@@ -7810,7 +7804,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\dom\WebCoreMemoryInstrumentation.cpp" />
     <ClCompile Include="..\dom\WebKitAnimationEvent.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_WinCairo|Win32'">true</ExcludedFromBuild>
@@ -10334,11 +10327,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\inspector\HeapGraphSerializer.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\inspector\IdentifiersFactory.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
@@ -10560,11 +10548,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\inspector\InstrumentingAgents.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\inspector\MemoryInstrumentationImpl.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_WinCairo|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Production|Win32'">true</ExcludedFromBuild>
@@ -11185,8 +11168,12 @@
     <ClInclude Include="..\ForwardingHeaders\runtime\WriteBarrier.h" />
     <ClInclude Include="..\ForwardingHeaders\yarr\YarrJIT.h" />
     <ClInclude Include="..\html\canvas\CanvasPathMethods.h" />
+    <ClInclude Include="..\html\track\AudioTrack.h" />
+    <ClInclude Include="..\html\track\AudioTrackList.h" />
     <ClInclude Include="..\html\track\TextTrackCueGeneric.h" />
     <ClInclude Include="..\html\track\TrackListBase.h" />
+    <ClInclude Include="..\html\track\VideoTrack.h" />
+    <ClInclude Include="..\html\track\VideoTrackList.h" />
     <ClInclude Include="..\html\track\WebVTTElement.h" />
     <ClInclude Include="..\inspector\TimelineTraceEventProcessor.h" />
     <ClInclude Include="..\Modules\filesystem\AsyncFileWriter.h" />
@@ -11575,7 +11562,9 @@
     <ClInclude Include="..\platform\FileStreamClient.h" />
     <ClInclude Include="..\platform\FileSystem.h" />
     <ClInclude Include="..\platform\FloatConversion.h" />
+    <ClInclude Include="..\platform\graphics\AudioTrackPrivate.h" />
     <ClInclude Include="..\platform\graphics\cg\SubimageCacheWithTimer.h" />
+    <ClInclude Include="..\platform\graphics\VideoTrackPrivate.h" />
     <ClInclude Include="..\platform\HistogramSupport.h" />
     <ClInclude Include="..\platform\HostWindow.h" />
     <ClInclude Include="..\platform\KillRing.h" />
@@ -11598,7 +11587,6 @@
     <ClInclude Include="..\platform\PlatformEvent.h" />
     <ClInclude Include="..\platform\PlatformInstrumentation.h" />
     <ClInclude Include="..\platform\PlatformKeyboardEvent.h" />
-    <ClInclude Include="..\platform\PlatformMemoryInstrumentation.h" />
     <ClInclude Include="..\platform\PlatformMenuDescription.h" />
     <ClInclude Include="..\platform\PlatformMouseEvent.h" />
     <ClInclude Include="..\platform\PlatformScreen.h" />
@@ -12160,7 +12148,6 @@
     <ClInclude Include="..\css\SelectorChecker.h" />
     <ClInclude Include="..\css\ShadowValue.h" />
     <ClInclude Include="..\css\SiblingTraversalStrategies.h" />
-    <ClInclude Include="..\css\StyleBuilder.h" />
     <ClInclude Include="..\css\StyleInvalidationAnalysis.h" />
     <ClInclude Include="..\css\StyleMedia.h" />
     <ClInclude Include="..\css\StylePropertySet.h" />
@@ -12593,7 +12580,6 @@
     <ClInclude Include="..\dom\UserGestureIndicator.h" />
     <ClInclude Include="..\dom\UserTypingGestureIndicator.h" />
     <ClInclude Include="..\dom\ViewportArguments.h" />
-    <ClInclude Include="..\dom\WebCoreMemoryInstrumentation.h" />
     <ClInclude Include="..\dom\WebKitAnimationEvent.h" />
     <ClInclude Include="..\dom\WebKitNamedFlow.h" />
     <ClInclude Include="..\dom\WebKitTransitionEvent.h" />
@@ -13269,7 +13255,6 @@
     <ClInclude Include="..\inspector\ContentSearchUtils.h" />
     <ClInclude Include="..\inspector\DOMEditor.h" />
     <ClInclude Include="..\inspector\DOMPatchSupport.h" />
-    <ClInclude Include="..\inspector\HeapGraphSerializer.h" />
     <ClInclude Include="..\inspector\IdentifiersFactory.h" />
     <ClInclude Include="..\inspector\InjectedScript.h" />
     <ClInclude Include="..\inspector\InjectedScriptBase.h" />
@@ -13321,7 +13306,6 @@
     <ClInclude Include="..\inspector\InspectorWorkerAgent.h" />
     <ClInclude Include="..\inspector\InspectorWorkerResource.h" />
     <ClInclude Include="..\inspector\InstrumentingAgents.h" />
-    <ClInclude Include="..\inspector\MemoryInstrumentationImpl.h" />
     <ClInclude Include="..\inspector\NetworkResourcesData.h" />
     <ClInclude Include="..\inspector\PageConsoleAgent.h" />
     <ClInclude Include="..\inspector\PageDebuggerAgent.h" />

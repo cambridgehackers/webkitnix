@@ -264,7 +264,6 @@ public:
     void resetTrackedRepaintRects();
     void setTracksRepaints(bool);
 
-    void reportMemoryUsage(MemoryObjectInfo*) const;
     void setShouldReevaluateCompositingAfterLayout() { m_reevaluateCompositingAfterLayout = true; }
 
     bool viewHasTransparentBackground(Color* backgroundColor = 0) const;
@@ -377,6 +376,9 @@ private:
     bool requiresOverhangAreasLayer() const;
     bool requiresContentShadowLayer() const;
 #endif
+
+    bool hasCoordinatedScrolling() const;
+    bool shouldCompositeOverflowControls() const;
 
     void scheduleLayerFlushNow();
     bool isThrottlingLayerFlushes() const;

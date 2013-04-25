@@ -727,17 +727,10 @@ static inline bool isValidKeywordPropertyAndValue(CSSPropertyID propertyId, int 
         if (valueID == CSSValueNormal || valueID == CSSValueItalic || valueID == CSSValueOblique)
             return true;
         break;
-    case CSSPropertyImageRendering: // auto | crisp-edges | pixelated | -webkit-smooth | optimizeSpeed | optimizeQuality | -webkit-optimize-contrast
-#if ENABLE(CSS4_IMAGES)
-        if (valueID == CSSValueAuto || valueID == CSSValueCrispEdges || valueID == CSSValuePixelated
-            || valueID == CSSValueWebkitSmooth || valueID == CSSValueWebkitOptimizeContrast
-            || valueID == CSSValueOptimizespeed || valueID == CSSValueOptimizequality)
+    case CSSPropertyImageRendering: // auto | optimizeSpeed | optimizeQuality | -webkit-crisp-edges | -webkit-optimize-contrast
+        if (valueID == CSSValueAuto || valueID == CSSValueOptimizespeed || valueID == CSSValueOptimizequality
+            || valueID == CSSValueWebkitCrispEdges || valueID == CSSValueWebkitOptimizeContrast)
             return true;
-#else
-        if (valueID == CSSValueAuto || valueID == CSSValueCrispEdges || valueID == CSSValueWebkitOptimizeContrast
-            || valueID == CSSValueOptimizespeed || valueID == CSSValueOptimizequality)
-            return true;
-#endif
         break;
     case CSSPropertyListStylePosition: // inside | outside | inherit
         if (valueID == CSSValueInside || valueID == CSSValueOutside)
@@ -11517,8 +11510,9 @@ bool CSSParser::isLoggingErrors()
 
 void CSSParser::logError(const String& message, int lineNumber)
 {
+    // FIXME: <http://webkit.org/b/114313> CSS Parser ConsoleMessage errors should include column numbers
     PageConsole* console = m_styleSheet->singleOwnerDocument()->page()->console();
-    console->addMessage(CSSMessageSource, WarningMessageLevel, message, m_styleSheet->baseURL().string(), lineNumber + 1);
+    console->addMessage(CSSMessageSource, WarningMessageLevel, message, m_styleSheet->baseURL().string(), lineNumber + 1, 0);
 }
 
 StyleRuleKeyframes* CSSParser::createKeyframesRule(const String& name, PassOwnPtr<Vector<RefPtr<StyleKeyframe> > > popKeyframes)
@@ -11798,7 +11792,23 @@ StyleKeyframe* CSSParser::createKeyframe(CSSParserValueList* keys)
     // Create a key string from the passed keys
     StringBuilder keyString;
     for (unsigned i = 0; i < keys->size(); ++i) {
+        // Just as per the comment below, we ignore keyframes with
+        // invalid key values (plain numbers or unknown identifiers)
+        // marked as CSSPrimitiveValue::CSS_UNKNOWN during parsing.
+        if (keys->valueAt(i)->unit == CSSPrimitiveValue::CSS_UNKNOWN) {
+            clearProperties();
+            return 0;
+        }
+
+        ASSERT(keys->valueAt(i)->unit == CSSPrimitiveValue::CSS_NUMBER);
         float key = static_cast<float>(keys->valueAt(i)->fValue);
+        if (key < 0 || key > 100) {
+            // As per http://www.w3.org/TR/css3-animations/#keyframes,
+            // "If a keyframe selector specifies negative percentage values
+            // or values higher than 100%, then the keyframe will be ignored."
+            clearProperties();
+            return 0;
+        }
         if (i != 0)
             keyString.append(',');
         keyString.append(String::number(key));

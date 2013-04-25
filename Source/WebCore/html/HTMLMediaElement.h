@@ -377,8 +377,6 @@ public:
 
     virtual bool willRespondToMouseClickEvents() OVERRIDE;
 
-    virtual void reportMemoryUsage(MemoryObjectInfo*) const;
-
 protected:
     HTMLMediaElement(const QualifiedName&, Document*, bool);
     virtual ~HTMLMediaElement();
@@ -550,7 +548,11 @@ private:
     void updateActiveTextTrackCues(double);
     HTMLTrackElement* showingTrackWithSameKind(HTMLTrackElement*) const;
 
-    void markCaptionAndSubtitleTracksAsUnconfigured();
+    enum ReconfigureMode {
+        Immediately,
+        AfterDelay,
+    };
+    void markCaptionAndSubtitleTracksAsUnconfigured(ReconfigureMode);
     virtual void captionPreferencesChanged() OVERRIDE;
 #endif
 
@@ -720,6 +722,8 @@ private:
     bool m_tracksAreReady : 1;
     bool m_haveVisibleTextTrack : 1;
     bool m_processingPreferenceChange : 1;
+
+    String m_forcedOrAutomaticSubtitleTrackLanguage;
     float m_lastTextTrackUpdateTime;
 
     CaptionUserPreferences::CaptionDisplayMode m_captionDisplayMode;

@@ -30,9 +30,7 @@
 #include "PropertySetCSSStyleDeclaration.h"
 #include "StylePropertyShorthand.h"
 #include "StyleSheetContents.h"
-#include "WebCoreMemoryInstrumentation.h"
 #include <wtf/BitArray.h>
-#include <wtf/MemoryInstrumentationVector.h>
 #include <wtf/text/StringBuilder.h>
 
 #if ENABLE(CSS_VARIABLES)
@@ -679,14 +677,12 @@ bool MutableStylePropertySet::setProperty(CSSPropertyID propertyID, const String
 {
     // Setting the value to an empty string just removes the property in both IE and Gecko.
     // Setting it to null seems to produce less consistent results, but we treat it just the same.
-    if (value.isEmpty()) {
-        static_cast<MutableStylePropertySet*>(this)->removeProperty(propertyID);
-        return true;
-    }
+    if (value.isEmpty())
+        return removeProperty(propertyID);
 
     // When replacing an existing property value, this moves the property to the end of the list.
     // Firefox preserves the position, and MSIE moves the property to the beginning.
-    return CSSParser::parseValue(static_cast<MutableStylePropertySet*>(this), propertyID, value, important, cssParserMode(), contextStyleSheet);
+    return CSSParser::parseValue(this, propertyID, value, important, cssParserMode(), contextStyleSheet);
 }
 
 void MutableStylePropertySet::setProperty(CSSPropertyID propertyID, PassRefPtr<CSSValue> prpValue, bool important)
@@ -1245,18 +1241,6 @@ unsigned StylePropertySet::averageSizeInBytes()
 {
     // Please update this if the storage scheme changes so that this longer reflects the actual size.
     return sizeForImmutableStylePropertySetWithPropertyCount(4);
-}
-
-void StylePropertySet::reportMemoryUsage(MemoryObjectInfo* memoryObjectInfo) const
-{
-    size_t actualSize = m_isMutable ? sizeof(StylePropertySet) : sizeForImmutableStylePropertySetWithPropertyCount(m_arraySize);
-    MemoryClassInfo info(memoryObjectInfo, this, WebCoreMemoryTypes::CSS, actualSize);
-    if (m_isMutable)
-        info.addMember(static_cast<const MutableStylePropertySet*>(this)->m_propertyVector, "m_propertyVector");
-    else {
-        for (unsigned i = 0; i < propertyCount(); ++i)
-            info.addMember(propertyAt(i).value(), "value");
-    }
 }
 
 // See the function above if you need to update this.

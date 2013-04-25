@@ -168,7 +168,7 @@ my @features = (
       define => "ENABLE_BATTERY_STATUS", default => (isEfl() || isBlackBerry()), value => \$batteryStatusSupport },
 
     { option => "blob", desc => "Toggle Blob support",
-      define => "ENABLE_BLOB", default => (isAppleMacWebKit() || isGtk() || isChromium() || isBlackBerry() || isEfl()), value => \$blobSupport },
+      define => "ENABLE_BLOB", default => (isAppleMacWebKit() || isGtk() || isBlackBerry() || isEfl()), value => \$blobSupport },
 
     { option => "canvas-path", desc => "Toggle Canvas Path support",
       define => "ENABLE_CANVAS_PATH", default => 1, value => \$canvasPathSupport },
@@ -199,9 +199,6 @@ my @features = (
 
     { option => "css3-text-line-break", desc => "Toggle CSS3 Text Line Break support",
       define => "ENABLE_CSS3_TEXT_LINE_BREAK", default => 0, value => \$css3TextLineBreakSupport },
-
-    { option => "css4-images", desc => "Toggle CSS4 Images support",
-      define => "ENABLE_CSS4_IMAGES", default => 0, value => \$css4ImagesSupport },
 
     { option => "css-box-decoration-break", desc => "Toggle CSS box-decoration-break support",
       define => "ENABLE_CSS_BOX_DECORATION_BREAK", default => 1, value => \$cssBoxDecorationBreakSupport },
@@ -327,7 +324,7 @@ my @features = (
       define => "ENABLE_LEGACY_NOTIFICATIONS", default => isBlackBerry(), value => \$legacyNotificationsSupport },
 
     { option => "legacy-vendor-prefixes", desc => "Toggle Legacy Vendor Prefix support",
-      define => "ENABLE_LEGACY_VENDOR_PREFIXES", default => !isChromium(), value => \$legacyVendorPrefixSupport },
+      define => "ENABLE_LEGACY_VENDOR_PREFIXES", default => 1, value => \$legacyVendorPrefixSupport },
 
     { option => "legacy-web-audio", desc => "Toggle Legacy Web Audio support",
       define => "ENABLE_LEGACY_WEB_AUDIO", default => 1, value => \$legacyWebAudioSupport },
@@ -351,7 +348,7 @@ my @features = (
       define => "ENABLE_MEDIA_STATISTICS", default => 0, value => \$mediaStatisticsSupport },
 
     { option => "media-stream", desc => "Toggle Media Stream support",
-      define => "ENABLE_MEDIA_STREAM", default => (isChromium() || isBlackBerry()), value => \$mediaStreamSupport },
+      define => "ENABLE_MEDIA_STREAM", default => isBlackBerry(), value => \$mediaStreamSupport },
 
     { option => "meter-tag", desc => "Toggle Meter Tag support",
       define => "ENABLE_METER_ELEMENT", default => !isAppleWinWebKit(), value => \$meterTagSupport },
@@ -447,7 +444,7 @@ my @features = (
       define => "WTF_USE_TILED_BACKING_STORE", default => (isQt() || isEfl()), value => \$tiledBackingStoreSupport },
 
     { option => "threaded-html-parser", desc => "Toggle threaded HTML parser support",
-      define => "ENABLE_THREADED_HTML_PARSER", default => isChromium(), value => \$threadedHTMLParserSupport },
+      define => "ENABLE_THREADED_HTML_PARSER", default => 0, value => \$threadedHTMLParserSupport },
 
     { option => "touch-events", desc => "Toggle Touch Events support",
       define => "ENABLE_TOUCH_EVENTS", default => (isQt() || isBlackBerry() || isEfl()), value => \$touchEventsSupport },

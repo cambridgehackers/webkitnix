@@ -997,8 +997,11 @@ bool AbstractState::executeEffects(unsigned indexInBlock, Node* node)
         break;
             
     case RegExpExec:
-    case RegExpTest:
         forNode(node).makeTop();
+        break;
+
+    case RegExpTest:
+        forNode(node).set(SpecBoolean);
         break;
             
     case Jump:
@@ -1458,10 +1461,7 @@ bool AbstractState::executeEffects(unsigned indexInBlock, Node* node)
         }
         
         node->setCanExit(true); // Lies! We can do better.
-        if (!forNode(node->child1()).filterByValue(node->function())) {
-            m_isValid = false;
-            break;
-        }
+        forNode(node->child1()).filterByValue(node->function());
         break;
     }
         
@@ -1539,6 +1539,10 @@ bool AbstractState::executeEffects(unsigned indexInBlock, Node* node)
     case ForceOSRExit:
         node->setCanExit(true);
         m_isValid = false;
+        break;
+            
+    case CheckWatchdogTimer:
+        node->setCanExit(true);
         break;
             
     case Phantom:

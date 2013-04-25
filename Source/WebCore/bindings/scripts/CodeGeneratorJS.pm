@@ -95,7 +95,7 @@ sub GenerateInterface
     $codeGenerator->LinkOverloadedFunctions($interface);
 
     # Start actual generation
-    if ($interface->extendedAttributes->{"Callback"}) {
+    if ($interface->isCallback) {
         $object->GenerateCallbackHeader($interface);
         $object->GenerateCallbackImplementation($interface);
     } else {
@@ -1223,8 +1223,11 @@ sub GenerateAttributesHashTable($$)
         push(@hashKeys, $name);
 
         my @specials = ();
-        push(@specials, "DontDelete") unless $attribute->signature->extendedAttributes->{"Deletable"};
-        push(@specials, "DontEnum") if $attribute->signature->extendedAttributes->{"NotEnumerable"};
+        # As per Web IDL specification, constructor properties on the ECMAScript global object should be
+        # configurable and should not be enumerable.
+        my $is_domwindow_constructor = ($interface->name eq "DOMWindow" && $attribute->signature->type =~ /Constructor$/);
+        push(@specials, "DontDelete") unless ($attribute->signature->extendedAttributes->{"Deletable"} || $is_domwindow_constructor);
+        push(@specials, "DontEnum") if ($attribute->signature->extendedAttributes->{"NotEnumerable"} || $is_domwindow_constructor);
         push(@specials, "ReadOnly") if IsReadonly($attribute);
         my $special = (@specials > 0) ? join(" | ", @specials) : "0";
         push(@hashSpecials, $special);
@@ -1619,8 +1622,8 @@ sub GenerateImplementation
             my $functionName = GetFunctionName($className, $function);
             push(@hashValue1, $functionName);
 
-            my $numParameters = @{$function->parameters};
-            push(@hashValue2, $numParameters);
+            my ($numMandatoryParams, $parametersCheck) = GenerateFunctionParametersCheck($function);
+            push(@hashValue2, $numMandatoryParams);
 
             my @specials = ();
             push(@specials, "DontDelete") unless $function->signature->extendedAttributes->{"Deletable"};
@@ -1683,8 +1686,8 @@ sub GenerateImplementation
         my $functionName = GetFunctionName($className, $function);
         push(@hashValue1, $functionName);
 
-        my $numParameters = @{$function->parameters};
-        push(@hashValue2, $numParameters);
+        my ($numMandatoryParams, $parametersCheck) = GenerateFunctionParametersCheck($function);
+        push(@hashValue2, $numMandatoryParams);
 
         my @specials = ();
         push(@specials, "DontDelete") unless $function->signature->extendedAttributes->{"Deletable"};
@@ -4158,19 +4161,19 @@ sub GenerateConstructorHelperMethods
     my $generatingNamedConstructor = shift;
 
     my $constructorClassName = $generatingNamedConstructor ? "${className}NamedConstructor" : "${className}Constructor";
-    my $numberOfConstructorParameters = $interface->extendedAttributes->{"ConstructorParameters"};
-    if (!defined $numberOfConstructorParameters) {
-        if ($codeGenerator->IsConstructorTemplate($interface, "Event")) {
-            $numberOfConstructorParameters = 2;
+    my $leastNumMandatoryParams = $interface->extendedAttributes->{"ConstructorParameters"};
+    if (!defined $leastNumMandatoryParams) {
+        if ($codeGenerator->IsConstructorTemplate($interface, "Event") || $codeGenerator->IsConstructorTemplate($interface, "TypedArray")) {
+            $leastNumMandatoryParams = 1;
         } elsif ($interface->extendedAttributes->{"Constructor"}) {
             my @constructors = @{$interface->constructors};
-            $numberOfConstructorParameters = 255;
+            $leastNumMandatoryParams = 255;
             foreach my $constructor (@constructors) {
-                my $currNumberOfParameters = @{$constructor->parameters};
-                if ($currNumberOfParameters < $numberOfConstructorParameters) {
-                    $numberOfConstructorParameters = $currNumberOfParameters;
-                }
+                my ($numMandatoryParams, $parametersCheck) = GenerateFunctionParametersCheck($constructor);
+                $leastNumMandatoryParams = $numMandatoryParams if ($numMandatoryParams < $leastNumMandatoryParams);
             }
+        } else {
+            $leastNumMandatoryParams = 0;
         }
     }
 
@@ -4211,7 +4214,7 @@ sub GenerateConstructorHelperMethods
         push(@$outputArray, "    ASSERT(inherits(&s_info));\n");
         push(@$outputArray, "    putDirect(exec->vm(), exec->propertyNames().prototype, ${protoClassName}::self(exec, globalObject), DontDelete | ReadOnly);\n");
     }
-    push(@$outputArray, "    putDirect(exec->vm(), exec->propertyNames().length, jsNumber(${numberOfConstructorParameters}), ReadOnly | DontDelete | DontEnum);\n") if defined $numberOfConstructorParameters;
+    push(@$outputArray, "    putDirect(exec->vm(), exec->propertyNames().length, jsNumber(${leastNumMandatoryParams}), ReadOnly | DontDelete | DontEnum);\n") if defined $leastNumMandatoryParams;
     push(@$outputArray, "}\n\n");
 
     if (!$generatingNamedConstructor) {

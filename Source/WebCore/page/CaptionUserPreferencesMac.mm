@@ -625,21 +625,27 @@ int CaptionUserPreferencesMac::textTrackSelectionScore(TextTrack* track, HTMLMed
         return 0;
     if (!track->isMainProgramContent())
         return 0;
-    if (displayMode == ForcedOnly && !track->containsOnlyForcedSubtitles())
+
+    bool trackHasOnlyForcedSubtitles = track->containsOnlyForcedSubtitles();
+    if ((trackHasOnlyForcedSubtitles && displayMode != ForcedOnly)
+        || (!trackHasOnlyForcedSubtitles && displayMode == ForcedOnly))
         return 0;
 
     Vector<String> userPreferredCaptionLanguages = preferredLanguages();
 
-    if (displayMode == Automatic || track->containsOnlyForcedSubtitles()) {
+    if (displayMode == Automatic || trackHasOnlyForcedSubtitles) {
 
         if (!mediaElement || !mediaElement->player())
             return 0;
 
-        String audioTrackLanguage;
+        String textTrackLanguage = track->language();
+        if (textTrackLanguage.isEmpty())
+            return 0;
 
         Vector<String> languageList;
         languageList.reserveCapacity(1);
 
+        String audioTrackLanguage;
         if (testingMode())
             audioTrackLanguage = primaryAudioTrackLanguageOverride();
         else
@@ -648,20 +654,23 @@ int CaptionUserPreferencesMac::textTrackSelectionScore(TextTrack* track, HTMLMed
         if (audioTrackLanguage.isEmpty())
             return 0;
 
-        if (displayMode == Automatic) {
-            // Only enable a text track if the current audio track is not in the user's preferred language.
-            languageList.append(defaultLanguage());
-            size_t offset = indexOfBestMatchingLanguageInList(audioTrackLanguage, languageList);
+        if (trackHasOnlyForcedSubtitles) {
+            languageList.append(audioTrackLanguage);
+            size_t offset = indexOfBestMatchingLanguageInList(textTrackLanguage, languageList);
+
+            // Only consider a forced-only track if it IS in the same language as the primary audio track.
             if (offset)
                 return 0;
         } else {
-            // Only consider a forced-only track if it is in the same language as the primary audio track.
-            String trackLanguage = track->language();
-            if (trackLanguage.isEmpty())
+            languageList.append(defaultLanguage());
+
+            // Only enable a text track if the current audio track is NOT in the user's preferred language ...
+            size_t offset = indexOfBestMatchingLanguageInList(audioTrackLanguage, languageList);
+            if (!offset)
                 return 0;
 
-            languageList.append(audioTrackLanguage);
-            size_t offset = indexOfBestMatchingLanguageInList(trackLanguage, languageList);
+            // and the text track matches the user's preferred language.
+            offset = indexOfBestMatchingLanguageInList(textTrackLanguage, languageList);
             if (offset)
                 return 0;
         }

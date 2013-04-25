@@ -236,7 +236,6 @@ fast/forms/number/number-spinbutton-in-multi-column.html
 fast/forms/select/listbox-in-multi-column.html
 fast/inline/continuation-outlines-with-layers.html
 fast/invalid/residual-style.html
-fast/js/constructor-length.html
 
 # The black text is not overlapping with the red one
 fast/text/line-initial-and-final-swashes.html
@@ -360,9 +359,6 @@ webkit.org/b/89052 fast/css/image-orientation
 
 # Pre-HMTL5 parser quirks only apply to the mac port for now.
 fast/parser/pre-html5-parser-quirks.html [ WontFix ]
-
-# This port doesn't support v8 i18n extension.
-fast/js/i18n-bindings-locale.html [ WontFix ]
 
 # No CORS support for media elements is implemented yet.
 Bug(EFL) http/tests/security/video-cross-origin-readback.html [ Failure ]
@@ -641,18 +637,6 @@ webkit.org/b/110546 fast/parser/document-write-partial-entity-before-load.html [
 webkit.org/b/110546 fast/parser/document-write-fighting-eof.html [ Crash ]
 
 webkit.org/b/111521 editing/selection/selection-invalid-offset.html [ Crash Pass ]
-
-# ASSERTION FAILED: m_state.drawsContent && m_state.contentsVisible && !m_state.size.isEmpty().
-webkit.org/b/114731 compositing [ Crash Pass ]
-webkit.org/b/114731 css1/box_properties/acid_test.html [ Crash Pass ]
-webkit.org/b/114731 css1/cascade/cascade_order.html [ Crash Pass ]
-webkit.org/b/114731 ietestcenter/css3/grid/display-grid-001.htm [ Crash Pass ]
-webkit.org/b/114731 fast/canvas/webgl [ Crash Pass ]
-webkit.org/b/114731 http/tests/canvas/webgl [ Crash Pass ]
-webkit.org/b/114731 http/tests/inspector/styles/xsl-transformed.xml [ Crash Pass ]
-webkit.org/b/114731 media/track/track-text-track-cue-list.html [ Crash Pass ]
-webkit.org/b/114731 media/video-display-toggle.html [ Crash Pass ]
-webkit.org/b/114731 webgl [ Crash Pass ]
 
 #////////////////////////////////////////////////////////////////////////////////////////
 # FLAKY TESTS
@@ -1459,10 +1443,6 @@ webkit.org/b/50485 inspector/profiler/heap-snapshot-summary-sorting.html [ Skip 
 webkit.org/b/50485 inspector/profiler/heap-snapshot-summary-sorting-instances.html [ Skip ]
 webkit.org/b/50485 inspector-protocol/heap-profiler [ Skip ]
 
-webkit.org/b/113787 inspector/profiler/memory-instrumentation-external-array.html [ Skip ]
-
-webkit.org/b/113787 inspector/profiler/memory-instrumentation-external-string.html [ Skip ]
-
 # ENABLE(INPUT_MULTIPLE_FIELDS_UI) is disabled
 fast/forms/date-multiple-fields
 fast/forms/datetime-multiple-fields
@@ -1541,8 +1521,6 @@ webkit.org/b/100324 css3/supports-dom-api.html
 # fast/selectors/unqualified-hover-quirks.html or itself.
 webkit.org/b/10890 fast/selectors/unqualified-hover-strict.html [ Failure Pass ]
 
-# New inspector/profiler/memory-instrumentation-canvas.html fails on JSC platforms
-webkit.org/b/99001 inspector/profiler/memory-instrumentation-canvas.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-has-uninstrumented-canvases.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-stack-trace.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-replay-log-grid.html
@@ -1873,3 +1851,4 @@ webkit.org/b/114876 media/click-volume-bar-not-pausing.html [ Failure ]
 webkit.org/b/114877 accessibility/link-inside-button-accessible-text.html [ Failure ]
 
 webkit.org/b/114612 editing/style/block-style-005.html [ Failure ]
+

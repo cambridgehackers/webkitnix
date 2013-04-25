@@ -1312,12 +1312,6 @@ inspector/profiler/heap-snapshot-summary-sorting.html
 inspector/profiler/heap-snapshot-summary-sorting-instances.html
 webkit.org/b/50485 inspector-protocol/heap-profiler [ Skip ]
 
-webkit.org/b/113787 inspector/profiler/memory-instrumentation-external-array.html [ Skip ]
-
-webkit.org/b/113787 inspector/profiler/memory-instrumentation-external-string.html [ Skip ]
-
-# New inspector/profiler/memory-instrumentation-canvas.html fails on JSC platforms
-webkit.org/b/99001 inspector/profiler/memory-instrumentation-canvas.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-has-uninstrumented-canvases.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-stack-trace.html
 webkit.org/b/73936 inspector/profiler/canvas2d/canvas-replay-log-grid.html
@@ -1404,9 +1398,6 @@ http/tests/loading/cross-origin-XHR-willLoadRequest.html
 
 # Uses showModalDialog (https://bugs.webkit.org/show_bug.cgi?id=53675)
 fast/animation/request-animation-frame-during-modal.html
-
-# This port doesn't support v8 i18n extension.
-fast/js/i18n-bindings-locale.html
 
 # https://bugs.webkit.org/show_bug.cgi?id=55921
 # Windows port doesn't support HTML in pastes.
@@ -2264,7 +2255,6 @@ http/tests/inspector/resource-tree/resource-request-content-while-loading.html
 http/tests/inspector/search/resources-search-match-index.html
 http/tests/inspector/network/network-initiator-from-console.html
 inspector/profiler/heap-snapshot.html
-inspector/profiler/memory-instrumentation-cached-images.html
 inspector/styles/media-queries.html
 inspector/styles/region-style-crash.html
 
@@ -2339,7 +2329,6 @@ proximity/create-event-deviceproximity.html
 fast/events/constructors/device-proximity-event-constructor.html
 fast/forms/state-restore-broken-state.html
 fast/html/progress-user-modify.html
-fast/js/global-constructors.html
 fast/multicol/shrink-to-column-height-for-pagination.html
 inspector/device-orientation-success.html
 inspector/geolocation-error.html
@@ -2439,6 +2428,9 @@ css3/flexbox/flexbox-baseline-margins.html
 css3/supports.html
 css3/supports-cssom.html
 css3/supports-dom-api.html
+
+# MHTML is not yet enabled
+mhtml [ Skip ]
 
 # https://bugs.webkit.org/show_bug.cgi?id=98169
 http/tests/inspector/stacktraces

@@ -144,6 +144,7 @@ public:
     virtual IntSize contentsSize() const = 0;
     virtual IntSize overhangAmount() const { return IntSize(); }
     virtual IntPoint lastKnownMousePosition() const { return IntPoint(); }
+    virtual bool isHandlingWheelEvent() const { return false; }
 
     virtual int headerHeight() const { return 0; }
     virtual int footerHeight() const { return 0; }
@@ -183,8 +184,6 @@ public:
     virtual TiledBacking* tiledBacking() { return 0; }
     virtual bool usesCompositedScrolling() const { return false; }
 #endif
-
-    virtual void reportMemoryUsage(MemoryObjectInfo*) const;
 
 protected:
     ScrollableArea();

@@ -44,6 +44,7 @@
 #include "HTMLElement.h"
 #include "HTMLNames.h"
 #include "HitTestResult.h"
+#include "LogicalSelectionOffsetCaches.h"
 #include "Page.h"
 #include "RenderArena.h"
 #include "RenderCounter.h"
@@ -72,7 +73,6 @@
 #include "Settings.h"
 #include "StyleResolver.h"
 #include "TransformState.h"
-#include "WebCoreMemoryInstrumentation.h"
 #include "htmlediting.h"
 #include <algorithm>
 #include <stdio.h>
@@ -768,48 +768,18 @@ void RenderObject::setLayerNeedsFullRepaintForPositionedMovementLayout()
     toRenderLayerModelObject(this)->layer()->setRepaintStatus(NeedsFullRepaintForPositionedMovementLayout);
 }
 
-static inline bool isContainingBlockCandidateForAbsolutelyPositionedObject(RenderObject* object)
-{
-    return object->style()->position() != StaticPosition
-        || (object->hasTransform() && object->isRenderBlock())
-#if ENABLE(SVG)
-        || object->isSVGForeignObject()
-#endif
-        || object->isRenderView();
-}
-
-static inline bool isNonRenderBlockInline(RenderObject* object)
-{
-    return (object->isInline() && !object->isReplaced()) || !object->isRenderBlock();
-}
-
 RenderBlock* RenderObject::containingBlock() const
 {
     RenderObject* o = parent();
     if (!o && isRenderScrollbarPart())
         o = toRenderScrollbarPart(this)->rendererOwningScrollbar();
 
-    if (!isText() && m_style->position() == FixedPosition) {
-        while (o && !o->canContainFixedPositionObjects())
-            o = o->parent();
-        ASSERT(!o || !o->isAnonymousBlock());
-    } else if (!isText() && m_style->position() == AbsolutePosition) {
-        while (o && !isContainingBlockCandidateForAbsolutelyPositionedObject(o))
-            o = o->parent();
-
-        // For a relatively positioned inline, return its nearest non-anonymous containing block,
-        // not the inline itself, to avoid having a positioned objects list in all RenderInlines
-        // and use RenderBlock* as this function's return type.
-        // Use RenderBlock::container() to obtain the inline.
-        if (o && o->isRenderInline())
-            o = o->containingBlock();
-
-        while (o && o->isAnonymousBlock())
-            o = o->containingBlock();
-    } else {
-        while (o && isNonRenderBlockInline(o))
-            o = o->parent();
-    }
+    if (!isText() && m_style->position() == FixedPosition)
+        o = containingBlockForFixedPosition(o);
+    else if (!isText() && m_style->position() == AbsolutePosition)
+        o = containingBlockForAbsolutePosition(o);
+    else
+        o = containingBlockForObjectInFlow(o);
 
     if (!o || !o->isRenderBlock())
         return 0; // This can still happen in case of an orphaned tree
@@ -3138,18 +3108,6 @@ bool RenderObject::canHaveGeneratedChildren() const
 bool RenderObject::canBeReplacedWithInlineRunIn() const
 {
     return true;
-}
-
-void RenderObject::reportMemoryUsage(MemoryObjectInfo* memoryObjectInfo) const
-{
-    MemoryClassInfo info(memoryObjectInfo, this, PlatformMemoryTypes::Rendering);
-    info.addMember(m_style, "style");
-    info.addWeakPointer(m_node);
-    info.addWeakPointer(m_parent);
-    info.addWeakPointer(m_previous);
-    info.addWeakPointer(m_next);
-
-    info.setCustomAllocation(true);
 }
 
 #if ENABLE(SVG)

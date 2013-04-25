@@ -803,6 +803,10 @@ webcore_built_sources += \
 	DerivedSources/WebCore/JSWebGLContextAttributes.h \
 	DerivedSources/WebCore/JSWebGLContextEvent.cpp \
 	DerivedSources/WebCore/JSWebGLContextEvent.h \
+	DerivedSources/WebCore/JSWebGLDebugRendererInfo.cpp \
+	DerivedSources/WebCore/JSWebGLDebugRendererInfo.h \
+	DerivedSources/WebCore/JSWebGLDebugShaders.cpp \
+	DerivedSources/WebCore/JSWebGLDebugShaders.h \
 	DerivedSources/WebCore/JSWebGLDepthTexture.cpp \
 	DerivedSources/WebCore/JSWebGLDepthTexture.h \
 	DerivedSources/WebCore/JSWebGLFramebuffer.cpp \
@@ -1581,6 +1585,8 @@ dom_binding_idls += \
 	$(WebCore)/html/canvas/WebGLCompressedTextureS3TC.idl \
 	$(WebCore)/html/canvas/WebGLContextAttributes.idl \
 	$(WebCore)/html/canvas/WebGLContextEvent.idl \
+	$(WebCore)/html/canvas/WebGLDebugRendererInfo.idl \
+	$(WebCore)/html/canvas/WebGLDebugShaders.idl \
 	$(WebCore)/html/canvas/WebGLDepthTexture.idl \
 	$(WebCore)/html/canvas/WebGLFramebuffer.idl \
 	$(WebCore)/html/canvas/WebGLLoseContext.idl \
@@ -3113,8 +3119,6 @@ webcore_sources += \
 	Source/WebCore/dom/ViewportArguments.h \
 	Source/WebCore/dom/VisitedLinkState.cpp \
 	Source/WebCore/dom/VisitedLinkState.h \
-	Source/WebCore/dom/WebCoreMemoryInstrumentation.cpp \
-	Source/WebCore/dom/WebCoreMemoryInstrumentation.h \
 	Source/WebCore/dom/WebKitAnimationEvent.cpp \
 	Source/WebCore/dom/WebKitAnimationEvent.h \
 	Source/WebCore/dom/WebKitNamedFlow.cpp \
@@ -3869,8 +3873,6 @@ webcore_sources += \
 	Source/WebCore/inspector/DOMEditor.h \
 	Source/WebCore/inspector/DOMPatchSupport.cpp \
 	Source/WebCore/inspector/DOMPatchSupport.h \
-	Source/WebCore/inspector/HeapGraphSerializer.cpp \
-	Source/WebCore/inspector/HeapGraphSerializer.h \
 	Source/WebCore/inspector/IdentifiersFactory.cpp \
 	Source/WebCore/inspector/IdentifiersFactory.h \
 	Source/WebCore/inspector/InjectedScript.cpp \
@@ -3966,8 +3968,6 @@ webcore_sources += \
 	Source/WebCore/inspector/InspectorWorkerResource.h \
 	Source/WebCore/inspector/InstrumentingAgents.cpp \
 	Source/WebCore/inspector/InstrumentingAgents.h \
-	Source/WebCore/inspector/MemoryInstrumentationImpl.cpp \
-	Source/WebCore/inspector/MemoryInstrumentationImpl.h \
 	Source/WebCore/inspector/NetworkResourcesData.cpp \
 	Source/WebCore/inspector/NetworkResourcesData.h \
 	Source/WebCore/inspector/PageConsoleAgent.cpp \
@@ -4152,7 +4152,6 @@ webcore_sources += \
 	Source/WebCore/loader/SubframeLoader.h \
 	Source/WebCore/loader/SubresourceLoader.cpp \
 	Source/WebCore/loader/SubresourceLoader.h \
-	Source/WebCore/loader/SubstituteData.cpp \
 	Source/WebCore/loader/SubstituteData.h \
 	Source/WebCore/loader/SubstituteResource.h \
 	Source/WebCore/loader/TextResourceDecoder.cpp \
@@ -4447,6 +4446,7 @@ webcore_sources += \
 	Source/WebCore/rendering/InlineTextBox.h \
 	Source/WebCore/rendering/LayoutState.cpp \
 	Source/WebCore/rendering/LayoutState.h \
+	Source/WebCore/rendering/LogicalSelectionOffsetCaches.h \
 	Source/WebCore/rendering/LayoutRepainter.h \
 	Source/WebCore/rendering/LayoutRepainter.cpp \
 	Source/WebCore/rendering/OverlapTestRequestClient.h \
@@ -5461,9 +5461,6 @@ webcore_platform_sources += \
 	Source/WebCore/platform/audio/gstreamer/AudioDestinationGStreamer.cpp \
 	Source/WebCore/platform/audio/gstreamer/AudioDestinationGStreamer.h \
 	Source/WebCore/platform/audio/gstreamer/AudioFileReaderGStreamer.cpp \
-	Source/WebCore/platform/audio/gstreamer/FFTFrameGStreamer.cpp \
-	Source/WebCore/platform/audio/gstreamer/WebKitWebAudioSourceGStreamer.cpp \
-	Source/WebCore/platform/audio/gstreamer/WebKitWebAudioSourceGStreamer.h \
 	Source/WebCore/platform/Arena.cpp \
 	Source/WebCore/platform/Arena.h \
 	Source/WebCore/platform/AsyncFileSystem.cpp \
@@ -5519,8 +5516,6 @@ webcore_platform_sources += \
 	Source/WebCore/platform/LayoutUnit.h \
 	Source/WebCore/platform/Gamepads.h \
 	Source/WebCore/platform/HashTools.h \
-	Source/WebCore/platform/HistogramSupport.cpp \
-	Source/WebCore/platform/HistogramSupport.h \
 	Source/WebCore/platform/InitializeLogging.h \
 	Source/WebCore/platform/graphics/ANGLEWebKitBridge.cpp \
 	Source/WebCore/platform/graphics/ANGLEWebKitBridge.h \
@@ -5544,8 +5539,6 @@ webcore_platform_sources += \
 	Source/WebCore/platform/graphics/Extensions3D.h \
 	Source/WebCore/platform/graphics/NativeImagePtr.h \
 	Source/WebCore/platform/graphics/cairo/BitmapImageCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/CairoUtilities.cpp \
-	Source/WebCore/platform/graphics/cairo/CairoUtilities.h \
 	Source/WebCore/platform/graphics/cairo/FloatRectCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/FontCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/FontCustomPlatformData.h \
@@ -5553,18 +5546,10 @@ webcore_platform_sources += \
 	Source/WebCore/platform/graphics/cairo/ImageBufferCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/ImageBufferDataCairo.h \
 	Source/WebCore/platform/graphics/cairo/ImageCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/IntRectCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/OwnPtrCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/OwnPtrCairo.h \
 	Source/WebCore/platform/graphics/cairo/PathCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/PatternCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/PlatformContextCairo.cpp \
 	Source/WebCore/platform/graphics/cairo/PlatformContextCairo.h \
-	Source/WebCore/platform/graphics/cairo/PlatformPathCairo.h \
-	Source/WebCore/platform/graphics/cairo/PlatformPathCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/RefPtrCairo.cpp \
-	Source/WebCore/platform/graphics/cairo/RefPtrCairo.h \
-	Source/WebCore/platform/graphics/cairo/TransformationMatrixCairo.cpp \
 	Source/WebCore/platform/graphics/filters/CustomFilterArrayParameter.h \
 	Source/WebCore/platform/graphics/filters/CustomFilterColorParameter.h \
 	Source/WebCore/platform/graphics/filters/CustomFilterConstants.h \
@@ -5829,46 +5814,10 @@ webcore_platform_sources += \
 	Source/WebCore/platform/Length.cpp \
 	Source/WebCore/platform/Length.h \
 	Source/WebCore/platform/LengthSize.h \
-	Source/WebCore/platform/leveldb/LevelDBComparator.h \
-	Source/WebCore/platform/leveldb/LevelDBDatabase.cpp \
-	Source/WebCore/platform/leveldb/LevelDBDatabase.h \
-	Source/WebCore/platform/leveldb/LevelDBIterator.h \
-	Source/WebCore/platform/leveldb/LevelDBSlice.h \
-	Source/WebCore/platform/leveldb/LevelDBTransaction.h \
-	Source/WebCore/platform/leveldb/LevelDBTransaction.cpp \
-	Source/WebCore/platform/leveldb/LevelDBWriteBatch.h \
-	Source/WebCore/platform/leveldb/LevelDBWriteBatch.cpp \
-	Source/WebCore/platform/LinkHash.cpp \
-	Source/WebCore/platform/LinkHash.h \
 	Source/WebCore/platform/LocalizedStrings.h \
-	Source/WebCore/platform/Logging.cpp \
-	Source/WebCore/platform/Logging.h \
 	Source/WebCore/platform/MainThreadTask.h \
 	Source/WebCore/platform/MIMETypeRegistry.cpp \
 	Source/WebCore/platform/MIMETypeRegistry.h \
-	Source/WebCore/platform/MemoryPressureHandler.cpp \
-	Source/WebCore/platform/MemoryPressureHandler.h \
-	Source/WebCore/platform/MemoryUsageSupport.cpp \
-	Source/WebCore/platform/MemoryUsageSupport.h \
-	Source/WebCore/platform/image-decoders/bmp/BMPImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/bmp/BMPImageDecoder.h \
-	Source/WebCore/platform/image-decoders/bmp/BMPImageReader.cpp \
-	Source/WebCore/platform/image-decoders/bmp/BMPImageReader.h \
-	Source/WebCore/platform/image-decoders/cairo/ImageDecoderCairo.cpp \
-	Source/WebCore/platform/image-decoders/gif/GIFImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/gif/GIFImageDecoder.h \
-	Source/WebCore/platform/image-decoders/gif/GIFImageReader.cpp \
-	Source/WebCore/platform/image-decoders/gif/GIFImageReader.h \
-	Source/WebCore/platform/image-decoders/ico/ICOImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/ico/ICOImageDecoder.h \
-	Source/WebCore/platform/image-decoders/ImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/ImageDecoder.h \
-	Source/WebCore/platform/image-decoders/jpeg/JPEGImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/jpeg/JPEGImageDecoder.h \
-	Source/WebCore/platform/image-decoders/png/PNGImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/png/PNGImageDecoder.h \
-	Source/WebCore/platform/image-decoders/webp/WEBPImageDecoder.cpp \
-	Source/WebCore/platform/image-decoders/webp/WEBPImageDecoder.h \
 	Source/WebCore/platform/linux/GamepadDeviceLinux.cpp \
 	Source/WebCore/platform/linux/GamepadDeviceLinux.h \
 	Source/WebCore/platform/mediastream/MediaConstraints.h \
@@ -5975,8 +5924,6 @@ webcore_platform_sources += \
 	Source/WebCore/platform/network/soup/CookieStorageSoup.cpp \
 	Source/WebCore/platform/network/soup/CredentialStorageSoup.cpp \
 	Source/WebCore/platform/network/soup/DNSSoup.cpp \
-	Source/WebCore/platform/network/soup/GOwnPtrSoup.cpp \
-	Source/WebCore/platform/network/soup/GOwnPtrSoup.h \
 	Source/WebCore/platform/network/soup/NetworkStorageSessionSoup.cpp \
 	Source/WebCore/platform/network/soup/ProxyServerSoup.cpp \
 	Source/WebCore/platform/network/soup/ResourceError.h \
@@ -5989,18 +5936,12 @@ webcore_platform_sources += \
 	Source/WebCore/platform/network/soup/SocketStreamError.h \
 	Source/WebCore/platform/network/soup/SocketStreamHandle.h \
 	Source/WebCore/platform/network/soup/SocketStreamHandleSoup.cpp \
-	Source/WebCore/platform/network/soup/SoupURIUtils.cpp \
-	Source/WebCore/platform/network/soup/SoupURIUtils.h \
-	Source/WebCore/platform/NotImplemented.cpp \
-	Source/WebCore/platform/NotImplemented.h \
 	Source/WebCore/platform/Pasteboard.h \
 	Source/WebCore/platform/PasteboardStrategy.h \
 	Source/WebCore/platform/PlatformEvent.cpp \
 	Source/WebCore/platform/PlatformEvent.h \
 	Source/WebCore/platform/PlatformExportMacros.h \
 	Source/WebCore/platform/PlatformKeyboardEvent.h \
-	Source/WebCore/platform/PlatformMemoryInstrumentation.cpp \
-	Source/WebCore/platform/PlatformMemoryInstrumentation.h \
 	Source/WebCore/platform/PlatformMenuDescription.h \
 	Source/WebCore/platform/PlatformMouseEvent.h \
 	Source/WebCore/platform/PlatformPasteboard.h \
@@ -6022,10 +5963,6 @@ webcore_platform_sources += \
 	Source/WebCore/platform/PurgePriority.h \
 	Source/WebCore/platform/RefCountedSupplement.h \
 	Source/WebCore/platform/ReferrerPolicy.h \
-	Source/WebCore/platform/RunLoop.cpp \
-	Source/WebCore/platform/RunLoop.h \
-	Source/WebCore/platform/RuntimeApplicationChecks.cpp \
-	Source/WebCore/platform/RuntimeApplicationChecks.h \
 	Source/WebCore/platform/SchemeRegistry.cpp \
 	Source/WebCore/platform/SchemeRegistry.h \
 	Source/WebCore/platform/ScrollAnimator.cpp \
@@ -6140,12 +6077,75 @@ webcore_platform_sources += \
 	Source/WebCore/platform/Timer.cpp \
 	Source/WebCore/platform/Timer.h \
 	Source/WebCore/platform/TreeShared.h \
-	Source/WebCore/platform/UUID.cpp \
-	Source/WebCore/platform/UUID.h \
 	Source/WebCore/platform/VisitedLinkStrategy.h \
 	Source/WebCore/platform/Widget.cpp \
 	Source/WebCore/platform/Widget.h \
 	Source/WebCore/platform/WindowsKeyboardCodes.h
+
+platform_sources += \
+	Source/WebCore/platform/audio/gstreamer/FFTFrameGStreamer.cpp \
+	Source/WebCore/platform/audio/gstreamer/WebKitWebAudioSourceGStreamer.cpp \
+	Source/WebCore/platform/audio/gstreamer/WebKitWebAudioSourceGStreamer.h \
+	Source/WebCore/platform/graphics/cairo/CairoUtilities.cpp \
+	Source/WebCore/platform/graphics/cairo/CairoUtilities.h \
+	Source/WebCore/platform/graphics/cairo/IntRectCairo.cpp \
+	Source/WebCore/platform/graphics/cairo/OwnPtrCairo.cpp \
+	Source/WebCore/platform/graphics/cairo/OwnPtrCairo.h \
+	Source/WebCore/platform/graphics/cairo/PlatformPathCairo.h \
+	Source/WebCore/platform/graphics/cairo/PlatformPathCairo.cpp \
+	Source/WebCore/platform/graphics/cairo/RefPtrCairo.cpp \
+	Source/WebCore/platform/graphics/cairo/RefPtrCairo.h \
+	Source/WebCore/platform/graphics/cairo/TransformationMatrixCairo.cpp \
+	Source/WebCore/platform/image-decoders/bmp/BMPImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/bmp/BMPImageDecoder.h \
+	Source/WebCore/platform/image-decoders/bmp/BMPImageReader.cpp \
+	Source/WebCore/platform/image-decoders/bmp/BMPImageReader.h \
+	Source/WebCore/platform/image-decoders/cairo/ImageDecoderCairo.cpp \
+	Source/WebCore/platform/image-decoders/gif/GIFImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/gif/GIFImageDecoder.h \
+	Source/WebCore/platform/image-decoders/gif/GIFImageReader.cpp \
+	Source/WebCore/platform/image-decoders/gif/GIFImageReader.h \
+	Source/WebCore/platform/image-decoders/ico/ICOImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/ico/ICOImageDecoder.h \
+	Source/WebCore/platform/image-decoders/ImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/ImageDecoder.h \
+	Source/WebCore/platform/image-decoders/jpeg/JPEGImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/jpeg/JPEGImageDecoder.h \
+	Source/WebCore/platform/image-decoders/png/PNGImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/png/PNGImageDecoder.h \
+	Source/WebCore/platform/image-decoders/webp/WEBPImageDecoder.cpp \
+	Source/WebCore/platform/image-decoders/webp/WEBPImageDecoder.h \
+	Source/WebCore/platform/leveldb/LevelDBComparator.h \
+	Source/WebCore/platform/leveldb/LevelDBDatabase.cpp \
+	Source/WebCore/platform/leveldb/LevelDBDatabase.h \
+	Source/WebCore/platform/leveldb/LevelDBIterator.h \
+	Source/WebCore/platform/leveldb/LevelDBSlice.h \
+	Source/WebCore/platform/leveldb/LevelDBTransaction.h \
+	Source/WebCore/platform/leveldb/LevelDBTransaction.cpp \
+	Source/WebCore/platform/leveldb/LevelDBWriteBatch.h \
+	Source/WebCore/platform/leveldb/LevelDBWriteBatch.cpp \
+	Source/WebCore/platform/network/soup/GOwnPtrSoup.cpp \
+	Source/WebCore/platform/network/soup/GOwnPtrSoup.h \
+	Source/WebCore/platform/network/soup/SoupURIUtils.cpp \
+	Source/WebCore/platform/network/soup/SoupURIUtils.h \
+	Source/WebCore/platform/HistogramSupport.cpp \
+	Source/WebCore/platform/HistogramSupport.h \
+	Source/WebCore/platform/LinkHash.cpp \
+	Source/WebCore/platform/LinkHash.h \
+	Source/WebCore/platform/Logging.cpp \
+	Source/WebCore/platform/Logging.h \
+	Source/WebCore/platform/MemoryPressureHandler.cpp \
+	Source/WebCore/platform/MemoryPressureHandler.h \
+	Source/WebCore/platform/MemoryUsageSupport.cpp \
+	Source/WebCore/platform/MemoryUsageSupport.h \
+	Source/WebCore/platform/NotImplemented.cpp \
+	Source/WebCore/platform/NotImplemented.h \
+	Source/WebCore/platform/RunLoop.cpp \
+	Source/WebCore/platform/RunLoop.h \
+	Source/WebCore/platform/RuntimeApplicationChecks.cpp \
+	Source/WebCore/platform/RuntimeApplicationChecks.h \
+	Source/WebCore/platform/UUID.cpp \
+	Source/WebCore/platform/UUID.h
 
 # WebCore files that use GTK/GDK or any other dependency that requires GTK+.
 webcoregtk_sources += \

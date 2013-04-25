@@ -94,10 +94,8 @@ my $qmakebin = "qmake"; # Allow override of the qmake binary from $PATH
 my $isGtk;
 my $isWinCE;
 my $isWinCairo;
-my $isWx;
 my $isEfl;
 my $isNix;
-my @wxArgs;
 my $isBlackBerry;
 my $isChromium;
 my $isChromiumAndroid;
@@ -399,7 +397,6 @@ sub argumentsForConfiguration()
     push(@args, '--nix') if isNix();
     push(@args, '--wincairo') if isWinCairo();
     push(@args, '--wince') if isWinCE();
-    push(@args, '--wx') if isWx();
     push(@args, '--blackberry') if isBlackBerry();
     push(@args, '--chromium') if isChromium() && !isChromiumAndroid();
     push(@args, '--chromium-android') if isChromiumAndroid();
@@ -453,7 +450,7 @@ sub determineConfigurationProductDir
     return if defined $configurationProductDir;
     determineBaseProductDir();
     determineConfiguration();
-    if (isAppleWinWebKit() && !isWx()) {
+    if (isAppleWinWebKit()) {
         $configurationProductDir = File::Spec->catdir($baseProductDir, configurationForVisualStudio(), "bin");
     } else {
         if (usesPerConfigurationBuildDirectory()) {
@@ -646,7 +643,7 @@ sub determinePassedArchitecture
         my $opt = $ARGV[$i];
         if ($opt =~ /^--32-bit$/i) {
             splice(@ARGV, $i, 1);
-            if (isAppleMacWebKit() || isWx()) {
+            if (isAppleMacWebKit()) {
                 $passedArchitecture = `arch`;
                 chomp $passedArchitecture;
             }
@@ -685,6 +682,11 @@ sub setArchitecture
     $architecture = $passedArchitecture if $passedArchitecture;
 }
 
+sub skipSafariExecutableEntitlementChecks
+{
+    return `defaults read /Library/Preferences/org.webkit.BuildConfiguration SkipSafariExecutableEntitlementChecks 2>/dev/null` eq "1\n";
+}
+
 sub executableHasEntitlements
 {
     my $executablePath = shift;
@@ -697,8 +699,11 @@ sub safariPathFromSafariBundle
 
     if (isAppleMacWebKit()) {
         my $safariPath = "$safariBundle/Contents/MacOS/Safari";
+        return $safariPath if skipSafariExecutableEntitlementChecks();
+
         my $safariForWebKitDevelopmentPath = "$safariBundle/Contents/MacOS/SafariForWebKitDevelopment";
         return $safariForWebKitDevelopmentPath if -f $safariForWebKitDevelopmentPath && executableHasEntitlements($safariPath);
+
         return $safariPath;
     }
     return $safariBundle if isAppleWinWebKit();
@@ -802,9 +807,6 @@ sub builtDylibPathForName
         }
 
         return $result;
-    }
-    if (isWx()) {
-        return "$configurationProductDir/libwxwebkit.dylib";
     }
     if (isGtk()) {
         # WebKitGTK+ for GTK2, WebKitGTK+ for GTK3, and WebKit2 respectively.
@@ -969,8 +971,8 @@ sub determineIsQt()
         return;
     }
 
-    # The presence of QTDIR only means Qt if --gtk or --wx or --efl or --blackberry or --chromium or --wincairo are not on the command-line
-    if (isGtk() || isWx() || isEfl() || isBlackBerry() || isChromium() || isWinCairo() || isNix()) {
+    if (isGtk() || isEfl() || isBlackBerry() || isChromium() || isWinCairo() || isNix()) {
+    # The presence of QTDIR only means Qt if --gtk or --efl or --blackberry or --chromium or --wincairo are not on the command-line
         $isQt = 0;
         return;
     }
@@ -1154,35 +1156,6 @@ sub determineIsWinCE()
 {
     return if defined($isWinCE);
     $isWinCE = checkForArgumentAndRemoveFromARGV("--wince");
-}
-
-sub isWx()
-{
-    determineIsWx();
-    return $isWx;
-}
-
-sub determineIsWx()
-{
-    return if defined($isWx);
-    $isWx = checkForArgumentAndRemoveFromARGV("--wx");
-}
-
-sub getWxArgs()
-{
-    if (!@wxArgs) {
-        @wxArgs = ("");
-        my $rawWxArgs = "";
-        foreach my $opt (@ARGV) {
-            if ($opt =~ /^--wx-args/i ) {
-                @ARGV = grep(!/^--wx-args/i, @ARGV);
-                $rawWxArgs = $opt;
-                $rawWxArgs =~ s/--wx-args=//i;
-            }
-        }
-        @wxArgs = split(/,/, $rawWxArgs);
-    }
-    return @wxArgs;
 }
 
 # Determine if this is debian, ubuntu, linspire, or something similar.
@@ -1394,7 +1367,7 @@ sub isCrossCompilation()
 
 sub isAppleWebKit()
 {
-    return !(isQt() or isGtk() or isWx() or isChromium() or isEfl() or isWinCE() or isBlackBerry() or isNix());
+    return !(isQt() or isGtk() or isChromium() or isEfl() or isWinCE() or isBlackBerry() or isNix());
 }
 
 sub isAppleMacWebKit()
@@ -1569,7 +1542,7 @@ sub relativeScriptsDir()
 sub launcherPath()
 {
     my $relativeScriptsPath = relativeScriptsDir();
-    if (isGtk() || isQt() || isWx() || isEfl() || isWinCE() || isNix()) {
+    if (isGtk() || isQt() || isEfl() || isWinCE() || isNix()) {
         return "$relativeScriptsPath/run-launcher";
     } elsif (isAppleWebKit()) {
         return "$relativeScriptsPath/run-safari";
@@ -1582,8 +1555,6 @@ sub launcherName()
         return "GtkLauncher";
     } elsif (isQt()) {
         return "QtTestBrowser";
-    } elsif (isWx()) {
-        return "wxBrowser";
     } elsif (isAppleWebKit()) {
         return "Safari";
     } elsif (isEfl()) {
@@ -1618,7 +1589,7 @@ sub checkRequiredSystemConfig
             print "http://developer.apple.com/tools/xcode\n";
             print "*************************************************************\n";
         }
-    } elsif (isGtk() or isQt() or isWx() or isEfl() or isNix()) {
+    } elsif (isGtk() or isQt() or isEfl() or isNix()) {
         my @cmds = qw(bison gperf);
         if (isQt() and isWindows()) {
             push @cmds, "win_flex";
@@ -1907,50 +1878,6 @@ sub buildVisualStudioProject
     return system @command;
 }
 
-sub downloadWafIfNeeded
-{
-    # get / update waf if needed
-    my $waf = "$sourceDir/Tools/waf/waf";
-    my $wafURL = 'http://wxwebkit.kosoftworks.com/downloads/deps/waf';
-    if (!-f $waf) {
-        my $result = system "curl -o $waf $wafURL";
-        chmod 0755, $waf;
-    }
-}
-
-sub buildWafProject
-{
-    my ($project, $shouldClean, @options) = @_;
-    
-    # set the PYTHONPATH for waf
-    my $pythonPath = $ENV{'PYTHONPATH'};
-    if (!defined($pythonPath)) {
-        $pythonPath = '';
-    }
-    my $sourceDir = sourceDir();
-    my $newPythonPath = "$sourceDir/Tools/waf/build:$pythonPath";
-    if (isCygwin()) {
-        $newPythonPath = `cygpath --mixed --path $newPythonPath`;
-    }
-    $ENV{'PYTHONPATH'} = $newPythonPath;
-    
-    print "Building $project\n";
-
-    my $wafCommand = "$sourceDir/Tools/waf/waf";
-    if ($ENV{'WXWEBKIT_WAF'}) {
-        $wafCommand = $ENV{'WXWEBKIT_WAF'};
-    }
-    if (isCygwin()) {
-        $wafCommand = `cygpath --windows "$wafCommand"`;
-        chomp($wafCommand);
-    }
-    if ($shouldClean) {
-        return system $wafCommand, "uninstall", "clean", "distclean";
-    }
-    
-    return system $wafCommand, 'configure', 'build', 'install', @options;
-}
-
 sub retrieveQMakespecVar
 {
     my $mkspec = $_[0];
@@ -2011,6 +1938,9 @@ sub autotoolsFlag($$)
 sub runAutogenForAutotoolsProjectIfNecessary($@)
 {
     my ($dir, $prefix, $sourceDir, $project, $joinedOverridableFeatures, @buildArgs) = @_;
+
+    # Always enable introspection when building WebKitGTK+.
+    unshift(@buildArgs, "--enable-introspection");
 
     my $joinedBuildArgs = join(" ", @buildArgs);
 

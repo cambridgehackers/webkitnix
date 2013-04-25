@@ -129,11 +129,11 @@ public:
 
     virtual void setResizable(bool) = 0;
 
-    virtual void addMessageToConsole(MessageSource, MessageLevel, const String& message, unsigned lineNumber, const String& sourceID) = 0;
+    virtual void addMessageToConsole(MessageSource, MessageLevel, const String& message, unsigned lineNumber, unsigned columnNumber, const String& sourceID) = 0;
     // FIXME: Remove this MessageType variant once all the clients are updated.
-    virtual void addMessageToConsole(MessageSource source, MessageType, MessageLevel level, const String& message, unsigned lineNumber, const String& sourceID)
+    virtual void addMessageToConsole(MessageSource source, MessageType, MessageLevel level, const String& message, unsigned lineNumber, unsigned columnNumber, const String& sourceID)
     {
-        addMessageToConsole(source, level, message, lineNumber, sourceID);
+        addMessageToConsole(source, level, message, lineNumber, columnNumber, sourceID);
     }
 
     virtual bool canRunBeforeUnloadConfirmPanel() = 0;
@@ -279,6 +279,7 @@ public:
         AnimationTrigger = 1 << 4,
         FilterTrigger = 1 << 5,
         ScrollableInnerFrameTrigger = 1 << 6,
+        AnimatedOpacityTrigger = 1 << 7,
         AllTriggers = 0xFFFFFFFF
     };
     typedef unsigned CompositingTriggerFlags;
@@ -339,14 +340,6 @@ public:
     virtual void setPagePopupDriver(PagePopupDriver*) = 0;
     virtual void resetPagePopupDriver() = 0;
 #endif
-    // This function is called whenever a text field <input> is created. The
-    // implementation should return true if it wants to do something in
-    // addTextFieldDecorationsTo().
-    // The argument is always non-0.
-    virtual bool willAddTextFieldDecorationsTo(HTMLInputElement*) { return false; }
-    // The argument is always non-0.
-    virtual void addTextFieldDecorationsTo(HTMLInputElement*) { }
-
     virtual void postAccessibilityNotification(AccessibilityObject*, AXObjectCache::AXNotification) { }
 
     virtual void notifyScrollerThumbIsVisibleInRect(const IntRect&) { }

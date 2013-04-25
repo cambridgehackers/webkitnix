@@ -199,6 +199,17 @@ static PlayerToPrivateMapType& playerToPrivateMap()
 };
 #endif
 
+#if ENABLE(ENCRYPTED_MEDIA) || ENABLE(ENCRYPTED_MEDIA_V2)
+static dispatch_queue_t globalLoaderDelegateQueue()
+{
+    static dispatch_queue_t globalQueue;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        globalQueue = dispatch_queue_create("WebCoreAVFLoaderDelegate queue", DISPATCH_QUEUE_SERIAL);
+    });
+    return globalQueue;
+}
+#endif
 
 PassOwnPtr<MediaPlayerPrivateInterface> MediaPlayerPrivateAVFoundationObjC::create(MediaPlayer* player)
 { 
@@ -411,7 +422,7 @@ void MediaPlayerPrivateAVFoundationObjC::createAVAssetForURL(const String& url)
     m_avAsset.adoptNS([[AVURLAsset alloc] initWithURL:cocoaURL options:options.get()]);
 
 #if __MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
-    [[m_avAsset.get() resourceLoader] setDelegate:m_loaderDelegate.get() queue:dispatch_get_main_queue()];
+    [[m_avAsset.get() resourceLoader] setDelegate:m_loaderDelegate.get() queue:globalLoaderDelegateQueue()];
 #endif
 
     m_haveCheckedPlayability = false;
@@ -962,6 +973,7 @@ float MediaPlayerPrivateAVFoundationObjC::mediaTimeForTimeValue(float timeValue)
 
 void MediaPlayerPrivateAVFoundationObjC::tracksChanged()
 {
+    String primaryAudioTrackLanguage = m_languageOfPrimaryAudioTrack;
     m_languageOfPrimaryAudioTrack = String();
 
     if (!m_avAsset)
@@ -1015,6 +1027,9 @@ void MediaPlayerPrivateAVFoundationObjC::tracksChanged()
         this, boolString(hasVideo()), boolString(hasAudio()), boolString(hasClosedCaptions()));
 
     sizeChanged();
+
+    if (!primaryAudioTrackLanguage.isNull() && primaryAudioTrackLanguage != languageOfPrimaryAudioTrack())
+        player()->characteristicChanged();
 }
 
 void MediaPlayerPrivateAVFoundationObjC::sizeChanged()
@@ -1483,6 +1498,7 @@ NSArray* itemKVOProperties()
                 @"playbackBufferFull",
                 @"playbackBufferEmpty",
                 @"duration",
+                @"hasEnabledAudio",
                 nil];
     }
     return keys;
@@ -1563,6 +1579,8 @@ NSArray* itemKVOProperties()
             m_callback->scheduleMainThreadNotification(MediaPlayerPrivateAVFoundation::Notification::ItemSeekableTimeRangesChanged);
         else if ([keyPath isEqualToString:@"tracks"])
             m_callback->scheduleMainThreadNotification(MediaPlayerPrivateAVFoundation::Notification::ItemTracksChanged);
+        else if ([keyPath isEqualToString:@"hasEnabledAudio"])
+            m_callback->scheduleMainThreadNotification(MediaPlayerPrivateAVFoundation::Notification::ItemTracksChanged);
         else if ([keyPath isEqualToString:@"presentationSize"])
             m_callback->scheduleMainThreadNotification(MediaPlayerPrivateAVFoundation::Notification::ItemPresentationSizeChanged);
         else if ([keyPath isEqualToString:@"duration"])
@@ -1612,7 +1630,17 @@ NSArray* itemKVOProperties()
     if (!m_callback)
         return NO;
 
-    return m_callback->shouldWaitForLoadingOfResource(loadingRequest);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (!m_callback) {
+            [loadingRequest finishLoadingWithError:nil];
+            return;
+        }
+
+        if (!m_callback->shouldWaitForLoadingOfResource(loadingRequest))
+            [loadingRequest finishLoadingWithError:nil];
+    });
+
+    return YES;
 }
 
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest

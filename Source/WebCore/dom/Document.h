@@ -1179,8 +1179,6 @@ public:
     void setContextFeatures(PassRefPtr<ContextFeatures>);
     ContextFeatures* contextFeatures() { return m_contextFeatures.get(); }
 
-    virtual void reportMemoryUsage(MemoryObjectInfo*) const OVERRIDE;
-
     DocumentSharedObjectPool* sharedObjectPool() { return m_sharedObjectPool.get(); }
 
     void didRemoveAllPendingStylesheet();
@@ -1250,7 +1248,7 @@ private:
     virtual const KURL& virtualURL() const; // Same as url(), but needed for ScriptExecutionContext to implement it without a performance loss for direct calls.
     virtual KURL virtualCompleteURL(const String&) const; // Same as completeURL() for the same reason as above.
 
-    virtual void addMessage(MessageSource, MessageLevel, const String& message, const String& sourceURL, unsigned lineNumber, PassRefPtr<ScriptCallStack>, ScriptState* = 0, unsigned long requestIdentifier = 0);
+    virtual void addMessage(MessageSource, MessageLevel, const String& message, const String& sourceURL, unsigned lineNumber, unsigned columnNumber, PassRefPtr<ScriptCallStack>, ScriptState* = 0, unsigned long requestIdentifier = 0);
 
     virtual double minimumTimerInterval() const;
 

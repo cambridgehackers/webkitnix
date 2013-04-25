@@ -59,8 +59,6 @@
 #include "Settings.h"
 #include "TiledBacking.h"
 #include "TransformState.h"
-#include "WebCoreMemoryInstrumentation.h"
-#include <wtf/MemoryInstrumentationHashMap.h>
 #include <wtf/TemporaryChange.h>
 
 #if ENABLE(PLUGIN_PROXY_FOR_VIDEO)
@@ -628,8 +626,9 @@ void RenderLayerCompositor::logLayerInfo(const RenderLayer* layer, int depth)
         m_secondaryBackingStoreBytes += backing->backingStoreMemoryEstimate();
     }
 
-    LOG(Compositing, "%*p %dx%d %.2fKB (%s) %s\n", 12 + depth * 2, layer, backing->compositedBounds().width(), backing->compositedBounds().height(),
+    LOG(Compositing, "%*p %dx%d %.2fKB %s(%s) %s\n", 12 + depth * 2, layer, backing->compositedBounds().width(), backing->compositedBounds().height(),
         backing->backingStoreMemoryEstimate() / 1024,
+        backing->graphicsLayer()->contentsOpaque() ? "opaque " : "",
         logReasonsForCompositing(layer), layer->name().utf8().data());
 }
 #endif
@@ -1259,6 +1258,12 @@ void RenderLayerCompositor::frameViewDidChangeSize()
     }
 }
 
+bool RenderLayerCompositor::hasCoordinatedScrolling() const
+{
+    ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator();
+    return scrollingCoordinator && scrollingCoordinator->coordinatesScrollingForFrameView(m_renderView->frameView());
+}
+
 void RenderLayerCompositor::frameViewDidScroll()
 {
     FrameView* frameView = m_renderView->frameView();
@@ -1269,11 +1274,12 @@ void RenderLayerCompositor::frameViewDidScroll()
 
     // If there's a scrolling coordinator that manages scrolling for this frame view,
     // it will also manage updating the scroll layer position.
-    if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator()) {
-        if (scrollingCoordinator->coordinatesScrollingForFrameView(frameView))
-            return;
-        if (Settings* settings = m_renderView->document()->settings()) {
-            if (settings->compositedScrollingForFramesEnabled())
+    if (hasCoordinatedScrolling())
+        return;
+
+    if (Settings* settings = m_renderView->document()->settings()) {
+        if (settings->compositedScrollingForFramesEnabled()) {
+            if (ScrollingCoordinator* scrollingCoordinator = this->scrollingCoordinator())
                 scrollingCoordinator->scrollableAreaScrollLayerDidChange(frameView);
         }
     }
@@ -2101,7 +2107,8 @@ bool RenderLayerCompositor::requiresCompositingForAnimation(RenderObject* render
         return false;
 
     if (AnimationController* animController = renderer->animation()) {
-        return (animController->isRunningAnimationOnRenderer(renderer, CSSPropertyOpacity) && inCompositingMode())
+        return (animController->isRunningAnimationOnRenderer(renderer, CSSPropertyOpacity)
+                && (inCompositingMode() || (m_compositingTriggers & ChromeClient::AnimatedOpacityTrigger)))
 #if ENABLE(CSS_FILTERS)
 #if !PLATFORM(MAC) || (!PLATFORM(IOS) && __MAC_OS_X_VERSION_MIN_REQUIRED >= 1080)
             // <rdar://problem/10907251> - WebKit2 doesn't support CA animations of CI filters on Lion and below
@@ -2189,7 +2196,7 @@ bool RenderLayerCompositor::requiresCompositingForPosition(RenderObject* rendere
     }
 
     if (isSticky)
-        return true;
+        return hasCoordinatedScrolling();
 
     RenderObject* container = renderer->container();
     // If the renderer is not hooked up yet then we have to wait until it is.
@@ -2383,38 +2390,38 @@ bool RenderLayerCompositor::keepLayersPixelAligned() const
     return true;
 }
 
-static bool shouldCompositeOverflowControls(FrameView* view)
+bool RenderLayerCompositor::shouldCompositeOverflowControls() const
 {
+    FrameView* view = m_renderView->frameView();
+
     if (view->platformWidget())
         return false;
 
-    if (Page* page = view->frame()->page()) {
-        if (ScrollingCoordinator* scrollingCoordinator = page->scrollingCoordinator())
-            if (scrollingCoordinator->coordinatesScrollingForFrameView(view))
-                return true;
-    }
+    if (hasCoordinatedScrolling())
+        return true;
 
     if (!view->hasOverlayScrollbars())
         return false;
+
     return true;
 }
 
 bool RenderLayerCompositor::requiresHorizontalScrollbarLayer() const
 {
     FrameView* view = m_renderView->frameView();
-    return shouldCompositeOverflowControls(view) && view->horizontalScrollbar();
+    return shouldCompositeOverflowControls() && view->horizontalScrollbar();
 }
 
 bool RenderLayerCompositor::requiresVerticalScrollbarLayer() const
 {
     FrameView* view = m_renderView->frameView();
-    return shouldCompositeOverflowControls(view) && view->verticalScrollbar();
+    return shouldCompositeOverflowControls() && view->verticalScrollbar();
 }
 
 bool RenderLayerCompositor::requiresScrollCornerLayer() const
 {
     FrameView* view = m_renderView->frameView();
-    return shouldCompositeOverflowControls(view) && view->isScrollCornerVisible();
+    return shouldCompositeOverflowControls() && view->isScrollCornerVisible();
 }
 
 #if ENABLE(RUBBER_BANDING)
@@ -3187,31 +3194,6 @@ void RenderLayerCompositor::layerFlushTimerFired(Timer<RenderLayerCompositor>*)
     if (!m_hasPendingLayerFlush)
         return;
     scheduleLayerFlushNow();
-}
-
-void RenderLayerCompositor::reportMemoryUsage(MemoryObjectInfo* memoryObjectInfo) const
-{
-    MemoryClassInfo info(memoryObjectInfo, this, PlatformMemoryTypes::Rendering);
-    info.addWeakPointer(m_renderView);
-    info.addMember(m_rootContentLayer, "rootContentLayer");
-    info.addMember(m_updateCompositingLayersTimer, "updateCompositingLayersTimer");
-    info.addMember(m_clipLayer, "clipLayer");
-    info.addMember(m_scrollLayer, "scrollLayer");
-    info.addMember(m_viewportConstrainedLayers, "viewportConstrainedLayers");
-    info.addMember(m_viewportConstrainedLayersNeedingUpdate, "viewportConstrainedLayersNeedingUpdate");
-    info.addMember(m_overflowControlsHostLayer, "overflowControlsHostLayer");
-    info.addMember(m_layerForHorizontalScrollbar, "layerForHorizontalScrollbar");
-    info.addMember(m_layerForVerticalScrollbar, "layerForVerticalScrollbar");
-    info.addMember(m_layerForScrollCorner, "layerForScrollCorner");
-#if ENABLE(RUBBER_BANDING)
-    info.addMember(m_layerForOverhangAreas, "layerForOverhangAreas");
-    info.addMember(m_contentShadowLayer, "contentShadowLayer");
-    info.addMember(m_layerForTopOverhangArea, "layerForTopOverhangArea");
-    info.addMember(m_layerForBottomOverhangArea, "layerForBottomOverhangArea");
-    info.addMember(m_layerForHeader, "layerForHeader");
-    info.addMember(m_layerForFooter, "layerForFooter");
-#endif
-    info.addMember(m_layerUpdater, "layerUpdater");
 }
 
 } // namespace WebCore

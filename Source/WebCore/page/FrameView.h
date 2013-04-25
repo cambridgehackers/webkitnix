@@ -238,7 +238,7 @@ public:
     void startDeferredRepaintTimer(double delay);
     void resetDeferredRepaintDelay();
 
-    void updateLayerFlushThrottlingInAllFrames(bool isLoadProgressing);
+    void updateLayerFlushThrottlingInAllFrames();
     void adjustTiledBackingCoverage();
 
     void beginDisableRepaints();
@@ -345,6 +345,7 @@ public:
     static void setRepaintThrottlingDeferredRepaintDelayIncrementDuringLoading(double p);
 
     virtual IntPoint lastKnownMousePosition() const;
+    virtual bool isHandlingWheelEvent() const OVERRIDE;
     bool shouldSetCursor() const;
 
     virtual bool scrollbarsCanBeActive() const OVERRIDE;
@@ -539,8 +540,6 @@ private:
     unsigned m_slowRepaintObjectCount;
     int m_borderX;
     int m_borderY;
-
-    Timer<FrameView> m_delayedResizeEventTimer;
 
     Timer<FrameView> m_layoutTimer;
     bool m_delayedLayout;

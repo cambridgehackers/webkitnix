@@ -63,6 +63,12 @@
 
 namespace WTR {
 
+const unsigned TestController::viewWidth = 800;
+const unsigned TestController::viewHeight = 600;
+
+const unsigned TestController::w3cSVGViewWidth = 480;
+const unsigned TestController::w3cSVGViewHeight = 360;
+
 // defaultLongTimeout + defaultShortTimeout should be less than 80,
 // the default timeout value of the test harness so we can detect an
 // unresponsive web process.
@@ -341,11 +347,7 @@ void TestController::initialize(int argc, const char* argv[])
     m_geolocationProvider = adoptPtr(new GeolocationProviderMock(m_context.get()));
 
     if (const char* dumpRenderTreeTemp = libraryPathForTesting()) {
-        WKRetainPtr<WKStringRef> dumpRenderTreeTempWK(AdoptWK, WKStringCreateWithUTF8CString(dumpRenderTreeTemp));
-        WKContextSetDatabaseDirectory(m_context.get(), dumpRenderTreeTempWK.get());
-        WKContextSetLocalStorageDirectory(m_context.get(), dumpRenderTreeTempWK.get());
-        WKContextSetDiskCacheDirectory(m_context.get(), dumpRenderTreeTempWK.get());
-        WKContextSetCookieStorageDirectory(m_context.get(), dumpRenderTreeTempWK.get());
+        String temporaryFolder = String::fromUTF8(dumpRenderTreeTemp);
 
         // WebCore::pathByAppendingComponent is not used here because of the namespace,
         // which leads us to this ugly #ifdef and file path concatenation.
@@ -354,8 +356,12 @@ void TestController::initialize(int argc, const char* argv[])
 #else
         const char separator = '/';
 #endif
-        String iconDatabaseFileTemp = String::fromUTF8(dumpRenderTreeTemp) + separator + String(ASCIILiteral("WebpageIcons.db"));
-        WKContextSetIconDatabasePath(m_context.get(), toWK(iconDatabaseFileTemp).get());
+
+        WKContextSetDatabaseDirectory(m_context.get(), toWK(temporaryFolder + separator + "Databases").get());
+        WKContextSetLocalStorageDirectory(m_context.get(), toWK(temporaryFolder + separator + "LocalStorage").get());
+        WKContextSetDiskCacheDirectory(m_context.get(), toWK(temporaryFolder + separator + "Cache").get());
+        WKContextSetCookieStorageDirectory(m_context.get(), toWK(temporaryFolder + separator + "Cookies").get());
+        WKContextSetIconDatabasePath(m_context.get(), toWK(temporaryFolder + separator + "IconDatabase" + separator + "WebpageIcons.db").get());
     }
 
     platformInitializeContext();
@@ -589,7 +595,7 @@ bool TestController::resetStateToConsistentValues()
     // EFL use a real window while other ports such as Qt don't.
     // In EFL, we need to resize the window to the original size after calls to window.resizeTo.
     WKRect rect = m_mainWebView->windowFrame();
-    m_mainWebView->setWindowFrame(WKRectMake(rect.origin.x, rect.origin.y, 800, 600));
+    m_mainWebView->setWindowFrame(WKRectMake(rect.origin.x, rect.origin.y, TestController::viewWidth, TestController::viewHeight));
 #endif
 
     // Reset notification permissions

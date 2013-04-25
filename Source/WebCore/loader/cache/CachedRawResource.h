@@ -49,8 +49,6 @@ public:
 
     virtual bool canReuse(const ResourceRequest&) const;
 
-    virtual void reportMemoryUsage(MemoryObjectInfo*) const OVERRIDE;
-
 private:
     virtual void didAddClient(CachedResourceClient*);
     virtual void data(PassRefPtr<ResourceBuffer> data, bool allDataReceived);
@@ -63,6 +61,7 @@ private:
     virtual void didSendData(unsigned long long bytesSent, unsigned long long totalBytesToBeSent);
 
     virtual void switchClientsToRevalidatedResource() OVERRIDE;
+    virtual bool mayTryReplaceEncodedData() const OVERRIDE { return true; }
 
     unsigned long m_identifier;
 

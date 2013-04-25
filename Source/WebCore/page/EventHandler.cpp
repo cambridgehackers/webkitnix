@@ -348,6 +348,7 @@ EventHandler::EventHandler(Frame* frame)
     , m_baseEventType(PlatformEvent::NoType)
     , m_didStartDrag(false)
     , m_didLongPressInvokeContextMenu(false)
+    , m_isHandlingWheelEvent(false)
 #if ENABLE(CURSOR_VISIBILITY)
     , m_autoHideCursorTimer(this, &EventHandler::autoHideCursorTimerFired)
 #endif
@@ -605,7 +606,7 @@ bool EventHandler::handleMousePressEventSingleClick(const MouseEventWithHitTestR
                 pos = selectionInUserSelectAll.end();
         }
 
-        if (!m_frame->editor()->behavior().shouldConsiderSelectionAsDirectional()) {
+        if (!m_frame->editor()->behavior().shouldConsiderSelectionAsDirectional() && pos.isNotNull()) {
             // See <rdar://problem/3668157> REGRESSION (Mail): shift-click deselects when selection
             // was created right-to-left
             Position start = newSelection.start();
@@ -2404,6 +2405,8 @@ bool EventHandler::handleWheelEvent(const PlatformWheelEvent& e)
     FrameView* view = m_frame->view();
     if (!view)
         return false;
+
+    m_isHandlingWheelEvent = true;
     setFrameWasScrolledByUser();
     LayoutPoint vPoint = view->windowToContents(e.position());
 
@@ -2449,21 +2452,24 @@ bool EventHandler::handleWheelEvent(const PlatformWheelEvent& e)
         
         if (isOverWidget && target && target->isWidget()) {
             Widget* widget = toRenderWidget(target)->widget();
-            if (widget && passWheelEventToWidget(e, widget))
+            if (widget && passWheelEventToWidget(e, widget)) {
+                m_isHandlingWheelEvent = false;
                 return true;
+            }
         }
 
-        if (node && !node->dispatchWheelEvent(event))
+        if (node && !node->dispatchWheelEvent(event)) {
+            m_isHandlingWheelEvent = false;
             return true;
+        }
     }
 
 
     // We do another check on the frame view because the event handler can run JS which results in the frame getting destroyed.
     view = m_frame->view();
-    if (!view)
-        return false;
-    
-    return view->wheelEvent(event);
+    bool didHandleEvent = view ? view->wheelEvent(event) : false;
+    m_isHandlingWheelEvent = false;
+    return didHandleEvent;
 }
 
 void EventHandler::defaultWheelEventHandler(Node* startNode, WheelEvent* wheelEvent)

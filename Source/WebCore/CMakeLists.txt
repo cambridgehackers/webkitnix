@@ -1256,7 +1256,6 @@ set(WebCore_SOURCES
     dom/UserTypingGestureIndicator.cpp
     dom/ViewportArguments.cpp
     dom/VisitedLinkState.cpp
-    dom/WebCoreMemoryInstrumentation.cpp
     dom/WebKitAnimationEvent.cpp
     dom/WebKitNamedFlow.cpp
     dom/WebKitTransitionEvent.cpp
@@ -1592,7 +1591,6 @@ set(WebCore_SOURCES
     inspector/ContentSearchUtils.cpp
     inspector/DOMEditor.cpp
     inspector/DOMPatchSupport.cpp
-    inspector/HeapGraphSerializer.cpp
     inspector/IdentifiersFactory.cpp
     inspector/InjectedScript.cpp
     inspector/InjectedScriptBase.cpp
@@ -1637,7 +1635,6 @@ set(WebCore_SOURCES
     inspector/InspectorValues.cpp
     inspector/InspectorWorkerAgent.cpp
     inspector/InstrumentingAgents.cpp
-    inspector/MemoryInstrumentationImpl.cpp
     inspector/NetworkResourcesData.cpp
     inspector/PageConsoleAgent.cpp
     inspector/PageDebuggerAgent.cpp
@@ -1686,7 +1683,6 @@ set(WebCore_SOURCES
     loader/SinkDocument.cpp
     loader/SubframeLoader.cpp
     loader/SubresourceLoader.cpp
-    loader/SubstituteData.cpp
     loader/TextResourceDecoder.cpp
     loader/TextTrackLoader.cpp
     loader/ThreadableLoader.cpp
@@ -1847,7 +1843,6 @@ set(WebCore_SOURCES
     platform/NotImplemented.cpp
     platform/PlatformEvent.cpp
     platform/PlatformInstrumentation.cpp
-    platform/PlatformMemoryInstrumentation.cpp
     platform/RunLoop.cpp
     platform/RuntimeApplicationChecks.cpp
     platform/ScrollAnimator.cpp
@@ -2553,6 +2548,20 @@ set(WebCore_SOURCES
     xml/parser/XMLDocumentParserLibxml2.cpp
     xml/parser/XMLDocumentParserScope.cpp
 )
+
+# GCC 4.6.x crashes when building this file with -O3 and -DNDEBUG.
+# References: https://bugs.webkit.org/show_bug.cgi?id=97268
+#             https://bugs.webkit.org/show_bug.cgi?id=114627
+if (CMAKE_COMPILER_IS_GNUCXX) # Can restrict based on the version.
+    string(TOUPPER "CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}" _CXXFLAGS_VARNAME)
+
+    string(FIND ${_CXXFLAGS_VARNAME} "-O3" _CXXFLAGS_HAS_O3)
+    if (_CXXFLAGS_HAS_O3)
+        string(REPLACE "-O3" "-O2" _CXXFLAGS ${${_CXXFLAGS_VARNAME}})
+        set_source_files_properties(Modules/websockets/WebSocketDeflater.cpp
+                                    PROPERTIES COMPILE_FLAGS "${_CXXFLAGS}")
+    endif ()
+endif ()
 
 set(WebCore_CSS_PROPERTY_NAMES
     ${WEBCORE_DIR}/css/CSSPropertyNames.in
