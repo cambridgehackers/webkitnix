@@ -33,7 +33,7 @@
 #include "TextureMapperPlatformLayer.h"
 #include "WebContextMenuProxy.h"
 #include "WebContextMenuProxyNix.h"
-#include "WebViewClient.h"
+#include "WebViewClientNix.h"
 #include "WebPopupItemPlatform.h"
 #include "WebPopupMenuListener.h"
 #include <WebCore/TransformationMatrix.h>

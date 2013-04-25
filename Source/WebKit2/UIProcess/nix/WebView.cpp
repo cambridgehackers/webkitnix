@@ -25,7 +25,7 @@
  */
 
 #include "config.h"
-#include "WebView.h"
+#include "WebViewNix.h"
 
 #include "DrawingAreaProxyImpl.h"
 #include "CoordinatedLayerTreeHostProxy.h"

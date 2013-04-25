@@ -26,7 +26,7 @@
 #include "config.h"
 #include "NIXView.h"
 
-#include "WebView.h"
+#include "WebViewNix.h"
 #include "WebContext.h"
 #include "WebPageGroup.h"
 

@@ -24,9 +24,9 @@
  */
 
 #include "config.h"
-#include "WebViewClient.h"
+#include "WebViewClientNix.h"
 
-#include "WebView.h"
+#include "WebViewNix.h"
 #include <cstring>
 
 namespace WebKit {
