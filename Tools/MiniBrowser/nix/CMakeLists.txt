@@ -7,11 +7,16 @@ add_definitions(-DMINIBROWSER_INJECTEDBUNDLE_DIR="${MINIBROWSER_INJECTEDBUNDLE_D
 
 set(MiniBrowser_SOURCES
     ${MiniBrowser_DIR}/main.cpp
-    ${MiniBrowser_DIR}/LinuxWindow.cpp
+    ${MiniBrowser_DIR}/BrowserControl.cpp
     ${MiniBrowser_DIR}/GestureRecognizer.cpp
     ${MiniBrowser_DIR}/Options.cpp
     ${MiniBrowser_DIR}/TouchMocker.cpp
     ${MiniBrowser_DIR}/XlibEventSource.cpp
+    ${MiniBrowser_DIR}/Components/VisualComponent.cpp
+    ${MiniBrowser_DIR}/Components/BrowserWindow.cpp
+    ${MiniBrowser_DIR}/Components/WebView.cpp
+    ${MiniBrowser_DIR}/Components/Button.cpp
+    ${MiniBrowser_DIR}/Components/UrlBar.cpp
 )
 
 set(MiniBrowser_LIBRARIES
@@ -36,15 +41,16 @@ set(MiniBrowser_INCLUDE_DIRECTORIES
 )
 
 if (WTF_USE_EGL)
-  list(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/LinuxWindowEGL.cpp)
+  list(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/Components/EGLWebView.cpp)
   list(APPEND MiniBrowser_LIBRARIES ${EGL_LIBRARY})
   list(APPEND MiniBrowser_INCLUDE_DIRECTORIES ${EGL_INCLUDE_DIR})
 else ()
-  list(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/LinuxWindowGLX.cpp)
+  list(APPEND MiniBrowser_SOURCES ${MiniBrowser_DIR}/Components/GLXWebView.cpp)
 endif ()
 
 include_directories(${MiniBrowser_INCLUDE_DIRECTORIES})
 
+add_definitions(-DMINIBROWSER_ICON_DIR="${MiniBrowser_DIR}/Components/icons")
 add_executable(MiniBrowser ${MiniBrowser_SOURCES})
 target_link_libraries(MiniBrowser ${MiniBrowser_LIBRARIES})
 set_target_properties(MiniBrowser PROPERTIES FOLDER "Tools")

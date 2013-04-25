@@ -24,7 +24,7 @@
  */
 
 #include "GestureRecognizer.h"
-#include "LinuxWindow.h"
+#include "BrowserControl.h"
 #include "Options.h"
 #include "TouchMocker.h"
 #include "XlibEventUtils.h"
@@ -65,14 +65,14 @@ extern void glUseProgram(GLuint);
 
 using namespace std;
 
-class MiniBrowser : public LinuxWindowClient, public GestureRecognizerClient {
+class MiniBrowser : public WebViewClient, public GestureRecognizerClient {
 public:
     MiniBrowser(GMainLoop* mainLoop, const Options& options);
     virtual ~MiniBrowser();
 
     WKPageRef pageRef() const { return NIXViewGetPage(m_view); }
 
-    // LinuxWindowClient.
+    // WebViewClient.
     virtual void handleExposeEvent() { scheduleUpdateDisplay(); }
     virtual void handleKeyPressEvent(const XKeyPressedEvent&);
     virtual void handleKeyReleaseEvent(const XKeyReleasedEvent&);
@@ -81,6 +81,14 @@ public:
     virtual void handlePointerMoveEvent(const XPointerMovedEvent&);
     virtual void handleSizeChanged(int, int);
     virtual void handleClosed();
+
+    virtual void pageGoBack() { WKPageGoBack(pageRef()); }
+    virtual void pageGoForward() { WKPageGoForward(pageRef()); }
+    virtual void pageReload() { WKPageReload(pageRef()); }
+    virtual void loadPage(const char* url) { WKPageLoadURL(pageRef(), WKURLCreateWithUTF8CString(url)); }
+    virtual void addFocus() { NIXViewSetFocused(m_view, true); }
+    virtual void releaseFocus() { NIXViewSetFocused(m_view, false); }
+    virtual std::string activeUrl();
 
     // NIXViewClient.
     static void viewNeedsDisplay(NIXView, WKRect area, const void* clientInfo);
@@ -140,7 +148,7 @@ private:
 
     WKRetainPtr<WKContextRef> m_context;
     WKRetainPtr<WKPageGroupRef> m_pageGroup;
-    LinuxWindow* m_window;
+    BrowserControl* m_control;
     NIXView m_view;
     WKRect m_viewRect;
     GMainLoop* m_mainLoop;
@@ -175,7 +183,7 @@ private:
 MiniBrowser::MiniBrowser(GMainLoop* mainLoop, const Options& options)
     : m_context(AdoptWK, WKContextCreateWithInjectedBundlePath(WKStringCreateWithUTF8CString(MINIBROWSER_INJECTEDBUNDLE_DIR "libMiniBrowserInjectedBundle.so")))
     , m_pageGroup(AdoptWK, (WKPageGroupCreateWithIdentifier(WKStringCreateWithUTF8CString("MiniBrowser"))))
-    , m_window(new LinuxWindow(this, options.width, options.height))
+    , m_control(new BrowserControl(this, options.width, options.height, options.url))
     , m_view(0)
     , m_mainLoop(mainLoop)
     , m_options(options)
@@ -234,7 +242,7 @@ MiniBrowser::MiniBrowser(GMainLoop* mainLoop, const Options& options)
     if (isMobileMode())
         WKPageSetUseFixedLayout(pageRef(), true);
 
-    WKSize size = m_window->size();
+    WKSize size = m_control->webViewSize();
     m_viewRect = WKRectMake(options.viewportHorizontalDisplacement, options.viewportVerticalDisplacement, size.width - options.viewportHorizontalDisplacement, size.height - options.viewportVerticalDisplacement);
     NIXViewSetSize(m_view, m_viewRect.size);
 
@@ -293,7 +301,7 @@ MiniBrowser::~MiniBrowser()
     g_main_loop_unref(m_mainLoop);
 
     NIXViewRelease(m_view);
-    delete m_window;
+    delete m_control;
     delete m_touchMocker;
 }
 
@@ -575,12 +583,12 @@ void MiniBrowser::handleClosed()
 
 void MiniBrowser::updateDisplay()
 {
-    if (!m_view || !m_window)
+    if (!m_view || !m_control)
         return;
 
-    m_window->makeCurrent();
+    m_control->makeCurrent();
 
-    WKSize size = m_window->size();
+    WKSize size = m_control->webViewSize();
     glViewport(0, 0, size.width, size.height);
     glClearColor(0.4, 0.4, 0.4, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -589,7 +597,7 @@ void MiniBrowser::updateDisplay()
     if (m_touchMocker)
         m_touchMocker->paintTouchPoints(size);
 
-    m_window->swapBuffers();
+    m_control->swapBuffers();
 }
 
 static gboolean callUpdateDisplay(gpointer data)
@@ -1101,6 +1109,16 @@ WKStringRef MiniBrowser::runJavaScriptPrompt(WKPageRef, WKStringRef message, WKS
     std::string userInput;
     getline(cin, userInput);
     return WKStringCreateWithUTF8CString(userInput.c_str());
+}
+
+std::string MiniBrowser::activeUrl()
+{
+    WKURLRef urlRef = WKPageCopyActiveURL(pageRef());
+    WKStringRef urlStr = WKURLCopyString(urlRef);
+    std::string url = createStdStringFromWKString(urlStr);
+    WKRelease(urlStr);
+    WKRelease(urlRef);
+    return url;
 }
 
 int main(int argc, char* argv[])
