@@ -53,6 +53,11 @@ static WebKit::WebThemeEngine* themeEngine()
     return WebKit::Platform::current()->themeEngine();
 }
 
+static WebKit::WebCanvas* webCanvas(const PaintInfo& info)
+{
+    return info.context->platformContext()->cr();
+}
+
 PassRefPtr<RenderTheme> RenderTheme::themeForPage(Page*)
 {
     return RenderThemeNix::create();
@@ -99,8 +104,7 @@ bool RenderThemeNix::paintButton(RenderObject* o, const PaintInfo& i, const IntR
     if (o->hasBackground())
         extraParams.backgroundColor = o->style()->visitedDependentColor(CSSPropertyBackgroundColor).rgb();
 
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintButton(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintButton(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -111,8 +115,7 @@ bool RenderThemeNix::paintTextField(RenderObject* o, const PaintInfo& i, const I
     if (o->style()->hasBorderRadius() || o->style()->hasBackgroundImage())
         return true;
 
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintTextField(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
+    themeEngine()->paintTextField(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect));
     return false;
 }
 
@@ -127,8 +130,7 @@ bool RenderThemeNix::paintCheckbox(RenderObject* o, const PaintInfo& i, const In
     extraParams.checked = isChecked(o);
     extraParams.indeterminate = isIndeterminate(o);
 
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintCheckbox(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintCheckbox(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -148,8 +150,7 @@ bool RenderThemeNix::paintRadio(RenderObject* o, const PaintInfo& i, const IntRe
     extraParams.checked = isChecked(o);
     extraParams.indeterminate = isIndeterminate(o);
 
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintRadio(canvas, getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintRadio(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
     return false;
 }
 
@@ -165,8 +166,7 @@ void RenderThemeNix::setRadioSize(RenderStyle* style) const
 
 bool RenderThemeNix::paintMenuList(RenderObject* o, const PaintInfo& i, const IntRect& rect)
 {
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintMenuList(canvas, getWebThemeState(this, o), WebKit::WebRect(rect));
+    themeEngine()->paintMenuList(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect));
     return false;
 }
 
@@ -200,8 +200,7 @@ bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInf
     extraParams.animationProgress = renderProgress->animationProgress();
     extraParams.animationStartTime = renderProgress->animationStartTime();
     
-    WebKit::WebCanvas* canvas = i.context->platformContext()->cr();
-    themeEngine()->paintProgressBar(canvas, getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintProgressBar(webCanvas(i), getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
 
     return false;
 }
