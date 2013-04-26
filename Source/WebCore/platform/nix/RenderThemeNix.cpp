@@ -189,6 +189,7 @@ void RenderThemeNix::adjustMenuListStyle(StyleResolver*, RenderStyle* style, Ele
 #if ENABLE(PROGRESS_ELEMENT)
 void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle*, Element *) const
 {
+    style->setBoxShadow(nullptr);
 }
 
 bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInfo& i, const IntRect& rect)
