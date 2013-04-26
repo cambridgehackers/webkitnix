@@ -187,7 +187,7 @@ void RenderThemeNix::adjustMenuListStyle(StyleResolver*, RenderStyle* style, Ele
 }
 
 #if ENABLE(PROGRESS_ELEMENT)
-void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle* style, Element *) const
+void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle*, Element *) const
 {
 }
 

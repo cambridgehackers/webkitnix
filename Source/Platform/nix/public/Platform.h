@@ -76,7 +76,7 @@ public:
 
     // Creates a device for audio I/O.
     // Pass in (numberOfInputChannels > 0) if live/local audio input is desired.
-    virtual WebAudioDevice* createAudioDevice(size_t bufferSize, unsigned numberOfInputChannels, unsigned numberOfChannels, double sampleRate, WebAudioDevice::RenderCallback*, const WebString& deviceId) { return 0; }
+    virtual WebAudioDevice* createAudioDevice(size_t /*bufferSize*/, unsigned /*numberOfInputChannels*/, unsigned /*numberOfChannels*/, double /*sampleRate*/, WebAudioDevice::RenderCallback*, const WebString& /*deviceId*/) { return 0; }
 
 
     // Gamepad -------------------------------------------------------------
@@ -84,17 +84,17 @@ public:
 
 
     // FFTFrame
-    virtual WebFFTFrame* createFFTFrame(unsigned fftsize) { return 0; }
-    virtual WebFFTFrame* createFFTFrame(const WebFFTFrame* frame) { return 0; }
+    virtual WebFFTFrame* createFFTFrame(unsigned /*fftsize*/) { return 0; }
+    virtual WebFFTFrame* createFFTFrame(const WebFFTFrame* /*frame*/) { return 0; }
 
     // Resources -----------------------------------------------------------
     // Returns a blob of data corresponding to the named resource.
-    virtual WebData loadResource(const char* name) { return WebData(); }
+    virtual WebData loadResource(const char* /*name*/) { return WebData(); }
 
     // Decodes the in-memory audio file data and returns the linear PCM audio data in the destinationBus.
     // A sample-rate conversion to sampleRate will occur if the file data is at a different sample-rate.
     // Returns true on success.
-    virtual bool loadAudioResource(WebAudioBus* destinationBus, const char* audioFileData, size_t dataSize, double sampleRate) { return false; }
+    virtual bool loadAudioResource(WebAudioBus* /*destinationBus*/, const char* /*audioFileData*/, size_t /*dataSize*/, double /*sampleRate*/) { return false; }
 
     // Theme engine
     virtual WebThemeEngine* themeEngine();
