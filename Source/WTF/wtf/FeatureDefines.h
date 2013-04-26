@@ -231,23 +231,6 @@
 
 #endif /* PLATFORM(WIN_CAIRO) */
 
-/* --------- WX port (Mac OS and Windows) --------- */
-#if PLATFORM(WX)
-
-#if OS(DARWIN)
-#if !defined(ENABLE_WEB_ARCHIVE)
-#define ENABLE_WEB_ARCHIVE 1
-#endif
-#endif
-
-#if OS(UNIX)
-#if !defined(ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH)
-#define ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH 1
-#endif
-#endif
-
-#endif /* PLATFORM(WX) */
-
 /* --------- NIX port (Unix) --------- */
 #if PLATFORM(NIX)
 
@@ -686,10 +669,6 @@
 #if !defined(ENABLE_PAN_SCROLLING)
 #define ENABLE_PAN_SCROLLING 1
 #endif
-#endif
-
-#if !defined(ENABLE_PARSED_STYLE_SHEET_CACHING)
-#define ENABLE_PARSED_STYLE_SHEET_CACHING 1
 #endif
 
 #if !defined(ENABLE_PLUGIN_PACKAGE_SIMPLE_HASH)

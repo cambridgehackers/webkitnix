@@ -1,3 +1,110 @@
+2013-04-26  Martin Robinson  <mrobinson@igalia.com>
+
+        Remove the remaining Skia #ifdefs
+        https://bugs.webkit.org/show_bug.cgi?id=114886
+
+        Reviewed by Benjamin Poulain.
+
+        * Api/WebPage.cpp: Remove Skia #ifdef references.
+        * WebCoreSupport/AboutDataUseFeatures.in: Ditto.
+
+2013-04-26  Mary Wu  <mary.wu@torchmobile.com.cn>
+
+        [BlackBerry] Should check if it's cached resource before download
+        https://bugs.webkit.org/show_bug.cgi?id=115101
+
+        Reviewed by Rob Buis.
+
+        Since main resource maybe cached, if user want to save the resource, we first check
+        if it's cached. If yes, don't need to initiate a fresh load again, but get the
+        cached resource data out to save.
+
+        RIM bug# 324003, internally reviewed by Charles Wei.
+
+        * WebCoreSupport/FrameLoaderClientBlackBerry.cpp:
+        (WebCore::FrameLoaderClientBlackBerry::convertMainResourceLoadToDownload):
+
+2013-04-26  Mary Wu  <mary.wu@torchmobile.com.cn>
+
+        [BlackBerry] Clean up load interface in WebPage
+        https://bugs.webkit.org/show_bug.cgi?id=113267
+
+        Reviewed by Rob Buis.
+
+        Remove unused loadExtended(), combine load() and download() api in WebPage.
+        RIM Bug# 315535, internally reviewed by Joe Mason.
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPage::load):
+        * Api/WebPage.h:
+
+2013-04-25  Andrew Lo  <anlo@rim.com>
+
+        [BlackBerry] Selection overlay on non-composited iframes are incorrectly positioned.
+        https://bugs.webkit.org/show_bug.cgi?id=115197
+
+        Reviewed by Rob Buis.
+
+        When drawing the selection overlay, the rects to
+        paint when selecting text on non-composited sub-frames
+        need to be adjusted by the frame position.
+
+        * WebKitSupport/SelectionOverlay.cpp:
+        (BlackBerry::WebKit::SelectionOverlay::paintContents):
+
+2013-04-25  Andreas Kling  <akling@apple.com>
+
+        Remove ENABLE(PARSED_STYLE_SHEET_CACHING) and make it always-on.
+
+        Rubber-stamped by Anders Koivisto.
+
+        * WebCoreSupport/AboutDataEnableFeatures.in:
+
+2013-04-25  Iris Wu  <shuwu@blackberry.com>
+
+        [BlackBerry] Make scroll position adjustment work with pages with fixed position elements.
+        https://bugs.webkit.org/show_bug.cgi?id=115178
+
+        Reviewed by Rob Buis.
+
+        PR 308796
+
+        Currently the position WebPage::adjustDocumentScrollPosition adjusts is the top
+        left point of the viewport.
+        On the page with fixed position elements, we want it to adjust the position beneath
+        the fixed elements so it can be always visible.
+
+        The basic idea is:
+        1.  Detect if there are fixed position elements before going through ProximityDetector.
+        2.  If the fixed element exists, calculate its the size and the actual visible position
+            beneath it.
+        3.  Pass the position to ProximityDetector. Then according to the new position we get,
+            calculate the top left position of the viewport (final scroll position).
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPage::fixedElementSizeDelta):
+        (WebKit):
+        * Api/WebPage.h:
+        * Api/WebPageCompositor.cpp:
+        (BlackBerry::WebKit::WebPageCompositorPrivate::findFixedElementRect):
+        (WebKit):
+        * Api/WebPageCompositor_p.h:
+        (WebPageCompositorPrivate):
+
+2013-04-25  Mike Lattanzio  <mlattanzio@blackberry.com>
+
+        [BlackBerry] Enable balanced page group load deferrer behaviour.
+        https://bugs.webkit.org/show_bug.cgi?id=115189
+
+        Reviewed by Rob Buis.
+
+        Prevent a possible deadlock by enabling balanced deferrers.
+        Internally reviewed by: Joe Mason
+        PR 329986
+
+        * Api/WebPage.cpp:
+        (BlackBerry::WebKit::WebPagePrivate::init):
+
 2013-04-25  Joseph Pecoraro  <pecoraro@apple.com>
 
         Web Inspector: ConsoleMessage should include line and column number where possible

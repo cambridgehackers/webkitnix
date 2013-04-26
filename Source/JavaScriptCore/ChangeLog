@@ -1,3 +1,294 @@
+2013-04-26  Mark Hahnenberg  <mhahnenberg@apple.com>
+
+        REGRESSION(r149165): It made many tests crash on 32 bit
+        https://bugs.webkit.org/show_bug.cgi?id=115227
+
+        Reviewed by Csaba Osztrogonác.
+
+        m_reservation is uninitialized when ENABLE(SUPER_REGION) is false.
+
+        * heap/SuperRegion.cpp:
+        (JSC::SuperRegion::~SuperRegion):
+
+2013-04-26  Julien Brianceau  <jbrianceau@nds.com>
+
+        Fix SH4 build broken since r149159.
+        https://bugs.webkit.org/show_bug.cgi?id=115229
+
+        Add BranchTruncateType enum in SH4 port and handle it in branchTruncateDoubleToInt32.
+
+        Reviewed by Allan Sandfeld Jensen.
+
+        * assembler/MacroAssemblerSH4.h:
+        (JSC::MacroAssemblerSH4::branchTruncateDoubleToInt32):
+
+2013-04-25  Mark Hahnenberg  <mhahnenberg@apple.com>
+
+        SuperRegion doesn't call deallocate() on its PageReservation
+        https://bugs.webkit.org/show_bug.cgi?id=115208
+
+        Reviewed by Geoffrey Garen.
+
+        It should. This doesn't cause us to leak physical memory, but it does cause us to leak virtual 
+        address space (and probably mach ports), which is also bad :-( FixedVMPoolExecutableAllocator 
+        also has this bug, but it doesn't matter much because there's only one instance of that class 
+        throughout the entire lifetime of the process, whereas each VM has its own SuperRegion. 
+
+        * heap/SuperRegion.cpp:
+        (JSC::SuperRegion::~SuperRegion):
+        * heap/SuperRegion.h:
+        (SuperRegion):
+        * jit/ExecutableAllocatorFixedVMPool.cpp:
+        (FixedVMPoolExecutableAllocator):
+        (JSC::FixedVMPoolExecutableAllocator::~FixedVMPoolExecutableAllocator):
+
+2013-04-25  Filip Pizlo  <fpizlo@apple.com>
+
+        DFG doesn't support to_jsnumber
+        https://bugs.webkit.org/show_bug.cgi?id=115129
+
+        Reviewed by Geoffrey Garen.
+        
+        Based on Oliver's patch. Implements to_jsnumber as Identity(Number:@thingy), and then does
+        an optimization in Fixup to turn Identity(Number:) into Identity(Int32:) if the predictions
+        tell us to. Identity is later turned into Phantom.
+        
+        Also fixed BackPropMask, which appeared to have NodeDoesNotExit included in it. That's
+        wrong; NodeDoesNotExit is not a backward propagation property.
+        
+        Also fixed Identity to be marked as CanExit (i.e. not NodeDoesNotExit).
+        
+        This more than doubles the FPS on ammo.
+
+        * dfg/DFGByteCodeParser.cpp:
+        (JSC::DFG::ByteCodeParser::parseBlock):
+        * dfg/DFGCapabilities.h:
+        (JSC::DFG::canCompileOpcode):
+        * dfg/DFGFixupPhase.cpp:
+        (JSC::DFG::FixupPhase::fixupNode):
+        (FixupPhase):
+        (JSC::DFG::FixupPhase::observeUseKindOnNode):
+        (JSC::DFG::FixupPhase::observeUseKindOnEdge):
+        * dfg/DFGNodeFlags.h:
+        (DFG):
+        * dfg/DFGNodeType.h:
+        (DFG):
+        * dfg/DFGPredictionPropagationPhase.cpp:
+        (JSC::DFG::PredictionPropagationPhase::propagate):
+
+2013-04-24  Oliver Hunt  <oliver@apple.com>
+
+        Add support for Math.imul
+        https://bugs.webkit.org/show_bug.cgi?id=115143
+
+        Reviewed by Filip Pizlo.
+
+        Add support for Math.imul, a thunk generator for Math.imul,
+        and an intrinsic.
+
+        Fairly self explanatory set of changes, DFG intrinsics simply
+        leverages the existing ValueToInt32 nodes.
+
+        * create_hash_table:
+        * dfg/DFGAbstractState.cpp:
+        (JSC::DFG::AbstractState::executeEffects):
+        * dfg/DFGBackwardsPropagationPhase.cpp:
+        (JSC::DFG::BackwardsPropagationPhase::propagate):
+        * dfg/DFGByteCodeParser.cpp:
+        (JSC::DFG::ByteCodeParser::handleIntrinsic):
+        * dfg/DFGCSEPhase.cpp:
+        (JSC::DFG::CSEPhase::performNodeCSE):
+        * dfg/DFGFixupPhase.cpp:
+        (JSC::DFG::FixupPhase::fixupNode):
+        * dfg/DFGNodeType.h:
+        (DFG):
+        * dfg/DFGPredictionPropagationPhase.cpp:
+        (JSC::DFG::PredictionPropagationPhase::propagate):
+        * dfg/DFGSpeculativeJIT.cpp:
+        (JSC::DFG::SpeculativeJIT::compileArithIMul):
+        * dfg/DFGSpeculativeJIT.h:
+        (SpeculativeJIT):
+        * dfg/DFGSpeculativeJIT32_64.cpp:
+        (JSC::DFG::SpeculativeJIT::compile):
+        * dfg/DFGSpeculativeJIT64.cpp:
+        (JSC::DFG::SpeculativeJIT::compile):
+        * jit/ThunkGenerators.cpp:
+        (JSC::imulThunkGenerator):
+        (JSC):
+        * jit/ThunkGenerators.h:
+        (JSC):
+        * runtime/Intrinsic.h:
+        * runtime/MathObject.cpp:
+        (JSC):
+        (JSC::mathProtoFuncIMul):
+        * runtime/VM.cpp:
+        (JSC::thunkGeneratorForIntrinsic):
+
+2013-04-25  Filip Pizlo  <fpizlo@apple.com>
+
+        Unreviewed, roll out http://trac.webkit.org/changeset/148999
+        It broke http://kripken.github.io/ammo.js/examples/new/ammo.html
+
+        * JavaScriptCore.order:
+        * bytecompiler/BytecodeGenerator.cpp:
+        (JSC::BytecodeGenerator::emitNewArray):
+        (JSC::BytecodeGenerator::emitThrowReferenceError):
+        (JSC::BytecodeGenerator::emitReadOnlyExceptionIfNeeded):
+        * bytecompiler/BytecodeGenerator.h:
+        (JSC::BytecodeGenerator::shouldEmitProfileHooks):
+        (BytecodeGenerator):
+        * bytecompiler/NodesCodegen.cpp:
+        (JSC):
+        (JSC::NullNode::emitBytecode):
+        (JSC::BooleanNode::emitBytecode):
+        (JSC::NumberNode::emitBytecode):
+        (JSC::StringNode::emitBytecode):
+        (JSC::IfNode::emitBytecode):
+        (JSC::IfElseNode::emitBytecode):
+        * parser/ASTBuilder.h:
+        (JSC::ASTBuilder::createIfStatement):
+        (ASTBuilder):
+        * parser/NodeConstructors.h:
+        (JSC):
+        (JSC::NullNode::NullNode):
+        (JSC::BooleanNode::BooleanNode):
+        (JSC::NumberNode::NumberNode):
+        (JSC::StringNode::StringNode):
+        (JSC::IfNode::IfNode):
+        (JSC::IfElseNode::IfElseNode):
+        * parser/Nodes.h:
+        (JSC::ExpressionNode::isPure):
+        (JSC::ExpressionNode::isSubtract):
+        (StatementNode):
+        (NullNode):
+        (JSC::NullNode::isNull):
+        (BooleanNode):
+        (JSC::BooleanNode::isPure):
+        (NumberNode):
+        (JSC::NumberNode::value):
+        (JSC::NumberNode::isPure):
+        (StringNode):
+        (JSC::StringNode::isPure):
+        (JSC::StringNode::isString):
+        (BinaryOpNode):
+        (IfNode):
+        (JSC):
+        (IfElseNode):
+        (ContinueNode):
+        (BreakNode):
+        * parser/Parser.cpp:
+        (JSC::::parseIfStatement):
+        * parser/ResultType.h:
+        (ResultType):
+        * runtime/JSCJSValueInlines.h:
+        (JSC::JSValue::pureToBoolean):
+        * runtime/JSCell.h:
+        (JSCell):
+        * runtime/JSCellInlines.h:
+        (JSC):
+
+2013-04-25  Filip Pizlo  <fpizlo@apple.com>
+
+        PreciseJumpTargets should treat loop_hint as a jump target
+        https://bugs.webkit.org/show_bug.cgi?id=115209
+
+        Reviewed by Mark Hahnenberg.
+        
+        I didn't add a test but I turned this into a release assertion. Running Octane is enough
+        to trigger it.
+
+        * bytecode/PreciseJumpTargets.cpp:
+        (JSC::computePreciseJumpTargets):
+        * dfg/DFGByteCodeParser.cpp:
+        (JSC::DFG::ByteCodeParser::parseBlock):
+
+2013-04-25  Roman Zhuykov  <zhroma@ispras.ru>
+
+        Fix problems with processing negative zero on DFG.
+        https://bugs.webkit.org/show_bug.cgi?id=113862
+
+        Reviewed by Filip Pizlo.
+
+        Fix NodeNeedsNegZero flag propagation in BackwardPropagationPhase.
+        Function arithNodeFlags should not mask NodeNeedsNegZero flag for ArithNegate and DoubleAsInt32
+        nodes and this flag should be always used to decide where we need to generate nezative-zero checks.
+        Remove unnecessary negative-zero checks from integer ArithDiv on ARM.
+        Also remove such checks from integer ArithMod on ARM and X86, and make them always to
+        check not only "modulo_result == 0" but also "dividend < 0".
+        Generate faster code for case when ArithMod operation divisor is constant power of 2 on ARMv7
+        in the same way as on ARMv7s, and add negative-zero checks into this code when needed.
+        Change speculationCheck ExitKind from Overflow to NegativeZero where applicable.
+ 
+        This shows 30% speedup of math-spectral-norm, and 5% speedup
+        on SunSpider overall on ARMv7 Linux.
+
+        * assembler/MacroAssemblerARM.h:
+        (JSC::MacroAssemblerARM::branchConvertDoubleToInt32):
+        * assembler/MacroAssemblerARMv7.h:
+        (JSC::MacroAssemblerARMv7::branchConvertDoubleToInt32):
+        * assembler/MacroAssemblerMIPS.h:
+        (JSC::MacroAssemblerMIPS::branchConvertDoubleToInt32):
+        * assembler/MacroAssemblerSH4.h:
+        (JSC::MacroAssemblerSH4::branchConvertDoubleToInt32):
+        * assembler/MacroAssemblerX86Common.h:
+        (JSC::MacroAssemblerX86Common::branchConvertDoubleToInt32):
+        * dfg/DFGBackwardsPropagationPhase.cpp:
+        (JSC::DFG::BackwardsPropagationPhase::isNotNegZero):
+        (JSC::DFG::BackwardsPropagationPhase::isNotPosZero):
+        (JSC::DFG::BackwardsPropagationPhase::propagate):
+        * dfg/DFGNode.h:
+        (JSC::DFG::Node::arithNodeFlags):
+        * dfg/DFGSpeculativeJIT.cpp:
+        (JSC::DFG::SpeculativeJIT::compileDoubleAsInt32):
+        (JSC::DFG::SpeculativeJIT::compileSoftModulo):
+        (JSC::DFG::SpeculativeJIT::compileArithNegate):
+
+2013-04-25  Oliver Hunt  <oliver@apple.com>
+
+        Stack guards are too conservative
+        https://bugs.webkit.org/show_bug.cgi?id=115147
+
+        Reviewed by Mark Hahnenberg.
+
+        Increase stack guard to closer to old size.
+
+        * interpreter/Interpreter.cpp:
+        (JSC::Interpreter::StackPolicy::StackPolicy):
+
+2013-04-25  Oliver Hunt  <oliver@apple.com>
+
+        Stack guards are too conservative
+        https://bugs.webkit.org/show_bug.cgi?id=115147
+
+        Reviewed by Geoffrey Garen.
+
+        Reduce the limits and simplify the decision making.
+
+        * interpreter/Interpreter.cpp:
+        (JSC::Interpreter::StackPolicy::StackPolicy):
+
+2013-04-25  Nick Diego Yamane  <nick.yamane@openbossa.org>
+
+        JSC: Fix interpreter misbehavior in builds with JIT disabled
+        https://bugs.webkit.org/show_bug.cgi?id=115190
+
+        Reviewed by Oliver Hunt.
+
+        Commit http://trac.webkit.org/changeset/147858 modified
+        some details on how JS stack traces are built. The method
+        "getLineNumberForCallFrame", renamed in that changeset to
+        "getBytecodeOffsetForCallFrame" is always returning `0' when
+        JIT is disabled
+
+        How to reproduce:
+         - Build webkit with JIT disabled
+         - Open MiniBrowser, for example, with http://google.com
+         - In a debug build, WebProcess will hit the following ASSERT:
+           Source/JavaScriptCore/bytecode/UnlinkedCodeBlock.cpp:279 ASSERT(low);
+
+        * interpreter/Interpreter.cpp:
+        (JSC::getBytecodeOffsetForCallFrame):
+
 2013-04-25  Oliver Hunt  <oliver@apple.com>
 
         Make checkSyntax take a VM instead of an ExecState

@@ -1,3 +1,125 @@
+2013-04-26  Alexey Proskuryakov  <ap@apple.com>
+
+        Blobs are not associated with connection when there are no sandbox extensions
+        https://bugs.webkit.org/show_bug.cgi?id=115264
+
+        Reviewed by Brady Eidson.
+
+        Covered by multiple fast/files tests when using NetworkProcess.
+
+        * NetworkProcess/FileAPI/NetworkBlobRegistry.cpp:
+        (WebKit::NetworkBlobRegistry::registerBlobURL): Fixed a logic error.
+
+2013-04-25  Andy Estes  <aestes@apple.com>
+
+        [WebKit2] Loading a resource from a custom protocol in a synchronous XHR times out
+        https://bugs.webkit.org/show_bug.cgi?id=115223
+
+        Reviewed by Darin Adler.
+
+        When WebKit performs a synchronous load on the Mac, it spins a nested
+        run loop in a mode that only accepts input from the NSURLConnection
+        performing the load. When the load is for a custom protocol in WebKit2,
+        we proxy it to the UI process via CoreIPC messages, but the response
+        messages from the UI process are never processed as long as the run
+        loop is in a non-common mode (and we wouldn't want to process messages
+        that could re-enter WebCore in the middle of loading, anyway). Since
+        these messages never make it back to the NSURLConnection handling the
+        request, the connection eventually times out.
+
+        Fix this by using a work queue to handle custom protocol messages in
+        the networking process. The work queue can process incoming custom
+        protocol messages while the main thread is blocked.
+
+        * NetworkProcess/NetworkProcess.cpp:
+        (WebKit::NetworkProcess::initializeConnection): Called
+        initializeConnection() on all the NetworkProcess's supplements.
+        * Shared/ChildProcessSupplement.h: Added a base class for
+        NetworkProcessSupplement and WebProcessSupplement which defines
+        initializeConnection and provides an empty default implementation.
+        (WebKit::ChildProcessSupplement::~ChildProcessSupplement):
+        (WebKit::ChildProcessSupplement::initializeConnection):
+        * Shared/Network/CustomProtocols/CustomProtocolManager.h:
+        * Shared/Network/CustomProtocols/mac/CustomProtocolManagerMac.mm:
+        (WebKit::CustomProtocolManager::CustomProtocolManager): Instantiated a
+        work queue for message processing.
+        (WebKit::CustomProtocolManager::initializeConnection): Added the work
+        queue as a message receiver on the CoreIPC connection.
+        (WebKit::CustomProtocolManager::initialize): If we're in the web
+        process and the network process is being used, unregister and destroy
+        the work queue we previously created. It'd be better to not create it
+        in the first place, but we have to register our work queue with the
+        CoreIPC connection before it is established, which is before the UI
+        process has told us whether the network process is in use.
+        * Shared/Network/NetworkProcessSupplement.h: Inherited from
+        ChildProcessSupplement.
+        * WebKit2.xcodeproj/project.pbxproj: Added ChildProcessSupplement.h.
+        * WebProcess/WebProcess.cpp:
+        (WebKit::WebProcess::initializeConnection): Called
+        initializeConnection() on all the WebProcess's supplements.
+        * WebProcess/WebProcessSupplement.h: Inherited from
+        ChildProcessSupplement.
+
+2013-04-26  Eduardo Lima Mitev  <elima@igalia.com>
+
+        [GTK] Compilation of ProcessLauncherGtk.cpp fails due to unresolved symbols
+        https://bugs.webkit.org/show_bug.cgi?id=115240
+
+        Reviewed by Martin Robinson.
+
+        * UIProcess/Launcher/gtk/ProcessLauncherGtk.cpp: Includes sys/socket.h if OS is Linux
+
+2013-04-25  Zan Dobersek  <zdobersek@igalia.com>
+
+        [GTK] Plugin process broken due to a missing symbol
+        https://bugs.webkit.org/show_bug.cgi?id=114901
+
+        Reviewed by Gustavo Noronha Silva.
+
+        Work around the missing symbols in the WebKitPluginProcess by specifying the required libraries
+        multiple times in the program's LDADD list. Libtool fights fiercely to avoid duplicate static library
+        references among the linker arguments (even if using the --preserve-dup-deps flag) so the required libraries
+        are specified in various ways.
+
+        The unresolved symbols in object files are no longer ignored as this can lead to further trouble (for instance
+        this patch also adds a few missing source files to the list of WebKitPluginProcess sources). The Freetype and
+        gamepad dependencies' libraries are also added to the binary's LDADD list.
+
+        * GNUmakefile.am:
+        * GNUmakefile.list.am: Add a few missing files to the build.
+
+2013-04-24  Chris Fleizach  <cfleizach@apple.com>
+
+        WEB SPEECH: language support does not work as expected
+        https://bugs.webkit.org/show_bug.cgi?id=115119
+
+        Reviewed by Alexey Proskuryakov.
+
+        * WebProcess/WebCoreSupport/mac/WebSystemInterface.mm:
+        (InitWebCoreSystemInterface):
+
+2013-04-25  Anders Carlsson  <andersca@apple.com>
+
+        Rename DecidePolicyForResponse message to DecidePolicyForResponseSync
+        https://bugs.webkit.org/show_bug.cgi?id=115207
+
+        Reviewed by Beth Dakin.
+
+        In preparation for adding a new async DecidePolicyForResponse message,
+        rename the current one to DecidePolicyForResponseSync. Also split out the async part
+        into a separate WebPageProxy::decidePolicyForResponse member function.
+
+        * UIProcess/WebPageProxy.cpp:
+        (WebKit::WebPageProxy::WebPageProxy):
+        (WebKit::WebPageProxy::receivedPolicyDecision):
+        (WebKit::WebPageProxy::decidePolicyForResponse):
+        (WebKit::WebPageProxy::decidePolicyForResponseSync):
+        * UIProcess/WebPageProxy.h:
+        (WebPageProxy):
+        * UIProcess/WebPageProxy.messages.in:
+        * WebProcess/WebCoreSupport/WebFrameLoaderClient.cpp:
+        (WebKit::WebFrameLoaderClient::dispatchDecidePolicyForResponse):
+
 2013-04-25  Joseph Pecoraro  <pecoraro@apple.com>
 
         Web Inspector: ConsoleMessage should include line and column number where possible

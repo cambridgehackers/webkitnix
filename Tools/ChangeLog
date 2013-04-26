@@ -1,3 +1,160 @@
+2013-04-26  Zan Dobersek  <zdobersek@igalia.com>
+
+        [GTK] Clean up the TestWebKitAPI GNUmakefile.am
+        https://bugs.webkit.org/show_bug.cgi?id=115233
+
+        Reviewed by Martin Robinson.
+
+        Specify unconditional, non-installable program targets in one declaration. Only conditionally specify
+        WebKit2-specific targets, not the complete target setups (i.e. targets' sources, cppflags listings etc.).
+        Add missing unit test source files to the TestWTF program, namely HashSet.cpp and MetaAllocator.cpp.
+        Specify the TestWTF program's CXXFLAGS to be the same as the global cxxflags as the source files need to
+        be compiled with the -fno-rtti flag that's present in the global_cxxflags variable.
+
+        * TestWebKitAPI/GNUmakefile.am:
+
+2013-04-25  Andy Estes  <aestes@apple.com>
+
+        [WebKit2] Loading a resource from a custom protocol in a synchronous XHR times out
+        https://bugs.webkit.org/show_bug.cgi?id=115223
+
+        Reviewed by Darin Adler.
+
+        Added an API test.
+
+        * TestWebKitAPI/TestWebKitAPI.xcodeproj/project.pbxproj: Added new files.
+        * TestWebKitAPI/Tests/CustomProtocolsSyncXHRTest.mm: Added.
+        (TestWebKitAPI::TEST): Tested that a synchronous XHR does not time out
+        when it loads a request with a custom protocol.
+        * TestWebKitAPI/Tests/WebKit2/custom-protocol-sync-xhr.html: Added.
+        * TestWebKitAPI/Tests/WebKit2ObjC/CustomProtocolsTest.mm: Moved the
+        NSURLProtocol subclass to TestProtocol.{h, mm} and did some
+        miscellaneous cleanup.
+        * TestWebKitAPI/mac/TestProtocol.h: Copied from Source/WebKit2/WebProcess/WebProcessSupplement.h.
+        * TestWebKitAPI/mac/TestProtocol.mm: Copied from Tools/TestWebKitAPI/Tests/WebKit2ObjC/CustomProtocolsTest.mm.
+        (+[TestProtocol canInitWithRequest:]):
+        (+[TestProtocol canonicalRequestForRequest:]):
+        (+[TestProtocol requestIsCacheEquivalent:toRequest:]):
+        (+[TestProtocol scheme]):
+        (-[TestProtocol startLoading]):
+        (-[TestProtocol stopLoading]):
+
+2013-04-26  Martin Robinson  <mrobinson@igalia.com>
+
+        Remove the remaining Skia #ifdefs
+        https://bugs.webkit.org/show_bug.cgi?id=114886
+
+        Reviewed by Benjamin Poulain.
+
+        * DumpRenderTree/blackberry/PixelDumpSupportBlackBerry.cpp:
+        (createBitmapContextFromWebView): Remove Skia #ifdef references.
+
+2013-04-26  Mary Wu  <mary.wu@torchmobile.com.cn>
+
+        [BlackBerry] Clean up load interface in WebPage
+        https://bugs.webkit.org/show_bug.cgi?id=113267
+
+        Reviewed by Rob Buis.
+
+        Update DumpRenderTree with change of load() interface in WebPage.
+        RIM Bug# 315535, internally reviewed by Joe Mason.
+
+        * DumpRenderTree/blackberry/DumpRenderTree.cpp:
+        (BlackBerry::WebKit::DumpRenderTree::runTest):
+
+2013-04-26  Zan Dobersek  <zdobersek@igalia.com>
+
+        Remove the HeapGraphSerializer unit test
+        https://bugs.webkit.org/show_bug.cgi?id=115231
+
+        Reviewed by Andreas Kling.
+
+        Remove the HeapGraphSerializer unit test. The code it was testing was removed in r148921,
+        specifically the Source/WebCore/inspector/HeapGraphSerializer.(cpp|h) files.
+
+        * TestWebKitAPI/Tests/WebCore/HeapGraphSerializerTest.cpp: Removed.
+
+2013-04-25  Seokju Kwon  <seokju.kwon@gmail.com>
+
+        Remove support for Chromium from build/update scripts
+        https://bugs.webkit.org/show_bug.cgi?id=115218
+
+        Reviewed by Darin Adler.
+
+        * Scripts/build-webkit:
+        (writeCongrats):
+        * Scripts/update-webkit:
+
+2013-04-25  Seokju Kwon  <seokju.kwon@gmail.com>
+
+        Remove support for Chromium from api-test
+        https://bugs.webkit.org/show_bug.cgi?id=115211
+
+        Reviewed by Dirk Pranke.
+
+        * Scripts/build-api-tests:
+        * Scripts/run-api-tests:
+        (isSupportedPlatform):
+
+2013-04-25  Seokju Kwon  <seokju.kwon@gmail.com>
+
+        Get rid of Chromium in build-dumprendertree
+        https://bugs.webkit.org/show_bug.cgi?id=115212
+
+        Reviewed by Dirk Pranke.
+
+        * Scripts/build-dumprendertree:
+
+2013-04-25  Alexey Proskuryakov  <ap@apple.com>
+
+        Pass relatedPage when creating a page in WebKitTestRunner
+        https://bugs.webkit.org/show_bug.cgi?id=115206
+
+        Reviewed by Geoffrey Garen.
+
+        To make sure that window.open() opens in the same process even when using multiple processes.
+
+        * WebKitTestRunner/PlatformWebView.h:
+        * WebKitTestRunner/TestController.cpp:
+        (WTR::TestController::createOtherPage):
+        (WTR::TestController::createWebViewWithOptions):
+        * WebKitTestRunner/efl/PlatformWebViewEfl.cpp:
+        (WTR::PlatformWebView::PlatformWebView):
+        * WebKitTestRunner/gtk/PlatformWebViewGtk.cpp:
+        (WTR::PlatformWebView::PlatformWebView):
+        * WebKitTestRunner/mac/PlatformWebViewMac.mm:
+        (-[TestRunnerWKView initWithFrame:contextRef:pageGroupRef:relatedToPage:useTiledDrawing:]):
+        (WTR::PlatformWebView::PlatformWebView):
+        * WebKitTestRunner/qt/PlatformWebViewQt.cpp:
+        (WTR::PlatformWebView::PlatformWebView):
+        * WebKitTestRunner/win/PlatformWebViewWin.cpp:
+        (WTR::PlatformWebView::PlatformWebView):
+
+2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Fix autocompletion for Benjamin. The Bugzilla email address must come first.
+
+        * Scripts/webkitpy/common/config/contributors.json:
+
+2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Build fix. Forgot to merge args.
+
+        * Scripts/webkitpy/tool/bot/irc_command.py:
+        (Hi.execute):
+
+2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
+
+        webkitbot should recognize its own nickname in greetings.
+        https://bugs.webkit.org/show_bug.cgi?id=115196
+
+        Reviewed by Andreas Kling.
+
+        Make webkitbot recognize other forms of its nick. Also be tolerant of spaces between the nick and !.
+
+        * Scripts/webkitpy/tool/bot/irc_command.py:
+        (Hi.execute):
+
 2013-04-25  Xavier Castano  <xcastanho@igalia.com>
 
         [GTK] Tools/gtk/install-dependencies added ragel dependency

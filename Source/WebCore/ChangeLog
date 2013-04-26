@@ -1,3 +1,572 @@
+2013-04-26  Martin Robinson  <mrobinson@igalia.com>
+
+        Remove the remaining Skia #ifdefs
+        https://bugs.webkit.org/show_bug.cgi?id=114886
+
+        Reviewed by Benjamin Poulain.
+
+        * html/HTMLCanvasElement.cpp: Remove Skia #ifdef references.
+        * platform/graphics/BitmapImage.cpp: Ditto.
+        * platform/graphics/FloatPoint.h: Ditto.
+        * platform/graphics/FloatRect.h: Ditto.
+        * platform/graphics/FontCache.h: Ditto.
+        * platform/graphics/Gradient.cpp: Ditto.
+        * platform/graphics/Gradient.h: Ditto.
+        * platform/graphics/GraphicsContext.cpp: Ditto.
+        * platform/graphics/GraphicsContext.h: Ditto.
+        * platform/graphics/GraphicsContext3D.h: Ditto.
+        * platform/graphics/ImageBuffer.cpp: Ditto.
+        * platform/graphics/ImageBuffer.h: Ditto.
+        * platform/graphics/ImageBufferData.h: Ditto.
+        * platform/graphics/IntPoint.h: Ditto.
+        * platform/graphics/IntRect.h: Ditto.
+        * platform/graphics/NativeImagePtr.h: Ditto.
+        * platform/graphics/Path.h: Ditto.
+        * platform/graphics/Pattern.cpp: Ditto.
+        * platform/graphics/Pattern.h: Ditto.
+        * platform/graphics/filters/FEBlend.h: Ditto.
+        * platform/graphics/filters/FEColorMatrix.h: Ditto.
+        * platform/graphics/filters/FEComponentTransfer.h: Ditto.
+        * platform/graphics/filters/FEComposite.h: Ditto.
+        * platform/graphics/filters/FEConvolveMatrix.h: Ditto.
+        * platform/graphics/filters/FEDisplacementMap.h: Ditto.
+        * platform/graphics/filters/FEGaussianBlur.h: Ditto.
+        * platform/graphics/filters/FELighting.h: Ditto.
+        * platform/graphics/filters/FEMorphology.h: Ditto.
+        * platform/graphics/filters/FEOffset.h: Ditto.
+        * platform/graphics/filters/FilterEffect.cpp: Ditto.
+        * platform/graphics/filters/FilterEffect.h: Ditto.
+        * platform/graphics/transforms/AffineTransform.h: Ditto.
+        * platform/graphics/transforms/TransformationMatrix.h: Ditto.
+        * platform/image-decoders/ImageDecoder.cpp: Ditto.
+        * platform/image-decoders/ImageDecoder.h: Ditto.
+        * platform/image-decoders/jpeg/JPEGImageDecoder.cpp: Ditto.
+        * platform/image-decoders/webp/WEBPImageDecoder.cpp: Ditto.
+        * platform/mac/LocalCurrentGraphicsContext.h: Ditto.
+        * platform/mac/LocalCurrentGraphicsContext.mm: Ditto.
+        * rendering/svg/RenderSVGResourceSolidColor.cpp: Ditto.
+        * svg/graphics/SVGImage.cpp: Ditto.
+        * svg/graphics/SVGImage.h: Ditto.
+
+2013-04-26  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        Assert in JSC::Heap::unprotect when closing facebook.com web site
+        https://bugs.webkit.org/show_bug.cgi?id=115058
+
+        Reviewed by Darin Adler.
+
+        Grab a JSLock before calling RootObject::invalidate().
+
+        * bindings/js/ScriptController.cpp:
+        (WebCore::ScriptController::~ScriptController):
+
+2013-04-26  Eric Carlson  <eric.carlson@apple.com>
+
+        [Mac] in-band cues sometimes have incorrect duration
+        https://bugs.webkit.org/show_bug.cgi?id=115200
+
+        Reviewed by Jer Noble.
+
+        No new tests, this is not possible to test in DRT.
+
+        * html/track/InbandTextTrack.cpp:
+        (WebCore::InbandTextTrack::addGenericCue): Don't add completed cues to the map.
+        (WebCore::InbandTextTrack::removeGenericCue): Log when a cue is removed from the track.
+
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.cpp:
+        (WebCore::InbandTextTrackPrivateAVF::InbandTextTrackPrivateAVF): Initialize m_pendingCueStatus.
+        (WebCore::InbandTextTrackPrivateAVF::processCue): Never call update() on a cue that is delivered
+            while seeking.
+        (WebCore::InbandTextTrackPrivateAVF::beginSeeking): Flush all incomplete cues, remember that 
+            we are seeking.
+        (WebCore::InbandTextTrackPrivateAVF::resetCueValues): 
+        * platform/graphics/avfoundation/InbandTextTrackPrivateAVF.h:
+
+        * platform/graphics/avfoundation/MediaPlayerPrivateAVFoundation.cpp:
+        (WebCore::MediaPlayerPrivateAVFoundation::seek): Call track->beginSeeking() instead of resetCueValues().
+        (WebCore::MediaPlayerPrivateAVFoundation::seekCompleted): Call track->endSeeking().
+
+        * platform/graphics/avfoundation/objc/InbandTextTrackPrivateAVFObjC.mm:
+        (WebCore::InbandTextTrackPrivateAVFObjC::kind): Include class name in Kind enum values to 
+            avoid compile error.
+
+2013-04-26  Andreas Kling  <akling@apple.com>
+
+        Remove wxWebKit from WebCore.
+        <http://webkit.org/b/115255>
+
+        Reviewed by Anders Carlsson.
+
+        * DerivedSources.make:
+        * WebCorePrefix.h:
+        * bindings/js/JSInspectorFrontendHostCustom.cpp:
+        (WebCore::JSInspectorFrontendHost::port):
+        * config.h:
+        * html/HTMLFormElement.cpp:
+        * platform/ContextMenu.h:
+        (ContextMenu):
+        * platform/ContextMenuItem.h:
+        * platform/Cursor.h:
+        * platform/DragData.h:
+        * platform/DragImage.h:
+        * platform/FileSystem.h:
+        * platform/PlatformExportMacros.h:
+        * platform/PlatformKeyboardEvent.h:
+        (PlatformKeyboardEvent):
+        * platform/PlatformMenuDescription.h:
+        * platform/PlatformMouseEvent.h:
+        (PlatformMouseEvent):
+        * platform/PlatformWheelEvent.h:
+        (PlatformWheelEvent):
+        * platform/ScrollView.cpp:
+        * platform/ScrollView.h:
+        (ScrollView):
+        * platform/Widget.h:
+        * platform/win/SharedTimerWin.cpp:
+
+2013-04-26  Zalan Bujtas  <zalan@apple.com>
+
+        use-after-free removing a frame from its parent in a beforeload event of an OBJECT element
+        https://bugs.webkit.org/show_bug.cgi?id=113964
+
+        Object elements have the tendecny to modify or even fully remove 
+        the containing Document inside beforeload callback. While Document is removed, 
+        RenderArena gets destroyed. Retained RenderWidgets fails to function with NULL arena.
+        
+        Protect RendereArena from getting wiped out, when Document is removed 
+        during FrameView::updateWidget(). 
+
+        Reviewed by Antti Koivisto.
+
+        Test: fast/frames/crash-remove-iframe-during-object-beforeload.html
+
+        * dom/Document.cpp:
+        (WebCore::Document::attach):
+        * dom/Document.h:
+        (Document):
+        * page/FrameView.cpp:
+        (WebCore::FrameView::updateWidgets):
+        * rendering/RenderArena.h:
+        (RenderArena):
+        (WebCore::RenderArena::create):
+
+2013-04-26  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        Optimize function and interface object length computation in bindings generator
+        https://bugs.webkit.org/show_bug.cgi?id=115247
+
+        Reviewed by Kentaro Hara.
+
+        Introduce new GetFunctionLength() function that efficiently compute the length
+        of a function (i.e. its number of mandatory parameters).
+
+        We now call GetFunctionLength() instead of GenerateFunctionParametersCheck()
+        whenever we care only interested in the function length and not the actual
+        expression for checking the parameters. This is much more efficient as
+        GenerateFunctionParametersCheck() does a lot more processing than we need in
+        this case.
+
+        No new tests, no behavior change.
+
+        * bindings/scripts/CodeGeneratorJS.pm:
+        (GetFunctionLength):
+        (GenerateImplementation):
+        (GenerateConstructorHelperMethods):
+
+2013-04-26  Andreas Kling  <akling@apple.com>
+
+        Web Audio: Remove reduplicative addInput() in AnalyserNode.
+        <http://webkit.org/b/115244>
+
+        From Blink r149155 by <james.wei@intel.com>:
+
+        The parent class BasicInspectorNode already called addInput() and addOutput().
+        So it is reduplicative to call them in AnalyserNode.
+
+        * Modules/webaudio/AnalyserNode.cpp:
+        (WebCore::AnalyserNode::AnalyserNode):
+        * Modules/webaudio/AudioBasicInspectorNode.cpp:
+        (WebCore::AudioBasicInspectorNode::AudioBasicInspectorNode):
+        * Modules/webaudio/AudioBasicInspectorNode.h:
+        (AudioBasicInspectorNode):
+        * Modules/webaudio/MediaStreamAudioDestinationNode.cpp:
+        (WebCore::MediaStreamAudioDestinationNode::MediaStreamAudioDestinationNode):
+
+2013-04-26  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        Mouseenter and mouseleave events not supported
+        https://bugs.webkit.org/show_bug.cgi?id=18930
+
+        Reviewed by David Hyatt.
+
+        Implements mouseenter and mouseleave events from W3C DOM Level 3 Events.
+        These event are already supported by all other major browsers.
+
+        To avoid performance regressions the new events are only dispatched when
+        there are event listeners for them.
+
+        Tests: fast/events/mouseenter-mouseleave-capture.html
+               fast/events/mouseenter-mouseleave.html
+
+        * bindings/scripts/CodeGenerator.pm:
+        * dom/Document.cpp:
+        (WebCore::Document::prepareMouseEvent):
+        (WebCore::Document::updateHoverActiveState):
+        * dom/Document.h:
+        (Document):
+        * dom/Document.idl:
+        * dom/Element.h:
+        (Element):
+        * dom/Element.idl:
+        * dom/EventListenerMap.cpp:
+        (WebCore::EventListenerMap::containsCapturing):
+        * dom/EventListenerMap.h:
+        (EventListenerMap):
+        * dom/EventNames.h:
+        * dom/EventTarget.h:
+        (EventTarget):
+        (WebCore::EventTarget::hasCapturingEventListeners):
+        * dom/MouseEvent.cpp:
+        (WebCore::MouseEvent::create):
+        (WebCore::MouseEvent::toElement):
+        (WebCore::MouseEvent::fromElement):
+        * html/HTMLAttributeNames.in:
+        * html/HTMLElement.cpp:
+        (WebCore::HTMLElement::eventNameForAttributeName):
+        * page/DOMWindow.h:
+        (DOMWindow):
+        * page/DOMWindow.idl:
+        * svg/SVGElement.cpp:
+        (WebCore::SVGElement::parseAttribute):
+        * svg/SVGElementInstance.h:
+        (SVGElementInstance):
+        * svg/SVGElementInstance.idl:
+
+2013-04-26  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        Add support for Web IDL partial interfaces to the bindings generator
+        https://bugs.webkit.org/show_bug.cgi?id=115228
+
+        Reviewed by Kentaro Hara.
+
+        Add support for Web IDL partial interfaces to the bindings generator:
+        http://dev.w3.org/2006/webapi/WebIDL/#dfn-partial-interface
+
+        Also drop support for the the WebKit-specific [Supplemental] extended
+        attribute and use partial interfaces instead in existing IDL files.
+
+        No new tests, no behavior change.
+
+        * Modules/battery/NavigatorBattery.idl:
+        * Modules/filesystem/DOMWindowFileSystem.idl:
+        * Modules/filesystem/DataTransferItemFileSystem.idl:
+        * Modules/filesystem/HTMLInputElementFileSystem.idl:
+        * Modules/filesystem/WorkerContextFileSystem.idl:
+        * Modules/gamepad/NavigatorGamepad.idl:
+        * Modules/geolocation/NavigatorGeolocation.idl:
+        * Modules/indexeddb/DOMWindowIndexedDatabase.idl:
+        * Modules/indexeddb/WorkerContextIndexedDatabase.idl:
+        * Modules/mediastream/DOMWindowMediaStream.idl:
+        * Modules/mediastream/NavigatorMediaStream.idl:
+        * Modules/navigatorcontentutils/NavigatorContentUtils.idl:
+        * Modules/networkinfo/NavigatorNetworkInfoConnection.idl:
+        * Modules/notifications/DOMWindowNotifications.idl:
+        * Modules/notifications/WorkerContextNotifications.idl:
+        * Modules/quota/DOMWindowQuota.idl:
+        * Modules/quota/NavigatorStorageQuota.idl:
+        * Modules/quota/WorkerNavigatorStorageQuota.idl:
+        * Modules/speech/DOMWindowSpeech.idl:
+        * Modules/speech/DOMWindowSpeechSynthesis.idl:
+        * Modules/vibration/NavigatorVibration.idl:
+        * Modules/webaudio/DOMWindowWebAudio.idl:
+        * Modules/webdatabase/DOMWindowWebDatabase.idl:
+        * Modules/webdatabase/WorkerContextWebDatabase.idl:
+        * Modules/websockets/DOMWindowWebSocket.idl:
+        * Modules/websockets/WorkerContextWebSocket.idl:
+        * bindings/scripts/IDLAttributes.txt:
+        * bindings/scripts/IDLParser.pm:
+        (parsePartialDefinition):
+        * bindings/scripts/generate-bindings.pl:
+        * bindings/scripts/preprocess-idls.pl:
+        (getPartialInterfaceNameFromIDLFile):
+        * bindings/scripts/test/TestSupplemental.idl:
+        * page/DOMWindowPagePopup.idl:
+
+2013-04-25  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions] Hit testing is broken for absolutely positioned regions that have overflow: hidden
+        https://bugs.webkit.org/show_bug.cgi?id=113874
+
+        Reviewed by David Hyatt.
+
+        Test: fast/regions/hit-test-abspos-overflow-region.html
+
+        When a region is an out-of-flow positioned object with an overflow clip, we need
+        to make sure that hit testing works also for cases other than foreground (content)
+        hit testing. This patch moves the previous hit testing code, that delegated foreground
+        hit testing to the region's flow thread hit testing, into the hitTestContent method,
+        now that RenderRegion is RenderBlock based.
+
+        * rendering/RenderRegion.cpp:
+        (WebCore::RenderRegion::hitTestContents):
+        * rendering/RenderRegion.h:
+        (RenderRegion):
+
+2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Copy and paste can strip !important CSS rules due to a bug in mergeStyleFromRules
+        https://bugs.webkit.org/show_bug.cgi?id=115217
+
+        Reviewed by Darin Adler.
+
+        The bug was caused by mergeStyleFromRules overriding "important" style rules with "unimportant" inline styles.
+        Fixed the bug by using addParsedProperty, which respects !important, in MutableStylePropertySet's
+        mergeAndOverrideOnConflict, which was only used in editing code. Now that we've fixed this function, we can use
+        it in ViewportStyleResolver::addViewportRule as well.
+
+        Test: editing/pasteboard/copy-paste-with-important-rules.html
+
+        * css/StylePropertySet.cpp:
+        (WebCore::MutableStylePropertySet::mergeAndOverrideOnConflict): Fixed to respect !important.
+        * css/ViewportStyleResolver.cpp:
+        (WebCore::ViewportStyleResolver::addViewportRule): Use mergeAndOverrideOnConflict now that the code is identical.
+
+2013-04-25  Andreas Kling  <akling@apple.com>
+
+        StylePropertySet::getPropertyShorthand() should return a String.
+        <http://webkit.org/b/115213>
+
+        Reviewed by Anders Carlsson.
+
+        Return a String directly from getPropertyShorthand() instead of forcing clients
+        to call getPropertyNameString().
+
+        * css/PropertySetCSSStyleDeclaration.cpp:
+        (WebCore::PropertySetCSSStyleDeclaration::getPropertyShorthand):
+        * css/StylePropertySet.cpp:
+        (WebCore::StylePropertySet::getPropertyShorthand):
+        * css/StylePropertySet.h:
+        (StylePropertySet):
+
+2013-04-25  Chris Fleizach  <cfleizach@apple.com>
+
+        WEB SPEECH: language support does not work as expected
+        https://bugs.webkit.org/show_bug.cgi?id=115119
+
+        Reviewed by Alexey Proskuryakov.
+
+        Make the Mac platform synthesizer have access to all the voices installed on the system.
+
+        * WebCore.exp.in:
+        * platform/mac/PlatformSpeechSynthesizerMac.mm:
+        (WebCore::PlatformSpeechSynthesizer::initializeVoiceList):
+        * platform/mac/WebCoreSystemInterface.h:
+        * platform/mac/WebCoreSystemInterface.mm:
+
+2013-04-25  Chris Fleizach  <cfleizach@apple.com>
+
+        <meter> element not exposed to accessibility
+        https://bugs.webkit.org/show_bug.cgi?id=109023
+        rdar://problem/13658964
+
+        Reviewed by Tim Horton.
+
+        Makes the <meter> element appear in the AX tree by reusing the
+        AccessibilityProgressIndicator element to handle either progress or meter
+        elements.
+
+        Test: accessibility/meter-element.html
+
+        * accessibility/AXObjectCache.cpp:
+        (WebCore::createFromRenderer):
+        (WebCore::AXObjectCache::getOrCreate):
+        * accessibility/AccessibilityNodeObject.cpp:
+        (WebCore::AccessibilityNodeObject::canHaveChildren):
+        (WebCore::AccessibilityNodeObject::visibleText):
+        * accessibility/AccessibilityProgressIndicator.cpp:
+        (WebCore::AccessibilityProgressIndicator::AccessibilityProgressIndicator):
+        (WebCore::AccessibilityProgressIndicator::create):
+        (WebCore::AccessibilityProgressIndicator::valueForRange):
+        (WebCore::AccessibilityProgressIndicator::maxValueForRange):
+        (WebCore::AccessibilityProgressIndicator::minValueForRange):
+        (WebCore::AccessibilityProgressIndicator::progressElement):
+        (WebCore::AccessibilityProgressIndicator::meterElement):
+        * accessibility/AccessibilityProgressIndicator.h:
+        (AccessibilityProgressIndicator):
+        * accessibility/AccessibilityRenderObject.cpp:
+        (WebCore::AccessibilityRenderObject::firstChild):
+        (WebCore::AccessibilityRenderObject::lastChild):
+            These methods are modified to handle when there is no rendered children, but there are Node
+            children. The node children are desired when calculating text within a node, for example.
+
+2013-04-25  Qiankun Miao  <qiankun.miao@intel.com>
+
+        [CSS Shaders] Remove the meshType from the CustomFilterOperation
+        https://bugs.webkit.org/show_bug.cgi?id=102529
+
+        Reviewed by Dean Jackson.
+
+        No new tests, no new functionality.
+
+        MeshType can be accessed from program, so remove the m_meshType
+        related code in CustomFilterOperation.
+
+        * css/StyleResolver.cpp:
+        (WebCore::StyleResolver::createCustomFilterOperationWithInlineSyntax):
+        * platform/graphics/filters/CustomFilterOperation.cpp:
+        (WebCore::CustomFilterOperation::CustomFilterOperation):
+        (WebCore::CustomFilterOperation::blend):
+        * platform/graphics/filters/CustomFilterOperation.h:
+        (WebCore::CustomFilterOperation::create):
+        (WebCore::CustomFilterOperation::meshType):
+        (CustomFilterOperation):
+        (WebCore::CustomFilterOperation::operator==):
+        * platform/graphics/texmap/coordinated/CoordinatedCustomFilterOperation.h:
+        (WebCore::CoordinatedCustomFilterOperation::CoordinatedCustomFilterOperation):
+
+2013-04-25  Kent Tamura  <tkent@chromium.org>
+
+        Ignore invalid regular expressions for input[pattern].
+        https://bugs.webkit.org/show_bug.cgi?id=115204
+
+        Reviewed by Darin Adler.
+
+        According to the specification, we should not proceed regular expression
+        matching if a pattern attribute value is an invalid regular
+        expression. We had a bug that invalid expressions such as
+        pattern=")foo(" made RegularExpression objects successfully.
+
+        http://www.whatwg.org/specs/web-apps/current-work/multipage/common-input-element-attributes.html#the-pattern-attribute
+        > If an input element has a pattern attribute specified, and the
+        > attribute's value, when compiled as a JavaScript regular expression with
+        > the global, ignoreCase, and multiline flags disabled (see ECMA262
+        > Edition 5, sections 15.10.7.2 through 15.10.7.4), compiles successfully,
+        > then the resulting regular expression is the element's compiled pattern
+        > regular expression. If the element has no such attribute, or if the
+        > value doesn't compile successfully, then the element has no compiled
+        > pattern regular expression.
+
+        This imports a part of Blink r148951.
+
+        Tests: Update fast/forms/ValidityState-patternMismatch.html
+
+        * html/BaseTextInputType.cpp:
+        (WebCore::BaseTextInputType::patternMismatch):
+        Check correctness of pattern attribute value before wrapping with parentheses.
+        * platform/text/RegularExpression.cpp:
+        (WebCore::RegularExpression::isValid): Added.
+        * platform/text/RegularExpression.h:
+        (RegularExpression): Declare isValid.
+
+2013-04-25  Antoine Quint  <graouts@apple.com>
+
+        Glyphs may fail to render when using SVG font
+        https://bugs.webkit.org/show_bug.cgi?id=115193
+
+        Reviewed by Simon Fraser.
+
+        Calling SimpleFontData::applyTransforms() when the font used is
+        an SVG font makes little sense since Core Text doesn’t know or
+        understand SVG fonts and would be passed some other, unrelated
+        platform font.
+
+        * platform/graphics/SimpleFontData.h:
+        (WebCore::SimpleFontData::applyTransforms):
+
+2013-04-25  Jer Noble  <jer.noble@apple.com>
+
+        Media elements shouldn't resume playback when a page is restored from the back/forward cache if the WKView isn't in a window
+        https://bugs.webkit.org/show_bug.cgi?id=115191
+
+        Reviewed by Eric Carlson.
+
+        If a page is suspended, then resumed when its WebView or WKView has been removed from a window,
+        the page's media elements will unpause. Check whether media is allowed to start during resume()
+        via Page::canMediaStart() and if not, register for mediaCanStart notifications. Then, in 
+        mediaCanStart() if the media is force-paused, unpause it.
+
+        * html/HTMLMediaElement.cpp:
+        (WebCore::HTMLMediaElement::suspend):
+        (WebCore::HTMLMediaElement::resume):
+        (WebCore::HTMLMediaElement::mediaCanStart):
+        * html/HTMLMediaElement.h:
+        (WebCore::HTMLMediaElement::pageConsentRequiredForResume):
+
+2013-04-25  Andreas Kling  <akling@apple.com>
+
+        Remove ENABLE(PARSED_STYLE_SHEET_CACHING) and make it always-on.
+
+        Rubber-stamped by Anders Koivisto.
+
+        * PlatformWinCE.cmake:
+        * accessibility/AccessibilityObject.h:
+        * html/HTMLLinkElement.cpp:
+        (WebCore::HTMLLinkElement::setCSSStyleSheet):
+
+2013-04-25  Patrick Gansterer  <paroga@webkit.org>
+
+        Remove OS(WINCE) from AccessibilityObject.h
+        https://bugs.webkit.org/show_bug.cgi?id=115192
+
+        Reviewed by Andreas Kling.
+
+        Use the same files like the the other PLATFORM(WIN) ports use.
+
+        * PlatformWinCE.cmake:
+        * accessibility/AccessibilityObject.h:
+        (AccessibilityObject):
+
+2013-04-25  Alberto Garcia  <agarcia@igalia.com>
+
+        Add definition of GlyphBufferGlyph for BlackBerry
+        https://bugs.webkit.org/show_bug.cgi?id=115183
+
+        Reviewed by Xan Lopez.
+
+        BlackBerry uses an unsigned int.
+
+        * platform/graphics/GlyphBuffer.h:
+        (WebCore):
+
+2013-04-25  Joseph Pecoraro  <pecoraro@apple.com>
+
+        ScriptExecutionContext log exception should include a column number
+        https://bugs.webkit.org/show_bug.cgi?id=114315
+
+        Reviewed by Oliver Hunt.
+
+        Test: inspector/console/console-exception-stack-traces.html
+
+        * bindings/js/ScriptCallStackFactory.h:
+        * bindings/js/ScriptCallStackFactory.cpp:
+        (WebCore::createScriptCallStackFromException):
+        Generate a ScriptCallStack from an exception. Use the vm.exceptionStack
+        if available, and fallback to the exception object where needed.
+
+        * bindings/js/JSDOMBinding.cpp:
+        (WebCore::reportException):
+        Always include a non-empty call stack with exceptions.
+        Where not provided, fallback to the exception object.
+
+        * dom/Document.h:
+        * dom/Document.cpp:
+        (WebCore::Document::logExceptionToConsole):
+        * dom/ScriptExecutionContext.h:
+        * dom/ScriptExecutionContext.cpp:
+        (WebCore::ScriptExecutionContext::PendingException::PendingException):
+        (ScriptExecutionContext::PendingException):
+        (WebCore::ScriptExecutionContext::reportException):
+        * workers/DefaultSharedWorkerRepository.cpp:
+        * workers/SharedWorkerContext.cpp:
+        (WebCore::SharedWorkerContext::logExceptionToConsole):
+        * workers/SharedWorkerContext.h:
+        * workers/WorkerContext.cpp:
+        (WebCore::WorkerContext::logExceptionToConsole):
+        * workers/WorkerContext.h:
+        * workers/WorkerMessagingProxy.cpp:
+        (WebCore::WorkerExceptionTask::performTask):
+        Plumb columnNumber through as needed.
+
 2013-04-25  Gregg Tavares  <gman@chromium.org>
 
         Fix build files so WebGLDebugXXX extensions can be used if enabled.

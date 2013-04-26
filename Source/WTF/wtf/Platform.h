@@ -428,7 +428,6 @@
 
 /* FIXME: these are all mixes of OS, operating environment and policy choices. */
 /* PLATFORM(QT) */
-/* PLATFORM(WX) */
 /* PLATFORM(EFL) */
 /* PLATFORM(GTK) */
 /* PLATFORM(BLACKBERRY) */
@@ -436,8 +435,6 @@
 /* PLATFORM(WIN) */
 #if defined(BUILDING_QT__)
 #define WTF_PLATFORM_QT 1
-#elif defined(BUILDING_WX__)
-#define WTF_PLATFORM_WX 1
 #elif defined(BUILDING_EFL__)
 #define WTF_PLATFORM_EFL 1
 #elif defined(BUILDING_GTK__)
@@ -473,7 +470,6 @@
 #endif
 
 #if PLATFORM(BLACKBERRY)
-#define WTF_USE_SKIA 1
 #define WTF_USE_LOW_QUALITY_IMAGE_INTERPOLATION 1
 #define WTF_USE_LOW_QUALITY_IMAGE_NO_JPEG_DITHERING 1
 #define WTF_USE_LOW_QUALITY_IMAGE_NO_JPEG_FANCY_UPSAMPLING 1
@@ -562,20 +558,6 @@
 
 #if USE(CFNETWORK) || PLATFORM(MAC) || PLATFORM(IOS)
 #define WTF_USE_CFURLCACHE 1
-#endif
-
-#if PLATFORM(WX)
-#if !CPU(PPC)
-#if !defined(ENABLE_ASSEMBLER)
-#define ENABLE_ASSEMBLER 1
-#endif
-#define ENABLE_JIT 1
-#endif
-#define ENABLE_GLOBAL_FASTMALLOC_NEW 0
-#define ENABLE_LLINT 0
-#if OS(DARWIN)
-#define WTF_USE_CF 1
-#endif
 #endif
 
 #if !defined(HAVE_ACCESSIBILITY)
@@ -932,7 +914,7 @@
    since most ports try to support sub-project independence, adding new headers
    to WTF causes many ports to break, and so this way we can address the build
    breakages one port at a time. */
-#if !defined(WTF_USE_EXPORT_MACROS) && (PLATFORM(MAC) || PLATFORM(QT) || PLATFORM(WX))
+#if !defined(WTF_USE_EXPORT_MACROS) && (PLATFORM(MAC) || PLATFORM(QT))
 #define WTF_USE_EXPORT_MACROS 1
 #endif
 

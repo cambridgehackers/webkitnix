@@ -1600,6 +1600,17 @@ bool ByteCodeParser::handleIntrinsic(bool usesResult, int resultOperand, Intrins
         
         return true;
     }
+
+    case IMulIntrinsic: {
+        if (argumentCountIncludingThis != 3)
+            return false;
+        int leftOperand = registerOffset + argumentToOperand(1);
+        int rightOperand = registerOffset + argumentToOperand(2);
+        Node* left = getToInt32(leftOperand);
+        Node* right = getToInt32(rightOperand);
+        setIntrinsicResult(usesResult, resultOperand, addToGraph(ArithIMul, left, right));
+        return true;
+    }
         
     default:
         return false;
@@ -3277,7 +3288,7 @@ bool ByteCodeParser::parseBlock(unsigned limit)
             // Baseline->DFG OSR jumps between loop hints. The DFG assumes that Baseline->DFG
             // OSR can only happen at basic block boundaries. Assert that these two statements
             // are compatible.
-            ASSERT_UNUSED(blockBegin, m_currentIndex == blockBegin);
+            RELEASE_ASSERT(m_currentIndex == blockBegin);
             
             // We never do OSR into an inlined code block. That could not happen, since OSR
             // looks up the code block that is the replacement for the baseline JIT code
@@ -3364,6 +3375,12 @@ bool ByteCodeParser::parseBlock(unsigned limit)
             set(currentInstruction[1].u.operand,
                 addToGraph(TypeOf, get(currentInstruction[2].u.operand)));
             NEXT_OPCODE(op_typeof);
+        }
+
+        case op_to_jsnumber: {
+            set(currentInstruction[1].u.operand,
+                addToGraph(Identity, Edge(get(currentInstruction[2].u.operand), NumberUse)));
+            NEXT_OPCODE(op_to_jsnumber);
         }
 
         default:

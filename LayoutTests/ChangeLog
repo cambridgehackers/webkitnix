@@ -1,3 +1,225 @@
+2013-04-26  David Kilzer  <ddkilzer@apple.com>
+
+        Sort jsc-test-list
+
+        $ sort -f -o LayoutTests/fast/js/jsc-test-list LayoutTests/fast/js/jsc-test-list 
+
+        * fast/js/jsc-test-list: Sort case-insensitively.
+
+2013-04-26  David Kilzer  <ddkilzer@apple.com>
+
+        Upstream iOS changes to jsc-test-list
+
+        Reviewed by Michael Saboff.
+
+        * fast/js/jsc-test-list: Add tests.
+
+2013-04-26  Ádám Kallai  <kadam@inf.u-szeged.hu>
+
+        [Qt] Unreviewed gardening. Skip two failing tests.
+
+        * platform/qt/TestExpectations:
+
+2013-04-26  Zalan Bujtas  <zalan@apple.com>
+
+        use-after-free removing a frame from its parent in a beforeload event of an OBJECT element
+        https://bugs.webkit.org/show_bug.cgi?id=113964
+
+        Reviewed by Antti Koivisto.
+
+        * fast/frames/crash-remove-iframe-during-object-beforeload-expected.txt: Added.
+        * fast/frames/crash-remove-iframe-during-object-beforeload.html: Added.
+        * fast/frames/resources/remove-this-during-object-beforeload.html: Added.
+
+2013-04-26  Zan Dobersek  <zdobersek@igalia.com>
+
+        [GTK] Enable Web Audio layout tests on WK2, provide platform-specific expected output
+        https://bugs.webkit.org/show_bug.cgi?id=114513
+
+        Reviewed by Philippe Normand.
+
+        Unskip the Web Audio layout tests for GTK WK2 and generate platform-specific baselines for the tests.
+        The audio baselines are not audibly different from the generic baselines, but it can be expected that
+        different backends won't produce the same binary output.
+
+        The remaining failures are marked as such in the TestExpectations, each failure having the appropriate
+        bug handle covering the issue. The tests are still skipped for GTK WK1 as DumpRenderTree is still missing
+        infrastructure support for running these tests.
+
+        * platform/gtk-wk1/TestExpectations:
+        * platform/gtk/TestExpectations:
+        * platform/gtk/webaudio/audiobuffersource-loop-points-expected.wav: Added.
+        * platform/gtk/webaudio/audiobuffersource-playbackrate-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/aac/vbr-128kbps-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/mp3/128kbps-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/vorbis/vbr-128kbps-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/vorbis/vbr-70kbps-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/vorbis/vbr-96kbps-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/wav/24bit-22khz-resample-expected.wav: Added.
+        * platform/gtk/webaudio/codec-tests/wav/24bit-44khz-expected.wav: Added.
+        * platform/gtk/webaudio/oscillator-custom-expected.wav: Added.
+        * platform/gtk/webaudio/oscillator-sawtooth-expected.wav: Added.
+        * platform/gtk/webaudio/oscillator-sine-expected.wav: Added.
+        * platform/gtk/webaudio/oscillator-square-expected.wav: Added.
+        * platform/gtk/webaudio/oscillator-triangle-expected.wav: Added.
+
+2013-04-26  Claudio Saavedra  <csaavedra@igalia.com>
+
+        [GTK] Unreviewed gardnering. Unskip passing test.
+
+        * platform/gtk/TestExpectations: Unskip http/tests/inspector/compiler-source-mapping-debug.html
+
+2013-04-26  Allan Sandfeld Jensen  <allan.jensen@digia.com>
+
+        Mouseenter and mouseleave events not supported
+        https://bugs.webkit.org/show_bug.cgi?id=18930
+
+        Reviewed by David Hyatt.
+
+        To new tests that mouseenter and mouseleave works in both bubbling and capture phase.
+
+        * fast/events/mouseenter-mouseleave-capture-expected.txt: Added.
+        * fast/events/mouseenter-mouseleave-capture.html: Added.
+        * fast/events/mouseenter-mouseleave-expected.txt: Added.
+        * fast/events/mouseenter-mouseleave.html: Added.
+
+2013-04-26  Christophe Dumez  <ch.dumez@sisa.samsung.com>
+
+        [Qt] REGRESSION(r149001): It made two fast/dom/DeviceMotion tests fail.
+        https://bugs.webkit.org/show_bug.cgi?id=115235
+
+        Reviewed by Kentaro Hara.
+
+        Update window-property.html test cases for DeviceMotion and DeviceOrientation.
+        The global constructors are no longer enumerable after r149001.
+
+        * fast/dom/DeviceMotion/script-tests/window-property.js:
+        * fast/dom/DeviceMotion/window-property-expected.txt:
+        * fast/dom/DeviceOrientation/script-tests/window-property.js:
+        * fast/dom/DeviceOrientation/window-property-expected.txt:
+
+2013-04-25  Mihnea Ovidenie  <mihnea@adobe.com>
+
+        [CSS Regions] Hit testing is broken for absolutely positioned regions that have overflow: hidden
+        https://bugs.webkit.org/show_bug.cgi?id=113874
+
+        Reviewed by David Hyatt.
+
+        Add test for hit-testing of border of an out-of-flow region with overflow: hidden.
+
+        * fast/regions/hit-test-abspos-overflow-region-expected.txt: Added.
+        * fast/regions/hit-test-abspos-overflow-region.html: Added.
+
+2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
+
+        Copy and paste can strip !important CSS rules due to a bug in mergeStyleFromRules
+        https://bugs.webkit.org/show_bug.cgi?id=115217
+
+        Reviewed by Darin Adler.
+
+        Added a regression test.
+
+        * editing/pasteboard/copy-paste-with-important-rules-expected.txt: Added.
+        * editing/pasteboard/copy-paste-with-important-rules.html: Added.
+
+2013-04-24  Oliver Hunt  <oliver@apple.com>
+
+        Add support for Math.imul
+        https://bugs.webkit.org/show_bug.cgi?id=115143
+
+        Reviewed by Filip Pizlo.
+
+        Add a bunch of tests for Math.imul
+
+        * fast/js/Object-getOwnPropertyNames-expected.txt:
+        * fast/js/imul-expected.txt: Added.
+        * fast/js/imul.html: Added.
+        * fast/js/regress/imul-double-only-expected.txt: Added.
+        * fast/js/regress/imul-double-only.html: Added.
+        * fast/js/regress/imul-int-only-expected.txt: Added.
+        * fast/js/regress/imul-int-only.html: Added.
+        * fast/js/regress/imul-mixed-expected.txt: Added.
+        * fast/js/regress/imul-mixed.html: Added.
+        * fast/js/regress/script-tests/imul-double-only.js: Added.
+        (f):
+        * fast/js/regress/script-tests/imul-int-only.js: Added.
+        (f):
+        * fast/js/regress/script-tests/imul-mixed.js: Added.
+        (f):
+        * fast/js/script-tests/Object-getOwnPropertyNames.js:
+        * fast/js/script-tests/imul.js: Added.
+        (testIMul):
+
+2013-04-25  Chris Fleizach  <cfleizach@apple.com>
+
+        <meter> element not exposed to accessibility
+        https://bugs.webkit.org/show_bug.cgi?id=109023
+
+        Reviewed by Tim Horton.
+
+        * accessibility/meter-element-expected.txt: Added.
+        * accessibility/meter-element.html: Added.
+        * platform/mac/accessibility/role-subrole-roledescription-expected.txt:
+        * platform/mac/accessibility/role-subrole-roledescription.html:
+
+2013-04-25  Roman Zhuykov  <zhroma@ispras.ru>
+
+        Arithmetic operations with negative zero should be optimized correclty.
+        https://bugs.webkit.org/show_bug.cgi?id=113862
+
+        Reviewed by Filip Pizlo.
+        * fast/js/regress/negative-zero-divide-expected.txt: Added.
+        * fast/js/regress/negative-zero-divide.html: Added.
+        * fast/js/regress/negative-zero-modulo-expected.txt: Added.
+        * fast/js/regress/negative-zero-modulo.html: Added.
+        * fast/js/regress/negative-zero-negate-expected.txt: Added.
+        * fast/js/regress/negative-zero-negate.html: Added.
+        * fast/js/regress/script-tests/negative-zero-divide.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/negative-zero-modulo.js: Added.
+        (foo):
+        * fast/js/regress/script-tests/negative-zero-negate.js: Added.
+        (foo):
+
+2013-04-25  Kent Tamura  <tkent@chromium.org>
+
+        Ignore invalid regular expressions for input[pattern].
+        https://bugs.webkit.org/show_bug.cgi?id=115204
+
+        Reviewed by Darin Adler.
+
+        * fast/forms/ValidityState-patternMismatch-expected.txt:
+        * fast/forms/ValidityState-patternMismatch.html:
+
+2013-04-25  Alexey Proskuryakov  <ap@apple.com>
+
+        Update a comment, mentioning a newly filed bug.
+
+        * platform/wk2/TestExpectations:
+
+2013-04-25  Joseph Pecoraro  <pecoraro@apple.com>
+
+        ScriptExecutionContext log exception should include a column number
+        https://bugs.webkit.org/show_bug.cgi?id=114315
+
+        Reviewed by Oliver Hunt.
+
+        * inspector/console/console-exception-stack-traces-expected.txt: Added.
+        * inspector/console/console-exception-stack-traces.html: Added.
+        Verifies that exceptions have stack traces and match a console.trace stack.
+
+        * http/tests/inspector-enabled/console-exception-while-no-inspector-expected.txt: Removed.
+        * http/tests/inspector-enabled/console-exception-while-no-inspector.html: Removed.
+        We now save exception backtraces even if the inspector is not open.
+
+        * fast/dom/javascript-url-exception-isolation-expected.txt
+        * fast/events/remove-target-with-shadow-in-drag-expected.txt
+        * fast/events/set-attribute-listener-window-onerror-crash-expected.txt
+        * inspector-protocol/media-query-listener-exception-expected.txt:
+        * inspector/console/console-uncaught-exception-expected.txt:
+        * inspector/console/console-uncaught-exception-in-eval-expected.txt:
+        Update results that now include backtraces or different data. Most better, some worse.
+
 2013-04-25  Ryosuke Niwa  <rniwa@webkit.org>
 
         HTMLOptionsCollection's namedItem and name getter should return the first item

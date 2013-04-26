@@ -1518,16 +1518,17 @@ public:
         releaseScratch(addressTempRegister);
     }
 
-    Jump branchTruncateDoubleToInt32(FPRegisterID src, RegisterID dest)
+    enum BranchTruncateType { BranchIfTruncateFailed, BranchIfTruncateSuccessful };
+    Jump branchTruncateDoubleToInt32(FPRegisterID src, RegisterID dest, BranchTruncateType branchType = BranchIfTruncateFailed)
     {
         m_assembler.ftrcdrmfpul(src);
         m_assembler.stsfpulReg(dest);
         m_assembler.loadConstant(0x7fffffff, scratchReg3);
-        m_assembler.cmplRegReg(dest, scratchReg3, SH4Condition(Equal));
+        m_assembler.cmplRegReg(dest, scratchReg3, SH4Condition(branchType == BranchIfTruncateFailed ? Equal : NotEqual));
         m_assembler.ensureSpace(m_assembler.maxInstructionSize + 14, sizeof(uint32_t));
         m_assembler.branch(BT_OPCODE, 2);
         m_assembler.addlImm8r(1, scratchReg3);
-        m_assembler.cmplRegReg(dest, scratchReg3, SH4Condition(Equal));
+        m_assembler.cmplRegReg(dest, scratchReg3, SH4Condition(branchType == BranchIfTruncateFailed ? Equal : NotEqual));
         return branchTrue();
     }
 
@@ -2036,20 +2037,22 @@ public:
         return branchTrue();
     }
 
-    void branchConvertDoubleToInt32(FPRegisterID src, RegisterID dest, JumpList& failureCases, FPRegisterID fpTemp)
+    void branchConvertDoubleToInt32(FPRegisterID src, RegisterID dest, JumpList& failureCases, FPRegisterID fpTemp, bool negZeroCheck = true)
     {
         m_assembler.ftrcdrmfpul(src);
         m_assembler.stsfpulReg(dest);
         convertInt32ToDouble(dest, fscratch);
         failureCases.append(branchDouble(DoubleNotEqualOrUnordered, fscratch, src));
 
-        if (dest == SH4Registers::r0)
-            m_assembler.cmpEqImmR0(0, dest);
-        else {
-            m_assembler.movImm8(0, scratchReg3);
-            m_assembler.cmplRegReg(scratchReg3, dest, SH4Condition(Equal));
+        if (negZeroCheck) {
+            if (dest == SH4Registers::r0)
+                m_assembler.cmpEqImmR0(0, dest);
+            else {
+                m_assembler.movImm8(0, scratchReg3);
+                m_assembler.cmplRegReg(scratchReg3, dest, SH4Condition(Equal));
+            }
+            failureCases.append(branchTrue());
         }
-        failureCases.append(branchTrue());
     }
 
     void neg32(RegisterID dst)

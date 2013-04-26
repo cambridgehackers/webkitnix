@@ -156,10 +156,6 @@
 #include "MediaPlayerPrivateBlackBerry.h"
 #endif
 
-#if USE(SKIA)
-#include "PlatformContextSkia.h"
-#endif
-
 #if USE(ACCELERATED_COMPOSITING)
 #include "FrameLayers.h"
 #include "WebPageCompositorClient.h"
@@ -625,6 +621,7 @@ void WebPagePrivate::init(const BlackBerry::Platform::String& pageGroupName)
     m_page->settings()->setAllowUniversalAccessFromFileURLs(false);
     m_page->settings()->setAllowFileAccessFromFileURLs(false);
     m_page->settings()->setFixedPositionCreatesStackingContext(true);
+    m_page->settings()->setWantsBalancedSetDefersLoadingBehavior(true);
 
     m_backingStoreClient = BackingStoreClient::create(m_mainFrame, /* parent frame */ 0, m_webPage);
     // The direct access to BackingStore is left here for convenience since it
@@ -724,16 +721,6 @@ void WebPagePrivate::load(const BlackBerry::Platform::String& url, const BlackBe
     m_mainFrame->loader()->load(FrameLoadRequest(m_mainFrame, request));
 }
 
-void WebPage::load(const BlackBerry::Platform::String& url, const BlackBerry::Platform::String& networkToken, bool isInitial, bool needReferer, bool forceDownload)
-{
-    d->load(url, networkToken, "GET", Platform::NetworkRequest::UseProtocolCachePolicy, 0, 0, 0, 0, isInitial, false, needReferer, forceDownload);
-}
-
-void WebPage::loadExtended(const char* url, const char* networkToken, const char* method, Platform::NetworkRequest::CachePolicy cachePolicy, const char* data, size_t dataLength, const char* const* headers, size_t headersLength, bool mustHandleInternally)
-{
-    d->load(url, networkToken, method, cachePolicy, data, dataLength, headers, headersLength, false, mustHandleInternally, false, false, "");
-}
-
 void WebPage::loadFile(const BlackBerry::Platform::String& path, const BlackBerry::Platform::String& overrideContentType)
 {
     BlackBerry::Platform::String fileUrl(path);
@@ -745,7 +732,7 @@ void WebPage::loadFile(const BlackBerry::Platform::String& path, const BlackBerr
     d->load(fileUrl, BlackBerry::Platform::String::emptyString(), BlackBerry::Platform::String("GET", 3), Platform::NetworkRequest::UseProtocolCachePolicy, 0, 0, 0, 0, false, false, false, false, overrideContentType.c_str());
 }
 
-void WebPage::download(const Platform::NetworkRequest& request)
+void WebPage::load(const Platform::NetworkRequest& request, bool needReferer, bool forceDownload)
 {
     vector<const char*> headers;
     Platform::NetworkRequest::HeaderList& list = request.getHeaderListRef();
@@ -753,7 +740,7 @@ void WebPage::download(const Platform::NetworkRequest& request)
         headers.push_back(list[i].first.c_str());
         headers.push_back(list[i].second.c_str());
     }
-    d->load(request.getUrlRef(), BlackBerry::Platform::String::emptyString(), "GET", Platform::NetworkRequest::UseProtocolCachePolicy, 0, 0, headers.empty() ? 0 : &headers[0], headers.size(), false, false, false, true, "", request.getSuggestedSaveName().c_str());
+    d->load(request.getUrlRef(), BlackBerry::Platform::String::emptyString(), "GET", Platform::NetworkRequest::UseProtocolCachePolicy, 0, 0, headers.empty() ? 0 : &headers[0], headers.size(), false, false, needReferer, forceDownload, BlackBerry::Platform::String::emptyString(), request.getSuggestedSaveName());
 }
 
 void WebPagePrivate::loadString(const BlackBerry::Platform::String& string, const BlackBerry::Platform::String& baseURL, const BlackBerry::Platform::String& contentType, const BlackBerry::Platform::String& failingURL)
@@ -5235,6 +5222,21 @@ void WebPage::inspectCurrentContextElement()
 Platform::IntPoint WebPage::adjustDocumentScrollPosition(const Platform::IntPoint& documentScrollPosition, const Platform::IntRect& documentPaddingRect)
 {
     return d->m_proximityDetector->findBestPoint(documentScrollPosition, documentPaddingRect);
+}
+
+Platform::IntSize WebPage::fixedElementSizeDelta()
+{
+    ASSERT(userInterfaceThreadMessageClient()->isCurrentThread());
+
+    // Traverse the layer tree and find the fixed element rect if there is one.
+    IntRect fixedElementRect;
+    if (d->compositor() && d->compositor()->rootLayer())
+        d->compositor()->findFixedElementRect(d->compositor()->rootLayer(), fixedElementRect);
+
+    // Ignore the fixed element if it is not at the top of page.
+    if (!fixedElementRect.isEmpty() && !fixedElementRect.y())
+        return Platform::IntSize(0, fixedElementRect.height());
+    return Platform::IntSize();
 }
 
 bool WebPagePrivate::compositorDrawsRootLayer() const

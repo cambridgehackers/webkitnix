@@ -94,7 +94,7 @@ void PlatformWebView::performDisplayUpdate()
     NIXViewPaintToCurrentGLContext(m_view);
 }
 
-PlatformWebView::PlatformWebView(WKContextRef context, WKPageGroupRef pageGroup, WKDictionaryRef options)
+PlatformWebView::PlatformWebView(WKContextRef context, WKPageGroupRef pageGroup, WKPageRef /* relatedPage */, WKDictionaryRef options)
 {
     m_view = NIXViewCreate(context, pageGroup);
     m_window = 0;

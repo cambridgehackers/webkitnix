@@ -164,7 +164,8 @@ private:
         case BitXor:
         case BitRShift:
         case BitLShift:
-        case BitURShift: {
+        case BitURShift:
+        case ArithIMul: {
             changed |= setPrediction(SpecInt32);
             break;
         }
@@ -472,7 +473,6 @@ private:
         case CheckArray:
         case Arrayify:
         case ArrayifyToStructure:
-        case Identity:
         case MovHint:
         case MovHintAndCheck:
         case ZombieHint: {
@@ -490,6 +490,10 @@ private:
 
         case GetScope:
             changed |= setPrediction(SpecCellOther);
+            break;
+
+        case Identity:
+            changed |= mergePrediction(node->child1()->prediction());
             break;
 
 #ifndef NDEBUG

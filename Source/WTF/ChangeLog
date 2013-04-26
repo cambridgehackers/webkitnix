@@ -1,3 +1,83 @@
+2013-04-26  Martin Robinson  <mrobinson@igalia.com>
+
+        Remove the remaining Skia #ifdefs
+        https://bugs.webkit.org/show_bug.cgi?id=114886
+
+        Reviewed by Benjamin Poulain.
+
+        * wtf/Platform.h:
+
+2013-04-26  Mikhail Pozdnyakov  <mikhail.pozdnyakov@intel.com>
+
+        Add move semantics to RefPtr
+        https://bugs.webkit.org/show_bug.cgi?id=115033
+
+        Reviewed by Anders Carlsson.
+
+        Add move constructors and move assignment operators to RefPtr when
+        COMPILER_SUPPORTS(CXX_RVALUE_REFERENCES).
+        This obviates unnecessary reffing/ureffing when RefPtr is created
+        or assigned from rvalue references.
+
+        * wtf/RefPtr.h:
+        (RefPtr):
+        (WTF::RefPtr::RefPtr):
+        (WTF::RefPtr::operator=):
+
+2013-04-26  Andreas Kling  <akling@apple.com>
+
+        Remove wxWebKit from WTF.
+        <http://webkit.org/b/115249>
+
+        Reviewed by Antti Koivisto.
+
+        * wscript: Removed.
+        * wtf/ArrayBufferView.h:
+        (ArrayBufferView):
+        * wtf/CurrentTime.cpp:
+        * wtf/DisallowCType.h:
+        * wtf/ExportMacros.h:
+        * wtf/FeatureDefines.h:
+        * wtf/Platform.h:
+        * wtf/text/WTFString.h:
+        (String):
+        * wtf/wx/MainThreadWx.cpp: Removed.
+        * wtf/wx/StringWx.cpp: Removed.
+
+2013-04-25  Filip Pizlo  <fpizlo@apple.com>
+
+        Unreviewed, roll out http://trac.webkit.org/changeset/148999
+        It broke http://kripken.github.io/ammo.js/examples/new/ammo.html
+
+        * wtf/TriState.h:
+
+2013-04-25  Oliver Hunt  <oliver@apple.com>
+
+        Fix 32bit build
+
+        * wtf/StackBounds.cpp:
+        (WTF::StackBounds::initialize):
+
+2013-04-25  Oliver Hunt  <oliver@apple.com>
+
+        Stack guards are too conservative
+        https://bugs.webkit.org/show_bug.cgi?id=115147
+
+        Reviewed by Mark Hahnenberg.
+
+        Use getrlimit on darwin to get the stack size for the main thread.
+
+        * wtf/StackBounds.cpp:
+        (WTF::StackBounds::initialize):
+
+2013-04-25  Andreas Kling  <akling@apple.com>
+
+        Remove ENABLE(PARSED_STYLE_SHEET_CACHING) and make it always-on.
+
+        Rubber-stamped by Anders Koivisto.
+
+        * wtf/FeatureDefines.h:
+
 2013-04-25  peavo@outlook.com  <peavo@outlook.com>
 
         [Windows] Compile fix.
