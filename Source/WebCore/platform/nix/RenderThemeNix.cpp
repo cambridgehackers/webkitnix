@@ -192,16 +192,15 @@ void RenderThemeNix::adjustProgressBarStyle(StyleResolver*, RenderStyle*, Elemen
     style->setBoxShadow(nullptr);
 }
 
-bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInfo& i, const IntRect& rect)
+bool RenderThemeNix::paintProgressBar(RenderObject* o, const PaintInfo& i, const IntRect& rect)
 {
-    RenderProgress* renderProgress = toRenderProgress(renderObject);
+    RenderProgress* renderProgress = toRenderProgress(o);
     WebKit::WebThemeEngine::ProgressBarExtraParams extraParams;
     extraParams.isDeterminate = renderProgress->isDeterminate();
     extraParams.position = renderProgress->position();
     extraParams.animationProgress = renderProgress->animationProgress();
     extraParams.animationStartTime = renderProgress->animationStartTime();
-
-    themeEngine()->paintProgressBar(webCanvas(i), getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
+    themeEngine()->paintProgressBar(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
 
     return false;
 }
