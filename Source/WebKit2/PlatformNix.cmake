@@ -278,6 +278,8 @@ set(WebKitNix_WebKit2_HEADERS
 
     "${CMAKE_CURRENT_SOURCE_DIR}/UIProcess/API/cpp/WKRetainPtr.h"
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/UIProcess/API/CoordinatedGraphics/WKCoordinatedScene.h"
+
     "${CMAKE_CURRENT_SOURCE_DIR}/WebProcess/InjectedBundle/API/c/WKBundle.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/WebProcess/InjectedBundle/API/c/WKBundleBackForwardList.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/WebProcess/InjectedBundle/API/c/WKBundleBackForwardListItem.h"
