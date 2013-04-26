@@ -49,7 +49,7 @@ set(WTF_PLATFORM_NIX 1)
 add_definitions(-DWEBKIT_IMPLEMENTATION=1)
 add_definitions(-DWEBKIT_DLL=1)
 
-find_package(Cairo 1.10 REQUIRED)
+find_package(Cairo 1.12.8 REQUIRED)
 find_package(Fontconfig 2.8.0 REQUIRED)
 find_package(Freetype REQUIRED)
 find_package(GLIB 2.36.0 REQUIRED COMPONENTS gio gobject gmodule gthread)
