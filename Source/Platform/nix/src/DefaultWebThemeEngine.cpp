@@ -43,6 +43,9 @@ const double TEXTFIELD_LIGHT_BORDER_COLOR = 0xEE/256.0;
 const int MENULIST_BORDER = 5;
 const int MENULIST_ARROW_SIZE = 6;
 
+const int INNERSPINBUTTON_BORDER = 3;
+const int INNERSPINBUTTON_ARROW_SIZE = 2;
+
 namespace WebKit {
 
 static void gradientFill(cairo_t* cairo, double yStart, double yLength, bool inverted = false)
@@ -194,7 +197,7 @@ WebSize DefaultWebThemeEngine::getProgressBarSize() const
 void DefaultWebThemeEngine::paintProgressBar(WebCanvas* canvas, State state, const WebRect& rect, const ProgressBarExtraParams& params) const
 {
     cairo_save(canvas);
-    
+
     if (params.isDeterminate) {
         // Background
         setupBorder(canvas, state);
@@ -224,6 +227,48 @@ double DefaultWebThemeEngine::getAnimationRepeatIntervalForProgressBar() const
 double DefaultWebThemeEngine::getAnimationDurationForProgressBar() const
 {
     return progressAnimationInterval * progressAnimationFrames * 2; // "2" for back and forth;
+}
+
+void DefaultWebThemeEngine::getInnerSpinButtonPadding(int& paddingTop, int& paddingLeft, int& paddingBottom, int& paddingRight) const
+{
+    paddingTop = INNERSPINBUTTON_BORDER;
+    paddingLeft = INNERSPINBUTTON_BORDER;
+    paddingBottom = INNERSPINBUTTON_BORDER;
+    paddingRight = 2 * INNERSPINBUTTON_BORDER + INNERSPINBUTTON_ARROW_SIZE;
+}
+
+void DefaultWebThemeEngine::paintInnerSpinButton(WebCanvas* canvas, State state, const WebRect& rect, const InnerSpinButtonExtraParams& param) const
+{
+    double rectHalfHeight = rect.height / 2;
+
+    cairo_save(canvas);
+    setupBorder(canvas, state);
+    cairo_rectangle(canvas, rect.x + 0.5, rect.y + 1.5, rect.width, rectHalfHeight);
+    cairo_stroke_preserve(canvas);
+
+    gradientFill(canvas, rect.y, rectHalfHeight, state == StatePressed && param.spinUp);
+
+    setupBorder(canvas, state);
+    cairo_rectangle(canvas, rect.x + 0.5, rect.y + 0.5 + rectHalfHeight, rect.width, rectHalfHeight);
+    cairo_stroke_preserve(canvas);
+
+    gradientFill(canvas, rect.y + rectHalfHeight, rectHalfHeight, state == StatePressed && !param.spinUp);
+
+    cairo_move_to(canvas, rect.x + rect.width - INNERSPINBUTTON_ARROW_SIZE - INNERSPINBUTTON_BORDER * 2, rect.y + rectHalfHeight + rect.height/4 - INNERSPINBUTTON_ARROW_SIZE + 1.5);
+    cairo_set_source_rgb(canvas, CHECK_COLOR, CHECK_COLOR, CHECK_COLOR);
+    cairo_rel_line_to(canvas, MENULIST_ARROW_SIZE, 0);
+    cairo_rel_line_to(canvas, -MENULIST_ARROW_SIZE / 2, MENULIST_ARROW_SIZE);
+    cairo_close_path(canvas);
+
+    cairo_move_to(canvas, rect.x + rect.width - INNERSPINBUTTON_ARROW_SIZE - INNERSPINBUTTON_BORDER * 2, rect.y + rect.height/4 + INNERSPINBUTTON_ARROW_SIZE);
+    cairo_set_source_rgb(canvas, CHECK_COLOR, CHECK_COLOR, CHECK_COLOR);
+    cairo_rel_line_to(canvas, MENULIST_ARROW_SIZE, 0);
+    cairo_rel_line_to(canvas, -MENULIST_ARROW_SIZE / 2, -MENULIST_ARROW_SIZE);
+    cairo_close_path(canvas);
+
+    cairo_fill(canvas);
+
+    cairo_restore(canvas);
 }
 
 }

@@ -66,6 +66,9 @@ protected:
     virtual bool paintProgressBar(RenderObject*, const PaintInfo&, const IntRect&) OVERRIDE;
 #endif
 
+    virtual void adjustInnerSpinButtonStyle(StyleResolver*, RenderStyle*, Element*) const;
+    virtual bool paintInnerSpinButton(RenderObject*, const PaintInfo&, const IntRect&);
+
 private:
     RenderThemeNix();
 };

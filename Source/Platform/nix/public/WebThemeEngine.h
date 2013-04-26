@@ -110,6 +110,8 @@ public:
     virtual void paintProgressBar(WebCanvas*, State, const WebRect&, const ProgressBarExtraParams&) const = 0;
     virtual double getAnimationRepeatIntervalForProgressBar() const = 0;
     virtual double getAnimationDurationForProgressBar() const = 0;
+    virtual void getInnerSpinButtonPadding(int& paddingTop, int& paddingLeft, int& paddingBottom, int& paddingRight) const = 0;
+    virtual void paintInnerSpinButton(WebCanvas*, State, const WebRect&, const InnerSpinButtonExtraParams&) const = 0;
 };
 
 } // namespace WebKit

@@ -199,7 +199,7 @@ bool RenderThemeNix::paintProgressBar(RenderObject* renderObject, const PaintInf
     extraParams.position = renderProgress->position();
     extraParams.animationProgress = renderProgress->animationProgress();
     extraParams.animationStartTime = renderProgress->animationStartTime();
-    
+
     themeEngine()->paintProgressBar(webCanvas(i), getWebThemeState(this, renderObject), WebKit::WebRect(rect), extraParams);
 
     return false;
@@ -215,5 +215,31 @@ double RenderThemeNix::animationDurationForProgressBar(RenderProgress*) const
     return themeEngine()->getAnimationDurationForProgressBar();
 }
 #endif
+
+void RenderThemeNix::adjustInnerSpinButtonStyle(StyleResolver*, RenderStyle* style, Element*) const
+{
+    style->resetBorder();
+    style->setWhiteSpace(PRE);
+
+    int paddingTop = 0;
+    int paddingLeft = 0;
+    int paddingBottom = 0;
+    int paddingRight = 0;
+    themeEngine()->getInnerSpinButtonPadding(paddingTop, paddingLeft, paddingBottom, paddingRight);
+    style->setPaddingTop(Length(paddingTop, Fixed));
+    style->setPaddingRight(Length(paddingRight, Fixed));
+    style->setPaddingBottom(Length(paddingBottom, Fixed));
+    style->setPaddingLeft(Length(paddingLeft, Fixed));
+}
+
+bool RenderThemeNix::paintInnerSpinButton(RenderObject* o, const PaintInfo& i, const IntRect& rect)
+{
+    WebKit::WebThemeEngine::InnerSpinButtonExtraParams extraParams;
+    extraParams.spinUp = isSpinUpButtonPartPressed(o);
+    extraParams.readOnly = isReadOnlyControl(o);
+
+    themeEngine()->paintInnerSpinButton(webCanvas(i), getWebThemeState(this, o), WebKit::WebRect(rect), extraParams);
+    return false;
+}
 
 }
