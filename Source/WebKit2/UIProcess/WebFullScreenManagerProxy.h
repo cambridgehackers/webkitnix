@@ -32,9 +32,6 @@
 #include <wtf/PassRefPtr.h>
 #include <wtf/RefCounted.h>
 #include <wtf/RefPtr.h>
-#if PLATFORM(NIX)
-#include <nix/NIXView.h>
-#endif
 
 namespace WebCore {
 class IntRect;
@@ -58,8 +55,6 @@ typedef QQuickWebView PlatformWebView;
 typedef WebKitWebViewBase PlatformWebView;
 #elif PLATFORM(EFL)
 typedef Evas_Object PlatformWebView;
-#elif PLATFORM(NIX)
-typedef NIXView* PlatformWebView;
 #endif
 
 class WebPageProxy;
